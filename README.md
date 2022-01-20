@@ -6,9 +6,11 @@
 
 ## 后台管理系统展示图：
   + 演示地址：[管理后台系统](https://madmin.zengye.top/admin/login) （里面的数据 随意操作）
-    + 如果访问不了 把https 改成http即可   http://madmin.zengye.top/admin/login
+  + 演示站点域名：`https://madmin.zengye.top/admin/login`
+  + 因为域名走了cdn和并且添加了防盗链 直接从码云跳转过去可能会访问不了，建议复制链接直接新开游览器窗口打开
   + 账号：`xiaozeng` 密码：`123465`
   + ![展示图](./demo_img/1.png);
+  + ![演示图](./demo_img/1.gif)
 
 ## 为什么开源？（希望中国能向西方工会学习，受了某些‘良心’老板的欠薪，严重刨削，敢于站出来维护打工人的利益，前人种树，后人乘凉）
   + 公司名称：`喵美美（广州）网络科技有限公司` 于2020年10月低 欠薪跑路 [企业查链接](https://www.tianyancha.com/brand/b306e612764)
