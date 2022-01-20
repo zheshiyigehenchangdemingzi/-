@@ -1,12 +1,14 @@
 {include file='common/head' /}
 <body>
-    　　<script src="__LAYUI__/jq.js"></script>
+　　
+<script src="__LAYUI__/jq.js"></script>
 <div class="x-nav">
           <span class="layui-breadcrumb">
               <a><cite>直播管理</cite></a>
               <a><cite>直播列表</cite></a>
           </span>
-    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
         <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
 </div>
 <div class="layui-fluid">
@@ -17,14 +19,16 @@
                     <form class="layui-form layui-col-space5">
                         <!--直播名称-->
                         <div class="layui-inline layui-show-xs-block">
-                            <input type="text" name="title"  placeholder="直播标题" autocomplete="off" class="layui-input" value="{$get.title|default=''}">
+                            <input type="text" name="title" placeholder="直播标题" autocomplete="off" class="layui-input"
+                                   value="{$get.title|default=''}">
                         </div>
                         <!--直播分类-->
                         <div class="layui-inline layui-show-xs-block">
                             <select name="type_id" lay-verify="" lay-search>
                                 <option value="">直播分类</option>
                                 {volist name="type" id="v"}
-                                <option value="{$key}" {if condition="$get['type_id'] == $key"}selected{/if}>{$v}</option>
+                                <option value="{$key}" {if condition="$get['type_id'] == $key" }selected{
+                                /if}>{$v}</option>
                                 {/volist}
                             </select>
                         </div>
@@ -32,36 +36,51 @@
                         <div class="layui-inline layui-show-xs-block">
                             <select name="status">
                                 <option value="">状态筛选</option>
-                                <option value="1" {if condition="$get['status'] == 1"}selected{/if}>开启</option>
-                                <option value="0" {if condition="strlen($get['status']) >= 1 && $get['status'] == 0"}selected{/if}>关闭</option>
+                                <option value="1" {if condition="$get['status'] == 1" }selected{
+                                /if}>开启</option>
+                                <option value="0" {if condition="strlen($get['status']) >= 1 && $get['status'] == 0"
+                                        }selected{
+                                /if}>关闭</option>
                             </select>
                         </div>
                         <!-- 分页数据 -->
                         <div class="layui-inline layui-show-xs-block" style="width: 150px;">
                             <select name="limit">
                                 <option value="" selected>分页数据</option>
-                                <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
-                                <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
-                                <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
-                                <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
-                                <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
-                                <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
-                                <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                                <option value="10" {if condition="$get['limit'] == 10" }selected{
+                                /if}>10条</option>
+                                <option value="20" {if condition="$get['limit'] == 20" }selected{
+                                /if}>20条</option>
+                                <option value="30" {if condition="$get['limit'] == 30" }selected{
+                                /if}>30条</option>
+                                <option value="50" {if condition="$get['limit'] == 50" }selected{
+                                /if}>50条</option>
+                                <option value="100" {if condition="$get['limit'] == 100" }selected{
+                                /if}>100条</option>
+                                <option value="150" {if condition="$get['limit'] == 150" }selected{
+                                /if}>150条</option>
+                                <option value="200" {if condition="$get['limit'] == 200" }selected{
+                                /if}>200条</option>
                             </select>
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <input class="layui-input"  autocomplete="off" placeholder="直播时间开始" name="start" id="start" value="{$get.start|default=''}">
+                            <input class="layui-input" autocomplete="off" placeholder="直播时间开始" name="start" id="start"
+                                   value="{$get.start|default=''}">
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <input class="layui-input"  autocomplete="off" placeholder="直播结束时间" name="end" id="end" value="{$get.end|default=''}">
+                            <input class="layui-input" autocomplete="off" placeholder="直播结束时间" name="end" id="end"
+                                   value="{$get.end|default=''}">
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i
+                                    class="layui-icon">&#xe615;</i></button>
                         </div>
                     </form>
                 </div>
                 <div class="layui-card-header">
-                    <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_hot')">批量热门/不热门</button>
+                    <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_hot')">
+                        批量热门/不热门
+                    </button>
                     <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
                 </div>
                 <div class="layui-card-body layui-table-body layui-table-main">
@@ -83,31 +102,44 @@
                         {volist name="list" id="v"}
                         <tr>
                             <td style="text-align: center;">
-                                <input type="checkbox" name="id" value="{$v.id}"   lay-skin="primary">
+                                <input type="checkbox" name="id" value="{$v.id}" lay-skin="primary">
                             </td>
                             <td style="text-align: center;">{$v.title}</td>
                             <td style="text-align: center;">{$type[$v['type_id']]|default='暂无分类'}</td>
                             <td style="text-align: center;">
-                                <a href="https://abc.miaommei.com//{$v.share}" target="_blank"><img src="https://abc.miaommei.com//{$v.share}" height="50"></a>
+                                <a href="https://abc.miaommei.com//{$v.share}" target="_blank"><img
+                                        src="https://abc.miaommei.com//{$v.share}" height="50"></a>
                             </td>
                             <td style="text-align: center;">
-                                昵称：<span style="color: #00a0e9">{$v->getUser->nickname}</span>
+                                昵称：<span style="color: #00a0e9">{$v->getUser->nickname ?? ''}</span>
                                 <hr>
-                                序号: <span style="color: #00a0e9">{$v->getUser->id}</span>
+                                序号: <span style="color: #00a0e9">{$v->getUser->id ?? ''}</span>
                             </td>
                             <!-- 上架 -->
-                            <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.status == 1 ? '不热门' : '热门'}" data-key="is_hot" data-val="{$v.is_hot == 1 ? 0 : 1}">
+                            <td class="clickStatus" style="text-align: center;" data-id={$v.id}
+                                data-title="{$v.status == 1 ? '不热门' : '热门'}" data-key="is_hot"
+                                data-val="{$v.is_hot == 1 ? 0 : 1}">
                                 {$v.is_hot == 1 ?
-                                '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
-                                '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i
+                                        class="layui-icon ">&#xe605;</i></button>
+                                ' :
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i
+                                        class="layui-icon">&#x1006;</i></button>
+                                ';
                                 }
                             </td>
                             <td>
-                               <span class="sortClick" title="排序" style="cursor: pointer; color:steelblue;">{$v.sort}</span>
-                               <div style="display: none;">
-                                <input type="number" value="{$v.sort}" class="layui-input" placeholder="输入排序值" style="width: 60px;">
-                                <button data-id="{$v.id}" title="点我改变" type="button" class="sortBtn layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon layui-icon-edit"></i></button>
-                               </div>
+                                <span class="sortClick" title="排序"
+                                      style="cursor: pointer; color:steelblue;">{$v.sort}</span>
+                                <div style="display: none;">
+                                    <input type="number" value="{$v.sort}" class="layui-input" placeholder="输入排序值"
+                                           style="width: 60px;">
+                                    <button data-id="{$v.id}" title="点我改变" type="button"
+                                            class="sortBtn layui-btn layui-btn-sm layui-btn-normal"><i
+                                            class="layui-icon layui-icon-edit"></i></button>
+                                </div>
                             </td>
                             <td style="text-align: center;">
                                 开始时间：<span style="color: #00a0e9">{:date('Y-m-d H:i:s',$v['start_time'])}</span>
@@ -117,8 +149,10 @@
                                 添加时间：<span style="color: #00a0e9">{:date('Y-m-d H:i:s',$v['add_time'])}</span>
                             </td>
                             <td style="text-align: center;">
-                                <br/><div style="margin-top: 10px;"></div>
-                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除"
+                                        onclick="member_del(this,{$v['id']})" href="javascript:;">
                                     <i class="layui-icon">&#xe640;</i>删除
                                 </button>
                             </td>
@@ -138,9 +172,9 @@
 </div>
 </body>
 <script>
-    layui.use(['form','laydate'], function(){
+    layui.use(['form', 'laydate'], function () {
         var laydate = layui.laydate;
-        var  form = layui.form;
+        var form = layui.form;
 
         //执行一个laydate实例
         laydate.render({
@@ -153,11 +187,11 @@
         });
 
         // 监听全选
-        form.on('checkbox(checkall)', function(data){
-            if(data.elem.checked){
-                $('tbody input').prop('checked',true);
-            }else{
-                $('tbody input').prop('checked',false);
+        form.on('checkbox(checkall)', function (data) {
+            if (data.elem.checked) {
+                $('tbody input').prop('checked', true);
+            } else {
+                $('tbody input').prop('checked', false);
             }
             form.render('checkbox');
         });
@@ -172,58 +206,58 @@
         });
 
 
-        $(".sortClick").click(function(){
-            $(this).parent().find('div').css('display','flex')
+        $(".sortClick").click(function () {
+            $(this).parent().find('div').css('display', 'flex')
             $(this).hide(300)
         })
 
-        $(".sortBtn").click(function(){
+        $(".sortBtn").click(function () {
             var id = $(this).attr('data-id')
-            if(!id) return layer.msg('没有该选项',{icon:5})
+            if (!id) return layer.msg('没有该选项', {icon: 5})
             var sort = $(this).prev().val()
-            if(!sort || sort < 0) return layer.msg('排序输入错误',{icon:5})
+            if (!sort || sort < 0) return layer.msg('排序输入错误', {icon: 5})
             var oldSort = $(this).parent().parent().find('.sortClick').text()
-            if(oldSort - 0 == sort - 0) return layer.msg('值不能相同',{icon:5})
+            if (oldSort - 0 == sort - 0) return layer.msg('值不能相同', {icon: 5})
             var self = this
             $.ajax({
-                url:'/admin/lives/lives_sortEdit',
-                data:{id,sort},
+                url: '/admin/lives/lives_sortEdit',
+                data: {id, sort},
                 dataType: 'json',
-                success:function(res){
-                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
-                    if(res && res.data){
+                success: function (res) {
+                    layer.msg(res.msg || '操作ok', {icon: res.code == 200 ? 6 : 5})
+                    if (res && res.data) {
                         $(self).parent().parent().find('.sortClick').text(sort).show(300)
                         console.log($(self).parent().parent())
-                        $(self).parent().css('display','none')
+                        $(self).parent().css('display', 'none')
                     }
                 },
-                error:function(err){
-                    layer.msg('输入错误',{icon:5})
+                error: function (err) {
+                    layer.msg('输入错误', {icon: 5})
                 }
             })
         })
     });
 
     /*删除*/
-    function member_del(obj,id){
-        layer.confirm('确认要删除吗？',function(index){
+    function member_del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
             var ids = [];
             ids.push(id);
             $.ajax({
-                url:"{:url('Lives/lives_del')}",
+                url: "{:url('Lives/lives_del')}",
                 type: "post",
-                data:{id:ids},
-                dataType:"json",
-                success:function (res) {
-                    if(res.code == 200){
-                        layer.msg('删除成功', {icon: 1,time:1000});
+                data: {id: ids},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        layer.msg('删除成功', {icon: 1, time: 1000});
                         $(obj).parents("tr").remove();
-                    }else{
-                        layer.alert(res.msg, {icon:2,time:1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
                     }
                 },
-                error:function(e){
-                    layer.alert("网络错误", {icon:5,time:1000});
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
                 },
             });
         });
@@ -233,81 +267,80 @@
     var objKeys = {
         // 是否精选  
         is_hot: {  // 下标  0 表示 不开启  1 表示开启
-            val: [0,1],
-            title: ['不推荐','推荐']
+            val: [0, 1],
+            title: ['不推荐', '推荐']
         },
         // 是否上架
         status: {  // 下标    0 不上架  1 表示 上架
-            val: [0,1],
-            title: ['不上架','上架']
+            val: [0, 1],
+            title: ['不上架', '上架']
         },
-      }
+    }
 
-      var btnStrs = [
-          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">ဆ</i></button>', // 不开启
-          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon "></i></button>' // 开启
-      ];
+    var btnStrs = [
+        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">ဆ</i></button>', // 不开启
+        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon "></i></button>' // 开启
+    ];
 
-    function start(obj,id){
-        layer.confirm('确认要上架此视频吗？',function(index){
+    function start(obj, id) {
+        layer.confirm('确认要上架此视频吗？', function (index) {
             $.ajax({
-                url:"{:url('Lives/lives_status')}",
+                url: "{:url('Lives/lives_status')}",
                 type: "post",
-                data:{id:id,'type':'start'},
-                dataType:"json",
-                success:function (res) {
-                    if(res.code == 200){
-                        $(obj).attr('onclick','end(this,'+id+')');
+                data: {id: id, 'type': 'start'},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        $(obj).attr('onclick', 'end(this,' + id + ')');
                         $(obj).html('下架视频');
                         $(obj).addClass('layui-btn-danger');
                         $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-danger').addClass('layui-btn-normal').html('上架');
-                        layer.msg(res.msg, {icon: 1,time:1000});
-                    }else{
-                        layer.alert(res.msg, {icon:2,time:1000});
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
                     }
                 },
-                error:function(e){
-                    layer.alert("网络错误", {icon:5,time:1000});
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
                 },
             });
         });
     }
 
-    function end(obj,id){
-        layer.confirm('确认要下架此视频吗？',function(index){
+    function end(obj, id) {
+        layer.confirm('确认要下架此视频吗？', function (index) {
             $.ajax({
-                url:"{:url('Lives/lives_status')}",
+                url: "{:url('Lives/lives_status')}",
                 type: "post",
-                data:{id:id,'type':'end'},
-                dataType:"json",
-                success:function (res) {
-                    if(res.code == 200){
-                        $(obj).attr('onclick','start(this,'+id+')');
+                data: {id: id, 'type': 'end'},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        $(obj).attr('onclick', 'start(this,' + id + ')');
                         $(obj).html('上架视频');
                         $(obj).removeClass('layui-btn-danger');
                         $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-normal').addClass('layui-btn-danger').html('下架');
-                        layer.msg(res.msg, {icon: 1,time:1000});
-                    }else{
-                        layer.alert(res.msg, {icon:2,time:1000});
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
                     }
                 },
-                error:function(e){
-                    layer.alert("网络错误", {icon:5,time:1000});
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
                 },
             });
         });
     }
 
-    $(function(){
+    $(function () {
         bindClickBtn()
-      })
+    })
 
-      // 绑定事件
-      function bindClickBtn()
-      {
+    // 绑定事件
+    function bindClickBtn() {
         $("table tbody .clickStatus button").off('click');
-        $("table tbody .clickStatus button").click(function(e){
-            var self  = this;
+        $("table tbody .clickStatus button").click(function (e) {
+            var self = this;
             // 拿取到tb
             var tb = $(this).parent()
             var data = {
@@ -315,125 +348,131 @@
                 val: $(tb).attr('data-val'),
                 key: $(tb).attr('data-key')
             }
-            clickStatusBtn('/admin/lives/lives_status.html',data,{
-                msg: '此序号:'+data.id+"-状态为:"+$(tb).attr('data-title')+'？',
+            clickStatusBtn('/admin/lives/lives_status.html', data, {
+                msg: '此序号:' + data.id + "-状态为:" + $(tb).attr('data-title') + '？',
                 elem: self
-            },toggleBtn);
-          })
-      }
+            }, toggleBtn);
+        })
+    }
 
-      /**
-       *  将按钮更改为相反的状态
-       */
-       function toggleBtn(data,self){
-        if(self && objKeys[data.key]){
+    /**
+     *  将按钮更改为相反的状态
+     */
+    function toggleBtn(data, self) {
+        if (self && objKeys[data.key]) {
             var i = objKeys[data.key].val.indexOf(data.val - 0)
-            if(i >= 0){
+            if (i >= 0) {
                 var tb = $(self).parent()
-                $(self).hide(500,function(){
+                $(self).hide(500, function () {
                     $(tb).html(btnStrs[i])
-                    setTimeout(function(){
-                        $(self).show(400,function(){
+                    setTimeout(function () {
+                        $(self).show(400, function () {
                             bindClickBtn();
                         })
-                    },300)
+                    }, 300)
                 })
                 // 目前只有两种状态
-                $(tb).attr('data-val',objKeys[data.key].val[i == 0 ? 1 : 0])
-                $(tb).attr('data-title',objKeys[data.key].title[i == 0 ? 1 : 0])
+                $(tb).attr('data-val', objKeys[data.key].val[i == 0 ? 1 : 0])
+                $(tb).attr('data-title', objKeys[data.key].title[i == 0 ? 1 : 0])
             }
         }
-      }
+    }
 
     // 三个按钮操作 等
-    function pinLiangStatusBtn(key){
-        if(!objKeys[key]) return layer.msg('必须选择一项',{icon:5});
+    function pinLiangStatusBtn(key) {
+        if (!objKeys[key]) return layer.msg('必须选择一项', {icon: 5});
         var ids = [];
         // 获取选中的id 
-        $('tbody input').each(function(index, el) {
-            if($(this).prop('checked')){
-               ids.push($(this).val())
+        $('tbody input').each(function (index, el) {
+            if ($(this).prop('checked')) {
+                ids.push($(this).val())
             }
         });
-        if(!ids || ids.length == 0) return layer.msg('必须选择一项',{icon:4});
+        if (!ids || ids.length == 0) return layer.msg('必须选择一项', {icon: 4});
         // 数据
         var obj = {
             ids,
             key
-        }  
-        layer.confirm('确认批量操作？',{title:'批量操作',icon:3,btn:[objKeys[key].title[1],objKeys[key].title[0],'取消']},function(index){
+        }
+        layer.confirm('确认批量操作？', {
+            title: '批量操作',
+            icon: 3,
+            btn: [objKeys[key].title[1], objKeys[key].title[0], '取消']
+        }, function (index) {
             obj.val = objKeys[key].val[1]
-            ajaxFun('/admin/lives/lives_list_pinliang_status.html',obj,'post',function(){
+            ajaxFun('/admin/lives/lives_list_pinliang_status.html', obj, 'post', function () {
                 window.location.href = window.location.href
             })
             layer.close(index)
-        },function(index){
+        }, function (index) {
             obj.val = objKeys[key].val[0]
-            ajaxFun('/admin/lives/lives_list_pinliang_status.html',obj,'post',function(){
+            ajaxFun('/admin/lives/lives_list_pinliang_status.html', obj, 'post', function () {
                 window.location.href = window.location.href
             })
         })
-      }
+    }
 
 
-
-      // ajax封装
-      function ajaxFun(url,obj,type = 'post',fun,errFun,elem){
-        var s = layer.msg('加载中...',{icon:4,time:999999})
+    // ajax封装
+    function ajaxFun(url, obj, type = 'post', fun, errFun, elem) {
+        var s = layer.msg('加载中...', {icon: 4, time: 999999})
         $.ajax({
-                url,
-                type,
-                data:obj,
-                dataType:"json",
-                success:function (res) {
-                    if(res.code == 200){
-                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
-                    }else{
-                        layer.alert(res.msg, {icon:2,time:1000});
-                    }
-                    layer.close(s)
-                    if(fun) fun(res.data,elem);
-                },
-                error:function(e){
-                    layer.close(s)
-                    layer.alert("网络错误", {icon:5,time:1000});
-                    if(errFun) errFun(res);
-                },
-            });
-      }
+            url,
+            type,
+            data: obj,
+            dataType: "json",
+            success: function (res) {
+                if (res.code == 200) {
+                    layer.msg(res.msg ? res.msg : '操作ok', {icon: 1, time: 1000});
+                } else {
+                    layer.alert(res.msg, {icon: 2, time: 1000});
+                }
+                layer.close(s)
+                if (fun) fun(res.data, elem);
+            },
+            error: function (e) {
+                layer.close(s)
+                layer.alert("网络错误", {icon: 5, time: 1000});
+                if (errFun) errFun(res);
+            },
+        });
+    }
 
 
-      /**
-       * 封装弹窗中的数据信息
-       * 参数：  请求地址， 请求数据， 标题，成功回调函数，错误回调函数
-       */
-      function clickStatusBtn(url,obj,options,fun= false,errFun = false){
-        var s = layer.msg('加载中...',{icon:4,time:999999})
-        layer.confirm(options.msg,{title: options.title ? options.title : '操作提示',icon: options.icon ? options.icon : 3},function(index){
+    /**
+     * 封装弹窗中的数据信息
+     * 参数：  请求地址， 请求数据， 标题，成功回调函数，错误回调函数
+     */
+    function clickStatusBtn(url, obj, options, fun = false, errFun = false) {
+        var s = layer.msg('加载中...', {icon: 4, time: 999999})
+        layer.confirm(options.msg, {
+            title: options.title ? options.title : '操作提示',
+            icon: options.icon ? options.icon : 3
+        }, function (index) {
             $.ajax({
                 url,
                 type: "post",
-                data:obj,
-                dataType:"json",
-                success:function (res) {
-                    if(res.code == 200){
+                data: obj,
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
                         //捉到所有被选中的，发异步进行删除
-                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1, time: 1000});
                         //$(".layui-form-checked").not('.header').parents('tr').remove();
-                    }else{
-                        layer.alert(res.msg, {icon:2,time:1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
                     }
                     layer.close(s)
-                    if(fun) fun(res.data,options.elem);
+                    if (fun) fun(res.data, options.elem);
                 },
-                error:function(e){
+                error: function (e) {
                     layer.close(s)
-                    layer.alert("网络错误", {icon:5,time:1000});
-                    if(errFun) errFun(res);
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                    if (errFun) errFun(res);
                 },
             });
         });
-      }
+    }
 </script>
 {include file='common/scroll' /}
 {include file='common/footer' /}
