@@ -1,0 +1,25 @@
+<div class="left-nav">
+    <div id="side-nav">
+        <ul id="nav">
+            {volist name="AdminMenu" id="v"}
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="{$v.name}">{$icon[$v['icon']]|default=''}</i>
+                    <cite>{$v.name}</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    {if condition="!empty($v['kids'])"}
+                    {volist name="v['kids']" id="vo"}
+                    <li>
+                        <a onclick="xadmin.add_tab('{$vo.name}','{$vo.url}')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>{$vo.name}</cite></a>
+                    </li>
+                    {/volist}
+                    {/if}
+                </ul>
+            </li>
+            {/volist}
+        </ul>
+    </div>
+</div>

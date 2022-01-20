@@ -1,0 +1,131 @@
+<!-- 省市区 -->
+<div class="layui-inline">
+    <div class="layui-input-inline">
+        <select id="province" name="province" lay-filter="province" lay-search="">
+            <option value="0">请选择或搜索省</option>
+            {if condition="!empty($province_list)"}
+                {if condition="empty($get.province)"}<?php $get['province'] = 0;?>{/if}
+                {if condition="!empty($data.province)"}<?php $get['province'] = $data['province'];?>{/if}
+            {volist name="province_list" id="v"}
+            <option value="{$v.code}" {if condition="$get['province'] == $v.code"}selected{/if}>{$v.name}</option>
+            {/volist}
+            {/if}
+        </select>
+    </div>
+    <div class="layui-input-inline">
+        <select id="city" name="city" lay-filter="city" lay-search="">
+            <option value="0">请选择或搜索市</option>
+            {if condition="!empty($city_list)"}
+                {if condition="empty($get.city)"}<?php $get['city'] = 0;?>{/if}
+                {if condition="!empty($data.city)"}<?php $get['city']= $data['city'];?>{/if}
+            {volist name="city_list" id="v"}
+            <option value="{$v.code}" {if condition="$get['city'] == $v.code"}selected{/if}>{$v.name}</option>
+            {/volist}
+            {/if}
+        </select>
+    </div>
+    <div class="layui-input-inline">
+        <select id="area" name="area" lay-filter="area" lay-search="">
+            <option value="0">请选择或搜索县/区</option>
+            {if condition="empty($get.area)"}<?php $get['area'] = 0;?>{/if}
+            {if condition="!empty($data.area)"}<?php $get['area']= $data['area'];?>{/if}
+            {if condition="!empty($area_list)"}
+                {volist name="area_list" id="v"}
+            <option value="{$v.code}" {if condition="$get['area'] == $v.code"}selected{/if}>{$v.name}</option>
+                {/volist}
+            {/if}
+        </select>
+    </div>
+    <div class="layui-input-inline" style="width:300px;">
+        {if condition="empty($get.pcd)"}<?php $get['pcd'] = '';?>{/if}
+        {if condition="!empty($data.pcd)"}<?php $get['pcd']= $data['pcd'];?>{/if}
+        <input class="layui-input" id="pcd" name="pcd" value="{$get.pcd|default=''}" placeholder="请输入详细地址：城镇＋乡村＋街道＋门牌号码" />
+    </div>
+</div>
+
+<script>
+    layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 省市区
+        var provinceText = "";
+        var cityText = "";
+        var areaText = "";
+        console.log("棕刷")
+        //监听省下拉框
+        form.on('select(province)', function(dataObj){
+            //移除城市下拉框所有选项
+            $("#city").empty();
+            var cityHtml = '<option value="">请选择或搜索市</option>';
+            $("#city").html(cityHtml);
+            var areaHtml = '<option value="">请选择或搜索县/区</option>';
+            $("#area").html(areaHtml);
+            provinceText = $("#province").find("option:selected").text();
+            var value = $("#province").val();
+
+            // 省
+            $.ajax({
+                url:'/admin/region/index',
+                data:{'p_code': value},
+                dataType: 'json',
+                success:function(res){
+                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
+                    if (res.data == null) {
+                        return false;
+                    }
+
+                    var $html = "";
+                    $.each(res.data, function (index, item) {
+                        $html += "<option value='" + item.code + "'>" + item.name + "</option>";
+                    });
+                    $("#city").append($html);
+                    //append后必须从新渲染
+                    form.render('select');
+                },
+                error:function(err){
+                    layer.msg('输入错误',{icon:5})
+                }
+            })
+
+        });
+
+        //监听市下拉框
+        form.on('select(city)', function(dataObj){
+            //移除县区下拉框所有选项
+            $("#area").empty();
+            var html = '<option value="">请选择或搜索县/区</option>';
+            $("#area").html(html);
+            cityText = $("#city").find("option:selected").text();
+            var value = $("#city").val();
+            // 市
+            $.ajax({
+                url:'/admin/region/index',
+                data:{'p_code': value},
+                dataType: 'json',
+                success:function(res){
+                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
+                    if (res.data == null) {
+                        return false;
+                    }
+
+                    var $html = "";
+                    $.each(res.data, function (index, item) {
+                        $html += "<option value='" + item.code + "'>" + item.name + "</option>";
+                    });
+                    $("#area").append($html);
+                    //append后必须从新渲染
+                    form.render('select');
+                },
+                error:function(err){
+                    layer.msg('输入错误',{icon:5})
+                }
+            })
+
+        });
+
+        //监听县区下拉框
+        form.on('select(area)', function(dataObj){
+            areaText = $("#area").find("option:selected").text();
+        });
+    });
+</script>

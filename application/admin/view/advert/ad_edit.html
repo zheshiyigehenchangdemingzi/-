@@ -1,0 +1,220 @@
+{include file='common/head' /}
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$data.id|default=''}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    广告类型
+                </label>
+                <div class="layui-col-xs8">
+                    <select name="type_key" lay-verify="" lay-search>
+                        <option value="">品牌筛选</option>
+                        {volist name="types" id="v"}
+                        <option value="{$key}" {if condition="isset($data['type_key']) && $data['type_key'] == $key"}selected{/if}>{$v}</option>
+                        {/volist}
+                    </select>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    必须选择广告类型
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    标题
+                </label>
+                <div class="layui-col-xs8">
+                    <input type="text" name="title" required="" autocomplete="off" class="layui-input" value="{$data.title|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    补充说明
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    图片
+                </label>
+                <div class="layui-input-block layui-upload">
+                    <button type="button" class="layui-btn layui-btn-normal file" id="test1"><i class="layui-icon"></i>上传图片</button>
+                    <input class="layui-upload-file" type="file" accept="undefined" name="file" id="test1s">
+                    <span class="layui-inline layui-upload-choose">支持 png、jpg、jpeg 格式文件</span>
+                </div>
+                <div>
+                    <img id="img" src="{$data.img_url|default=''}" alt="请选择图片" />
+                    <input type="hidden" name="img_url" value="{$data.img_url|default=''}" />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    小程序跳转
+                </label>
+                <div class="layui-col-xs8">
+                    <input type="text" name="url" required="" autocomplete="off" class="layui-input" value="{$data.url|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    点击图片后跳转路径
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    app跳转
+                </label>
+                <div class="layui-col-xs8">
+                    <input type="text" name="app_url" required="" autocomplete="off" class="layui-input" value="{$data.app_url|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    点击图片后跳转路径
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    排序
+                </label>
+                <div class="layui-col-xs8">
+                    <input type="number" name="sort" required="" autocomplete="off" class="layui-input" value="{$data.sort|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    值越高，排名越前
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    是否跳转
+                </label>
+                <div class="layui-input-inline">
+                    {if !isset($data['is_skip'])}
+                    <input type="radio" name="is_skip" value="1" title="是" checked>
+                    <input type="radio" name="is_skip" value="0" title="否">
+                    {else /}
+                    <input type="radio" name="is_skip" value="1" title="是" {if $data['is_skip'] == 1}checked{/if}>
+                    <input type="radio" name="is_skip" value="0" title="否" {if $data['is_skip'] == 0}checked{/if}>
+                    {/if}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    是否显示
+                </label>
+                <div class="layui-input-inline">
+                    {if !isset($data['show'])}
+                    <input type="radio" name="show" value="1" title="是" checked>
+                    <input type="radio" name="show" value="0" title="否">
+                    {else /}
+                    <input type="radio" name="show" value="1" title="是" {if $data['show'] == 1}checked{/if}>
+                    <input type="radio" name="show" value="0" title="否" {if $data['show'] == 0}checked{/if}>
+                    {/if}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            if(!data.field.title || data.field.title.length < 1){
+                layer.msg('标题不得为空，且长度不得小于2位',{icon:5})
+                return false;
+            }
+            if(!data.field.img_url || data.field.img_url.length < 10){
+                layer.msg('轮播图必须上传',{icon:5})
+                return false;
+            }
+            if(!data.field.type_key){
+                layer.msg('广告类型必须选择',{icon:5})
+                return false;
+            }
+            $.ajax({
+                url:"/admin/advert/ad_edit",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+
+    });
+
+//按钮-进行上传操作--图片阅览
+$('#test1').click(function(){
+    $('#test1s').click();
+})
+
+// 操作成功后的回调
+$('#test1s').change(function(e){
+    var imgBox = e.target;
+    if(imgBox.files[0].size > 1024 * 1024 *2){
+        return layer.msg('失败，文件不得超过2mb',{icon: 5})
+    }
+    var img = getObjectURL(imgBox.files[0]);
+    $('#img').attr('src',img);
+    var data = {image: imgBox.files[0]}
+    var formData = new FormData();
+    formData.append('image', imgBox.files[0]);
+    formData.append('prefix','productBanner');
+    $.ajax({
+        url:"{:url('admin/uploads/cosFiles')}",
+        type: 'post',
+        async: false,
+        data: formData,
+        dataType: 'json',
+        processData: false,// 告诉jQuery不要去处理发送的数据
+        contentType: false,// 告诉jQuery不要去设置Content-Type请求头
+        beforeSend: function (){ //过程...
+        },
+        success: function (res) {
+            if (res.code == 200) {
+                layer.msg('加载成功', {icon: 6})
+                //$('input[name=img_url]').val(HOST_URL +'/' +  res.data.fileName + '/' + (res.data.prefix ? '/' +  res.data.prefix + '/' : '') + res.data.url.replace("\\",'/'))
+                //$('input[name=img_url]').val('/' +  res.data.fileName + '/' + (res.data.prefix ? '/' +  res.data.prefix + '/' : '') + res.data.url.replace("\\",'/'))
+                $('input[name=img_url]').val(res.data.url)
+            } else {
+                layer.msg(res.msg || '失败，麻烦重新尝试', {icon: 5})
+            }
+        },
+        error:function(){
+            layer.msg( '失败，重新尝试，多次失败后麻烦联系开发人员', {icon: 5})
+        }
+    })
+});
+
+//建立一個可存取到該file的url
+function getObjectURL(file) {
+    var url;
+    if (window.createObjectURL != undefined) { // basic
+        url = window.createObjectURL(file);
+    } else if (window.URL != undefined) { // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+    } else if (window.webkitURL != undefined) { // webkit or chrome
+        url = window.webkitURL.createObjectURL(file);
+    }
+    return url;
+}
+
+</script>
+{include file='common/footer' /}

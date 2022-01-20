@@ -1,0 +1,87 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <input type="hidden" name="id" value="{$_GET['id']}">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="order_sn"  placeholder="订单号" autocomplete="off" class="layui-input" value="{$get.order_sn|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="type">
+                                <option value="" selected>类型筛选</option>
+                                <option value="1" >常规订单</option>
+                                <option value="2" >活动订单</option>
+                                <option value="3" >直播订单</option>
+                                <option value="4" >视频订单</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="开始时间" name="start" id="start" value="{$get.start|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="截止时间" name="end" id="end" value="{$get.end|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-header">
+                    <span style="line-height:40px;float: right;">
+                        订单总额：{$wallet.totalAmount} 元,
+                        订单总数：{$wallet.totalNumber} ,
+                        共有数据：{$count} 条
+                    </span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">订单号</th>
+                            <th style="text-align: center;">订单金额</th>
+                            <th style="text-align: center;">订单状态</th>
+                            <th style="text-align: center;">下单时间时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">{$v.order_sn}</td>
+                            <td style="text-align: center;">{$v.total}元</td>
+                            <td style="text-align: center;"><span style="color:{$color[$v['status']]}">{$status[$v['status']]}</span>&nbsp;</td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+</script>
+{include file='common/footer' /}

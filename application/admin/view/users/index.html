@@ -1,0 +1,237 @@
+{include file='common/head' /}
+<body>
+<div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>用户管理</cite></a>
+              <a><cite>用户列表</cite></a>
+          </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uname"  placeholder="会员名称" autocomplete="off" class="layui-input" value="{$get.uname|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uid"  placeholder="会员ID" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="invite_id"  placeholder="上级ID" autocomplete="off" class="layui-input" value="{$get.invite_id|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="name"  placeholder="真实姓名" autocomplete="off" class="layui-input" value="{$get.name|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="phone"  placeholder="手机号码" autocomplete="off" class="layui-input" value="{$get.phone|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="注册时间开始" name="start" id="start" value="{$get.start|default=''}">
+                        </div>
+                        <!--虚拟-->
+                        <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                            <select name="is_fictitious">
+                                <option value="" selected>虚拟用户</option>
+                                <option value="0" {if condition="isset($get['is_fictitious']) && strlen($get['is_fictitious']) >= 1 && $get['is_fictitious'] == 0"}selected{/if}>不是</option>
+                                <option value="1" {if condition="$get['is_fictitious'] == 1"}selected{/if}>是</option>
+                            </select>
+                        </div>
+                        <!--选取用户-->
+                        <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                            <select name="is_userType">
+                                <option value="" selected>用户类型</option>
+                                <option value="0" {if condition="isset($get['is_userType']) && strlen($get['is_userType']) >= 1 && $get['is_userType'] == 0"}selected{/if}>游客</option>
+                                <option value="1" {if condition="isset($get['is_userType']) && strlen($get['is_userType']) >= 1 && $get['is_userType'] == 1"}selected{/if}>潜在用户</option>
+                                <option value="2" {if condition="$get['is_userType'] == 2"}selected{/if}>有效用户</option>
+                            </select>
+                        </div>
+<!--                        会员层级-->
+                        <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                            <select name="level">
+                                <option value="">会员层级</option>
+                                <option value="0">游客</option>
+                                {volist name="level" id="v"}
+                                <option value="{$key}" {if condition="isset($get['level']) && strlen($get['level']) > 0 && $get['level'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 分页数据 -->
+                        <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                            <select name="limit">
+                                <option value="" selected>分页数据</option>
+                                <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                                <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                                <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="注册时间截止" name="end" id="end" value="{$get.end|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <blockquote class="layui-elem-quote">
+                    今天数据--游客数量：<span class="layui-badge layui-bg-orange">{$today.fangke}</span>
+                    潜在客户：<span class="layui-badge layui-bg-orange">{$today.qianzai}</span>
+                    有效客户：<span class="layui-badge layui-bg-orange">{$today.youxiao}</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    累计数据--游客数量：<span class="layui-badge layui-bg-blue">{$zongDay.fangke}</span>
+                    潜在客户：<span class="layui-badge layui-bg-blue">{$zongDay.qianzai}</span>
+                    有效客户：<span class="layui-badge layui-bg-blue">{$zongDay.youxiao}</span>
+                </blockquote>
+                <div class="layui-card-header">
+                    <button class="layui-btn" onclick="xadmin.open('添加会员','/admin/users/add',600,400)">
+                        <i class="layui-icon"></i>会员
+                    </button>
+                    <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">会员ID</th>
+                            <th style="text-align: center;">会员名/头像</th>
+                            <th style="text-align: center;">虚拟</th>
+                            <th style="text-align: center;">推荐人</th>
+                            <th style="text-align: center;">下线客户数量</th>
+                            <th style="text-align: center;">会员等级</th>
+                            <th style="text-align: center;">邀请码</th>
+                            <th style="text-align: center;">购物券余额</th>
+                            <th style="text-align: center;">积分</th>
+                            <th style="text-align: center;">钱包余额</th>
+                            <th style="text-align: center;">注册时间</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">{$v.id}</td>
+                            <td style="text-align: center;">
+                                {$v.name}
+                                <br>
+                                <img src="{$v.avatarurl}" />
+                            </td>
+                            <td style="text-align: center;">
+                                {$v.is_fictitious == 1 ?
+                                '<button type="button" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                '<button type="button" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                }
+                            </td>
+                            <td style="text-align: center;">{$v.invite_id}</td>
+                            <td style="text-align: center;">{$v.invite_num}</td>
+                            <td style="text-align: center;">
+                                {if condition="$v['level'] eq 0"}
+                                游客
+                                {else /}
+                                {$level[$v['level']]}
+                                {/if}
+                            </td>
+                            <td style="text-align: center;">{$v.invite_code}</td>
+                            <td style="text-align: center;">{$v.volume_num}元</td>
+                            <td style="text-align: center;">{$v.integral}</td>
+                            <td style="text-align: center;">{$v.balance}元</td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td style="text-align: center;">
+                                <button class="layui-btn layui-btn layui-btn-xs" onclick="xadmin.open('{$v.name}-信息详情','/admin/users/info?id={$v.id}','','',true)" href="javascript:;">
+                                    信息详情
+                                </button>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-订单详情','/admin/users/order?id={$v.id}','','',true)" href="javascript:;">
+                                    订单详情
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-收入详情','/admin/users/miao?id={$v.id}','','',true)" href="javascript:;">
+                                    收入详情
+                                </button>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-余额记录','/admin/users/balance?id={$v.id}','','',true)" href="javascript:;">
+                                    余额记录
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-银行卡详情','/admin/users/bank?id={$v.id}','','',true)" href="javascript:;">
+                                    银行卡详情
+                                </button>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-收货地址详情','/admin/users/address?id={$v.id}','','',true)" href="javascript:;">
+                                    收货地址详情
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-购物券详情','/admin/users/volume?id={$v.id}','','',true)" href="javascript:;">
+                                    购物券详情
+                                </button>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-购物券记录','/admin/users/volume_log?id={$v.id}','','',true)" href="javascript:;">
+                                    购物券记录
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('{$v.name}-推广客户','/admin/users/invite?id={$v.id}','','',true)" href="javascript:;">
+                                    推广客户
+                                </button>
+                                <button class="layui-btn layui-btn-normal layui-btn-xs"  onclick="xadmin.open('{$v.name}-测试专用','/admin/users/testEdit?id={$v.id}','','',false)" href="javascript:;">
+                                    测试专用
+                                </button>
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form','laydate'], function(){
+        var laydate = layui.laydate;
+        var  form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+    });
+</script>
+{include file='common/scroll' /}
+{include file='common/footer' /}

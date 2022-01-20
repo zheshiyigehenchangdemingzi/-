@@ -1,0 +1,133 @@
+{include file='common/head' /}
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$data.id|default=''}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    名称
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" required="" autocomplete="off" class="layui-input" value="{$data.name|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    补充说明
+                </div>
+            </div>
+<!--           单选框-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">单选框</label>
+                <div class="layui-input-block" id="radioMoney">
+                    {if !isset($data.type)}
+                    <input  data-str="个" data-class="typeStr" type="radio" name="type" value="0" title="按件收费" checked>
+                    <input data-str="克" data-class="typeStr" type="radio" name="type" value="1" title="按重收费">
+                    {else/}
+                    <input  data-str="个" data-class="typeStr" type="radio" name="type" value="0" title="按件收费" {if $data['type'] == '按件收费'}checked{/if}>
+                    <input data-str="克" data-class="typeStr" type="radio" name="type" value="1" title="按重收费" {if $data['type'] == '按重收费'}checked{/if}>
+                    {/if}
+                </div>
+            </div>
+            <?php
+             $defalutTypeStr = '个';
+             if (count($data) > 0){
+                $defalutTypeStr = $data['type'] == '按重收费' ?  '克' : '个';
+             }
+            ?>
+<!--            按件收费-->
+            <div id="anJianShouFei" class="typeBox">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        首件（<span class="typeStr">{$defalutTypeStr}</span>）
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="company" required="" autocomplete="off" class="layui-input" value="{$data.company|default=0}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        首费（元）
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="downpayment" required="" autocomplete="off" class="layui-input" value="{$data.downpayment|default=0}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        续件（<span class="typeStr">{$defalutTypeStr}</span>）
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="continuation" required="" autocomplete="off" class="layui-input" value="{$data.downpayment|default=0}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        续费（元）
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="renew" required="" autocomplete="off" class="layui-input" value="{$data.renew|default=0}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    排序
+                </label>
+                <div class="layui-input-inline">
+                    <input type="number" name="sort" required="" autocomplete="off" class="layui-input" value="{$data.sort|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    值越高，排名越前
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery'],
+    function() {
+        // 监听点击事件
+        $(".layui-form-radio").click(function(){
+            $("."+$(this).prev().attr('data-class')).text($(this).prev().attr('data-str'))
+        })
+
+
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('/admin/services/freightEdit')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+
+    });
+
+</script>
+{include file='common/footer' /}

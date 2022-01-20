@@ -1,0 +1,100 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$data.id|default=''}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            类型名称
+                        </label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="name" required="" autocomplete="off" class="layui-input" value="{$data.name|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            识别码
+                        </label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="key" {if isset($data.key) && $data.key}disabled{/if}  required="" autocomplete="off" class="layui-input" value="{$data.key|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            数字，字母，下划线
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            描述信息
+                        </label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="desc"  required="" autocomplete="off" class="layui-input" value="{$data.desc|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            状态
+                        </label>
+                        <div class="layui-input-inline">
+                            {if !isset($data['status'])}
+                            <input type="radio" name="status" value="1" title="是" checked>
+                            <input type="radio" name="status" value="0" title="否">
+                            {else /}
+                            <input type="radio" name="status" value="1" title="是" {if $data['status'] == 1}checked{/if}>
+                            <input type="radio" name="status" value="0" title="否" {if $data['status'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    if(!data.field.key){
+                        layer.msg('识别码必须填写',{icon:5})
+                        return false;
+                    }
+                    if(data.field.key.length <= 4){
+                        layer.msg('识别码长度需要大于4位',{icon:5})
+                        return false;
+                    }
+                    var usern = /^[a-zA-Z0-9_]{1,}$/;
+                    if (!data.field.key.match(usern)){
+                        layer.msg('识别码只能是数字和字母下划线',{icon:5})
+                        return false;
+                    }
+                    $.ajax({
+                        url:"{:url('Advert/type_edit')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+            });
+        </script>
+{include file='common/footer' /}

@@ -1,0 +1,203 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <input type="hidden" name="id" value="{$_GET['id']??0}">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uname"  placeholder="会员名称" autocomplete="off" class="layui-input" value="{$get.uname|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="status">
+                                <option value="" selected>状态筛选</option>
+                                {volist name="statusMap" id="v"}
+                                <option value="{$key}" {if condition="$get['status'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="开始时间" name="start" id="start" value="{$get.start|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="截止时间" name="end" id="end" value="{$get.end|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-header">
+                    <span style="line-height:40px;float: right;">
+
+                    </span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">用户id</th>
+                            <th style="text-align: center;">银行名称</th>
+                            <th style="text-align: center;">银行卡号</th>
+                            <th style="text-align: center;">持卡人</th>
+                            <th style="text-align: center;">提现金额</th>
+                            <th style="text-align: center;">实际到账金额</th>
+                            <th style="text-align: center;">提现手续费</th>
+                            <th style="text-align: center;">状态</th>
+                            <th style="text-align: center;">拒绝理由</th>
+                            <th style="text-align: center;">提现申请时间</th>
+                            <th style="text-align: center;">打款时间</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">{$v.uid}</td>
+                            <td style="text-align: center;">{$v.bank_name}</td>
+                            <td style="text-align: center;">{$v.card}</td>
+                            <td style="text-align: center;">{$v.name}（{$v.nickname}）</td>
+                            <td style="text-align: center;">{$v.gold}</td>
+                            <td style="text-align: center;">{$v.amount}</td>
+                            <td style="text-align: center;">{$v.rate}</td>
+                            <td style="text-align: center;">{$statusMap[$v.status]}</td>
+                            <td style="text-align: center;">
+                                {if condition="$v['remarks']"} {$v.remarks} {else} -- {/if}
+                            </td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td style="text-align: center;">{if condition="$v['dk_time']"} {:date('Y-m-d H:i:s',$v['dk_time'])} {else} -- {/if}</td>
+                            <td style="text-align: center;" class="td-manage">
+                                {if condition="$v['status'] <= 2"/}
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="审核" onclick="passs({$v['id']},{$v['withdrawal_type']})" href="javascript:;">
+                                    <i class="layui-icon">&#xe642;</i>审核
+                                </button>
+                                {/if}
+                                {if condition="$v['status'] eq 2"/}
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="完成" onclick="pass({$v['id']})" href="javascript:;">
+                                    <i class="layui-icon">&#xe642;</i>完成
+                                </button>
+                                {/if}
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form','laydate'], function(){
+        var laydate = layui.laydate;
+        var  form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+
+    //完成
+    function pass(id){
+        layer.confirm('确认提现已完成吗？',function(index){
+            $.ajax({
+                url:"{:url('Finance/withdrawExamine')}",
+                type: "post",
+                data:{id:id,'type':3},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                        location.reload();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //审核
+    function passs(id,type){
+        var msg;
+        if(type == 1) msg = '确认要通过审核吗？';
+        else msg = '点击确认后提现金额自动提现至用户微信零钱中，确认要执行吗？';
+        layer.msg('请选择审核类型', {
+            time: 0 //不自动关闭
+            ,btn: ['审核通过', '审核拒绝']
+            ,yes: function(index){
+                layer.confirm(msg,function(index){
+                    $.ajax({
+                        url:"{:url('Finance/withdrawExamine')}",
+                        type: "post",
+                        data:{id:id,'type':1},
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.msg(res.msg, {icon: 1,time:1000});
+                                location.reload();
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                });
+                layer.close(index);
+            }
+            ,btn2: function(index){
+                layer.close(index);
+                layer.prompt({title: '拒绝原因'},function(val, index){
+                    $.ajax({
+                        url:"{:url('Finance/withdrawExamine')}",
+                        type: "post",
+                        data:{id:id,'type':2,msg:val},
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.msg(res.msg, {icon: 1,time:1000});
+                                location.reload();
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    }
+</script>
+{include file='common/footer' /}

@@ -1,0 +1,158 @@
+{include file='common/head' /}
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+<body>
+    <!-- 分享列表 -->
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a><cite>订单管理</cite></a>
+            <a><cite>分享列表</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+    </div>
+    <!-- 主体内容 -->
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body ">
+                        <form class="layui-form layui-col-space5">
+                            <div class="layui-inline layui-show-xs-block">
+                                <input type="number" name="uid"  placeholder="购买人序号" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <input type="number" name="puid"  placeholder="分享人序号" autocomplete="off" class="layui-input" value="{$get.puid|default=''}">
+                            </div>
+                            <!-- 选择状态 -->
+                            <div class="layui-inline layui-show-xs-block">
+                                <select name="status">
+                                    <option value="">状态筛选</option>
+                                    {volist name="status" id="v"}
+                                    <option value="{$key}" {if condition="strlen($get['status']) > 0 && $get['status'] == $key"}selected{/if}>{$v}</option>
+                                    {/volist}
+                                </select>
+                            </div>
+                            <!-- 类型选择 -->
+                            <div class="layui-inline layui-show-xs-block">
+                                <select name="type">
+                                    <option value="">类型筛选</option>
+                                    {volist name="type" id="v"}
+                                    <option value="{$key}" {if condition="strlen($get['type']) > 0 && $get['type'] == $key"}selected{/if}>{$v}</option>
+                                    {/volist}
+                                </select>
+                            </div>
+                            <!-- 分页数据 -->
+                            <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                <select name="limit">
+                                    <option value="" selected>分页数据</option>
+                                    <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                    <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                    <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                    <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                </select>
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <input class="layui-input"  autocomplete="off" placeholder="下单时间开始" name="start" id="start" value="{$get.start|default=''}">
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <input class="layui-input"  autocomplete="off" placeholder="下单时间截止" name="end" id="end" value="{$get.end|default=''}">
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-card-header">
+                        <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                    </div>
+                    <style>
+                        .layui-table {
+                            text-align: center;
+                        }
+                    </style>
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table class="layui-table layui-form">
+                            <thead>
+                              <tr>
+                                <th style="text-align: center;">序号</th>
+                                <th style="text-align: center;">购买/分享-人</th>
+                                <th style="text-align: center;">状态</th>
+                                <th style="text-align: center;">类型</th>
+                                <th style="text-align: center;">下单/支付-时间</th>
+                                <th style="text-align: center;">金额详情</th>
+                                <th style="text-align: center;">描述信息</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            {volist name="list" id="v"}
+                            <tr>
+                                <td>{$v.id}</td>
+                                <td>
+                                    序号：{$v.uid}&nbsp;|
+                                    昵称：<sapn style="color:#01AAED;">{$v.oneUser && isset($v.oneUser->nickname) ? $v.oneUser->nickname : ''}</sapn>
+                                    <hr class="layui-bg-gray">
+                                    序号：{$v.puid}&nbsp;|
+                                    昵称：<sapn style="color:#01AAED;">{$v.onePUser && isset($v.onePUser->nickname) ? $v.onePUser->nickname : ''}</sapn>
+                                </td>
+                                <td><button type="button" class="layui-btn layui-btn layui-btn-normal">{$status[$v.status]|default='无'}</button></td>
+                                <td>
+                                    <button type="button" class="layui-btn">{$type[$v.type]|default='无'}</button>
+                                </td>
+                                <td>
+                                    下单：{:date('Y-m-d H:i:s',$v.add_time)}
+                                    <hr class="layui-bg-gray">
+                                    支付：{:date('Y-m-d H:i:s',$v.pay_time)}
+                                </td>
+                                <td>
+                                    喵呗奖励：<span style="color:#FF5722;">{$v.miao}</span>
+                                    <hr class="layui-bg-gray">
+                                    实付金额：<span style="color:#FF5722;">{$v.total}</span>
+                                    <hr class="layui-bg-gray">
+                                    分享人金额：<span style="color:#FF5722;">{$v.p_share_money}</span>
+                                    <hr class="layui-bg-gray">
+                                    自购省金额：<span style="color:#FF5722;">{$v.self_money}</span>
+                                </td>
+                                <td>{$v.desc}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="layui-card-body ">
+                        <div class="page">
+                            {$page}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+</body>
+<!-- <div id="app">
+</div> -->
+<script>
+
+layui.use(['form','laydate'], function(){
+          var laydate = layui.laydate;
+          var  form = layui.form;
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#start' //指定元素
+          });
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#end' //指定元素
+          });
+      });
+
+    // var app = new Vue({
+    //     el: '#app',
+    //     data: {
+    //         message: 'Hello Vue!'
+    //     }
+    // })
+</script>
+{include file='common/footer' /}

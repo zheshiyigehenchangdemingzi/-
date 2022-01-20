@@ -1,0 +1,106 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <input type="hidden" id="id" name="id" required="" value="{$data.shop_id|default=0}" autocomplete="off" class="layui-input">
+                <label class="layui-form-label">
+                    余额
+                </label>
+                <div class="layui-input-inline">
+                    <input type="number" name="money" required="" value="{$data.money|default=0}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    预估余额
+                </label>
+                <div class="layui-input-inline">
+                    <input type="number" name="pre_money" required="" value="{$data.pre_money|default=0}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    保证金余额
+                </label>
+                <div class="layui-input-inline">
+                    <input type="number" name="security_deposit" required="" value="{$data.security_deposit|default=0}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">操作</label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">编辑</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer','jquery'],
+        function() {
+            var laydate = layui.laydate;
+            $ = layui.jquery;
+            var form = layui.form,
+                layer = layui.layer;
+            //监听提交
+            form.on('submit(add)', function(data) {
+                var num = $('[lay-submit]').index($(this));
+                var formData = new FormData($('form')[num]);
+                //发异步，把数据提交给php
+                $.ajax({
+                    url:"/admin/shop/wallet_edit",
+                    type: "post",
+                    data:formData,
+                    dataType:"json",
+                    cache: false,                      // 不缓存
+                    processData: false,                // jQuery不要去处理发送的数据
+                    contentType: false,                // jQuery不要去设置Content-Type请求头
+                    success:function (res) {
+                        if(res.code == 200){
+                            layer.alert(res.msg, {icon: 1},function () {
+                                //关闭当前frame
+                                xadmin.close();
+                                // 可以对父窗口进行刷新
+                                xadmin.father_reload();
+                            });
+                        }else{
+                            layer.alert(res.msg, {icon: 5});
+                        }
+                    },
+                    error:function(e){
+                        layer.alert("网络错误", {icon: 5});
+                    },
+                });
+                return false;
+            });
+        });
+
+    // 删除操作
+    function del(){
+        layer.confirm('确认要删除吗？',function(index){
+            var id = $('#id').val();
+            $.ajax({
+                url:"/admin/shop/ADSSDASADSD",
+                type: "post",
+                data:{id:id},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon: 5});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon: 5});
+                },
+            });
+        });
+    }
+</script>
+{include file='common/footer' /}

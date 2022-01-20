@@ -1,0 +1,67 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$id}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            审核结果
+                        </label>
+                        <div class="layui-input-block">
+                            <select name="check" lay-verify="required">
+                                <option value="0">请选择</option>
+                                <option value="1">通过</option>
+                                <option value="2">拒绝</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            拒绝理由
+                        </label>
+                        <div class="layui-input-block">
+                            <textarea placeholder="选择拒绝时填写" name="reason" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Orders/refund')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

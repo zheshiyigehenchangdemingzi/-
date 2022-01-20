@@ -1,0 +1,101 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <button class="layui-btn" onclick="xadmin.open('添加评论','/admin/videos/add_comment?fid={$get.fid}&uid={$get.uid}',800,600)">
+                        <i class="layui-icon"></i>评论
+                    </button>
+                    <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">评论人</th>
+                            <th style="text-align: center;">被评论人</th>
+                            <th style="text-align: center;">评论内容</th>
+                            <th style="text-align: center;">回复内容</th>
+                            <th style="text-align: center;">评论时间</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">{$v.nickname}</td>
+                            <td style="text-align: center;">{$v.pname}</td>
+                            <td style="text-align: center;">{$v.content}</td>
+                            <td style="text-align: center;">{$v.reply}</td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td>
+                                <button class="layui-btn layui-btn-normal layui-btn-xs"  onclick="xadmin.open('{$v.nickname}：{$v.content}','/admin/videos/add_comment?fid={$v.fid}&upid={$v.uid}',800,600)" href="javascript:;">
+                                    添加评论
+                                </button>
+                                {if condition="$v['reply_time'] eq 0"}
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('回复','/admin/videos/reply_child?id={$v.id}',800,600)" href="javascript:;">
+                                    回复
+                                </button>
+                                {/if}
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                    <i class="layui-icon">&#xe640;</i>删除
+                                </button>
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+
+    /*删除*/
+    function member_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            var ids = [];
+            ids.push(id);
+            $.ajax({
+                url:"{:url('Videos/comment_child_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(obj).parents("tr").remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+</script>
+{include file='common/footer' /}

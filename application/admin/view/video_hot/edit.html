@@ -1,0 +1,433 @@
+{include file='common/head' /}
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Begin emoji-picker Stylesheets -->
+<link href="__PLURING__/emoji/lib/css/nanoscroller.css" rel="stylesheet">
+<link href="__PLURING__/emoji/lib/css/emoji.css" rel="stylesheet">
+<!-- End emoji-picker Stylesheets -->
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$data.id|default=''}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频标题
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="title" autocomplete="off" class="layui-input" value="{$data.title|default=''}" data-emojiable="true">
+                        </div>
+                    </div>
+
+                    <!-- 表情开始--- -->
+                    <script src="__PLURING__/jq.js"></script>
+                    <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+                    <!-- Begin emoji-picker JavaScript -->
+                    <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/config.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/util.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+                    <!-- End emoji-picker JavaScript -->
+                    <script>
+                    $(function() {
+                      // Initializes and creates emoji set from sprite sheet
+                      window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                      });
+                      // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                      // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                      // It can be called as many times as necessary; previously converted input fields will not be converted again
+                      window.emojiPicker.discover();
+                    });
+                      </script>
+                    <!-- 表情结束--- -->
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频封面
+                        </label>
+                        <div class="layui-input-block layui-upload">
+                            <button type="button" class="layui-btn layui-btn-normal file" id="cover_1"><i class="layui-icon"></i>上传图片</button>
+                            <input class="layui-upload-file" type="file" accept="undefined" name="cover" id="cover">
+                            <span class="layui-inline layui-upload-choose">支持 png、jpg、jpeg 格式文件</span>
+                            <img style="width:70px" id="cover_img" src="{$data.cover|default=''}" alt="">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频分类
+                        </label>
+                        <div class="layui-col-md6">
+                            <select name="type_id" lay-verify="required">
+                                <option value="0">请选择</option>
+                                {volist name="type" id="v"}
+                                <option value="{$key}" {if condition="$data['type_id'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            上传视频
+                        </label>
+                        <div class="layui-input-block layui-upload">
+                            <input type="file" name="video">
+                            <span class="layui-inline layui-upload-choose">支持视频格式文件</span>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            关联类型
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="type" value="1" title="商品" {if condition="$data['type'] == 1"}checked{/if}>
+                            <input type="radio" name="type" value="2" title="活动" {if condition="$data['type'] == 2"}checked{/if}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            关联产品
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="relation_id" autocomplete="off" class="layui-input" value="{$data.relation_id|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            填写活动ID或者商品ID
+                        </div>
+                    </div>
+                    <!-- 预览用户 -->
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>用户列表：</legend>
+                    </fieldset>
+                    <!-- 选择会员快捷操作 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            选择会员操作
+                        </label>
+                        <div class="layui-col-md9">
+                            <div class="layui-col-md6">
+                                <button onclick="suijiUser(true)" title="随机用户" class="layui-btn layui-btn-danger"  type="button" ><i class="layui-icon layui-icon-edit"></i>随机用户</button>
+                                用户数量：<span class="layui-badge layui-bg-blue">{$count}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function suijiUser(){
+                            var list =  getRandomArrayElements(USERLIST, 1)
+                            viewUser(list[0].id,list[0])
+                        }
+
+                        function getRandomArrayElements(arr, count) {
+                            var shuffled = arr.slice(0), i = arr.length, min = i - count, temp, index;
+                            while (i-- > min) {
+                                index = Math.floor((i + 1) * Math.random());
+                                temp = shuffled[index];
+                                shuffled[index] = shuffled[i];
+                                shuffled[i] = temp;
+                            }
+                            return shuffled.slice(min);
+                        }
+                    </script>
+
+                    <!-- 选择会员 -->
+                    <div class="layui-form-item">
+                        <div class="layui-col-md11" style="position: relative;padding-bottom: 20px;">
+                            <div class="userListBox" style="overflow-y: auto;max-height: 400px;padding: 10px;border: 1px solid #1E9FFF;border-left: none;border-right: none;">
+                                {volist name="users" id="v"}
+                                    <div title="{$v.nickname}">
+                                        <input style="display:inline;width:20px;height: 20px;cursor: pointer;" lay-ignore id="userId_{$v.id}" type="radio" name="uids" value="{$v.id}">
+                                        &nbsp;{$v.nickname}&nbsp;
+                                        <img src="{$v.avatarurl}" style="width:80px;height:80px;cursor: pointer;"/>
+                                    </div>
+                                {/volist}
+                                <div style="
+                                display: none;
+                                position: absolute;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                width: 100%;
+                                height: 26px;
+                                box-sizing: border-box;
+                                background: rgb(173, 251, 244);
+                                border-radius: 2px;
+                                cursor: pointer;
+                                text-align: center;
+                                line-height: 13px;
+                                bottom: -6px;" title="点我加载更多"
+                                onclick="$('.userListBoxItem').show(),layer.msg('加载用户信息ok',{icon: 6})">
+                                    加载更多...
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="userClickSelect">
+
+                        </div>
+                        <style>
+                            .userListBox > div {
+                                float: left;
+                                border: 1px solid #999;
+                                padding: 6px;
+                                margin-right: 6px;
+                                margin-bottom: 6px;
+                                border-style: dashed;
+                                border-radius: 5px;
+                                display: flex;
+                                align-items: center;
+                            }
+                        </style>
+                    </div>
+                    <hr>
+                    <!-- 关联用户 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            关联用户
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="uid" autocomplete="off" class="layui-input" value="{$data.uid|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            填写用户id
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            发布日期
+                        </label>
+                        <div class="layui-col-md3">
+                            <div class="layui-inline layui-show-xs-block">
+                                <input class="layui-input"  autocomplete="off" placeholder="发布日期" name="add_time" id="end_time" value="{$data.add_time|default=''}">
+                            </div>
+                        </div>
+                        <div class="layui-col-md3">
+                            <button onclick="dateStrRandom()" class="layui-btn layui-btn-normal" type="button"><i class="layui-icon layui-icon-edit"></i>随机日期</button>
+                        </div>
+                    </div>
+
+                    <script>
+                        // 随机日期
+                        function dateStrRandom(){
+                            var datestr = getDateYmdStr(getRandomDateBetween(10,150).toLocaleDateString())
+                            layer.msg('切换日期为：' + datestr,{icon: 6})
+                            $('#end_time').attr('value',datestr).attr('placeholder',datestr).val(datestr)
+                            // layui.laydate.render({
+                            //     elem:'#yulanuserviewclickitemdate_id_'+id
+                            // })
+                        }
+                    </script>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频排序
+                        </label>
+                        <div class="layui-col-md3">
+                            <input type="number" name="sort" autocomplete="off" class="layui-input" value="{$data.sort|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            值越大，越靠前，最大值99999，不填默认0
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            点赞数
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="likes" autocomplete="off" class="layui-input" value="{$data.likes|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享数
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="shares" autocomplete="off" class="layui-input" value="{$data.shares|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评论数
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="comments" autocomplete="off" class="layui-input" value="{$data.comments|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频状态
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="status" value="1" title="上架" {if condition="$data['status'] == 1"}checked{/if}>
+                            <input type="radio" name="status" value="0" title="下架" {if condition="$data['status'] == 0"}checked{/if}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            视频审核
+                        </label>
+                        <div class="layui-col-md6">
+                            {if isset($data['is_check'])}
+                            <input type="radio" name="is_check" value="0" title="待审核" {if condition="$data['is_check'] == 0"}checked{/if}>
+                            <input type="radio" name="is_check" value="1" title="通过" {if condition="$data['is_check'] == 1"}checked{/if}>
+                            <input type="radio" name="is_check" value="2" title="拒绝" {if condition="$data['is_check'] == 2"}checked{/if}>
+                            {else/}
+                                <input type="radio" name="is_check" value="0" title="待审核" checked>
+                                <input type="radio" name="is_check" value="1" title="通过">
+                                <input type="radio" name="is_check" value="2" title="拒绝">
+                            {/if}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            推荐首页
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_hot" value="1" title="是" {if condition="$data['is_hot'] == 1"}checked{/if}>
+                            <input type="radio" name="is_hot" value="0" title="否" {if condition="$data['is_hot'] == 0"}checked{/if}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            function viewUser(num, linshiData){
+                $("input[name=uid]").val(num)
+                $("#userClickSelect").html(`
+                <div title="昵称：${linshiData.nickname}-序号：${linshiData.id}" onclick="openUrl('${linshiData.avatarurl}')" style="
+    display: flex;justify-content: 
+    space-evenly;display: flex;
+    justify-content: space-evenly;
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding: 6px 8px;
+    align-items: center;
+    float: left;">
+                    <span style="text-align: left;">
+                        昵称：<span style="color:#1E9FFF;">${linshiData.nickname}</span>
+                        <hr>
+                        序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                    </span>
+                    <img style="height:80px;margin-left: 10px;" src="${linshiData.avatarurl}"/>
+                </div>
+                `)
+                layer.msg('用户昵称：' + linshiData.nickname + '选择ok',{icon: 6})
+            }
+            
+            var uid = '{$data.uid|default=0}';
+
+            $(function(){
+                if(uid && uid > 0){
+                    for(var i = 0; i < USERLIST.length;i++){
+                        if(USERLIST[i].id == uid){
+                            viewUser(uid, USERLIST[i])
+                        }
+                    }
+                }
+            })
+
+            layui.use(['form', 'layer','jquery', 'laydate'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+                var laydate = layui.laydate;
+                //日期时间选择器
+                laydate.render({
+                    elem: '#end_time'
+                });
+                
+                // 监听所选内容
+                $("input[name=uids]").change(function(){
+                    var num = $(this).val()
+	                if(num && num > 0){
+                        for(var i = 0; i < USERLIST.length;i++){
+                            if(USERLIST[i].id == num){
+                                viewUser(num, USERLIST[i])
+                                break;
+                            }
+                        }
+                    }
+                })
+                layer.msg('加载ok',{icon:6})
+
+
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    var num = $('[lay-submit]').index($(this));
+                    var formData = new FormData($('form')[num]);
+                    //发异步，把数据提交给php
+                    $.ajax({
+                        url:"{:url('Videos/edit')}",
+                        type: "post",
+                        data:formData,
+                        dataType:"json",
+                        cache: false,                      // 不缓存
+                        processData: false,                // jQuery不要去处理发送的数据
+                        contentType: false,                // jQuery不要去设置Content-Type请求头
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon: 5});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon: 5});
+                        },
+                    });
+                    return false;
+                });
+
+                //图片阅览
+                $('#cover_1').click(function(){
+                    $('#cover').click();
+                })
+
+                $('#cover').change(function(e){
+                    var imgBox = e.target;
+                    var img = getObjectURL(imgBox.files[0]);
+                    $('#cover_img').attr('src',img);
+                });
+
+                //建立一個可存取到該file的url
+                function getObjectURL(file) {
+                    var url;
+                    if (window.createObjectURL != undefined) { // basic
+                        url = window.createObjectURL(file);
+                    } else if (window.URL != undefined) { // mozilla(firefox)
+                        url = window.URL.createObjectURL(file);
+                    } else if (window.webkitURL != undefined) { // webkit or chrome
+                        url = window.webkitURL.createObjectURL(file);
+                    }
+                    return url;
+                }
+            });
+        </script>
+        <script>
+            window.USERLIST = {:json_encode($users)};
+            layer.msg('加载中。。。',{icon:4,time : 5000})
+        </script>
+{include file='common/footer' /}

@@ -1,0 +1,278 @@
+{include file='common/head' /}
+　　<script src="__LAYUI__/jq.js"></script>
+<body>
+<div class="x-nav">
+    <span class="layui-breadcrumb">
+        <a><cite>视频管理</cite></a>
+        <a><cite>视频评论</cite></a>
+    </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+    </div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <!-- 内容主题 -->
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div style="width:70px;" class="layui-inline layui-show-xs-block">
+                            <input  type="text" name="vid"  placeholder="视频序号" autocomplete="off" class="layui-input" value="{$get.vid|default=''}">
+                        </div>
+                        <div style="width:70px;" class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uid"  placeholder="评论者序号" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                        </div>
+                        <!-- 视频标题 -->
+                        <div class="layui-inline layui-show-xs-block">
+                          <input type="text" name="title"  placeholder="视频标题" autocomplete="off" class="layui-input" value="{$get.title|default=''}">
+                        </div>
+                        <!--评论者用户昵称 -->
+                        <div class="layui-inline layui-show-xs-block">
+                          <input type="text" name="nickname"  placeholder="评论者用户昵称" autocomplete="off" class="layui-input" value="{$get.nickname|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                          <input type="text" name="content"  placeholder="评论内容" autocomplete="off" class="layui-input" value="{$get.content|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                          <input type="text" name="reply"  placeholder="回复内容" autocomplete="off" class="layui-input" value="{$get.reply|default=''}">
+                        </div>
+                        <!-- 视频类型 -->
+                        <div class="layui-inline layui-show-xs-block">
+                            <select id="type_id" name="type_id" lay-verify="" lay-search>
+                                <option value="">类型筛选</option>
+                                {volist name="type" id="v"}
+                                <option value="{$key}" {if condition="$get['type_id'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 是否回复 -->
+                          <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                            <select id="is_reply" name="is_reply">
+                                <option value="" selected>回复</option>
+                                <option value="0" {if condition="strlen($get['is_reply']) >= 1 && $get['is_reply'] == 0"}selected{/if}>未回复</option>
+                                <option value="1" {if condition="$get['is_reply'] == 1"}selected{/if}>已回复</option>
+                            </select>
+                        </div>
+                        <!-- 分页数据 -->
+                        <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                          <select name="limit">
+                              <option value="" selected>分页数据</option>
+                              <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                              <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                              <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                              <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                              <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                              <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                              <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                          </select>
+                      </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <!-- 按钮 -->
+                <div class="layui-card-header">
+                    <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="iconfont">&#xe69d;</i> 批量删除</button>
+                    <button class="layui-btn layui-btn-normal" onclick="xadmin.open('批量一级评论','/admin/videos/comment_add_text_pl','','',true)"><i class="layui-icon"></i>批量一级评论</button>
+                    <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;width: 3%">
+                                <input type="checkbox" lay-filter="checkall" name="" lay-skin="primary">
+                            </th>
+                            <th style="text-align: center;">视频</th>
+                            <th style="text-align: center;">评论人</th>
+                            <th style="text-align: center;">评论内容</th>
+                            <th>详情</th>
+                            <th style="text-align: center;">回复内容</th>
+                            <th style="text-align: center;">评论时间</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" name="id" value="{$v.id}"   lay-skin="primary">
+                            </td>
+                            <td style="text-align: left;">
+                                昵称：<span style="cursor: pointer;color:#1E9FFF;" title="点我复制-{$v.title}" onclick="copyCode('{$v.title}')">{$v.title}</span>
+                                <hr>
+                                序号：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$v.relation_id}')">{$v.relation_id}</span>
+                                &nbsp|&nbsp;
+                                <span style="display: none;">{$typename = isset($type[$v.type_id]) ? $type[$v.type_id] : '无此分类'}</span>
+                                分类：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$typename}')">{$typename}</span>
+                            </td>
+                            <td style="text-align: left;">
+                                昵称：<span style="cursor: pointer;color:#1E9FFF;" title="点我复制-{$v.nickname}" onclick="copyCode('{$v.nickname}')">{$v.nickname}</span>
+                                <hr>
+                                序号：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$v.uid}')">{$v.uid}</span>
+                            </td>
+                            <td style="text-align: center;">{$v.content}</td>
+                            <th>
+                                二级评论数：{$v.child_count}
+                                <hr>
+                                点赞数：{$v.likes}
+                            </th>
+                            <td style="text-align: center;">{$v.reply}</td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td>
+                                <button class="layui-btn layui-btn-normal layui-btn-xs"  onclick="xadmin.open('{$v.nickname}：{$v.content}','/admin/videos/add_comment?fid={$v.id}&uid={$v.uid}',1200,800)" href="javascript:;">
+                                    添加二级评论
+                                </button>
+                                {if $v.child_count > 0}
+                                <button class="layui-btn layui-btn-normal layui-btn-xs"  onclick="xadmin.open('{$v.nickname}：{$v.content}','/admin/videos/comment_child?fid={$v.id}&uid={$v.uid}',1200,800)" href="javascript:;">
+                                    下级评论
+                                </button>
+                                {/if}
+                                {if condition="$v['reply_time'] eq 0"}
+                                <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('回复','/admin/videos/reply?id={$v.id}',1200,800)" href="javascript:;">
+                                    回复
+                                </button>
+                                {/if}
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                    <i class="layui-icon">&#xe640;</i>删除
+                                </button>
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    //批量删除
+    function delAll () {
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+        if(!ids || ids.length == 0) return layer.msg('必须选择一项',{icon:5})
+        layer.confirm('确定是删除所选,会将下级评论也清空？',{icon: 3,title: '提示'},function(index){
+            $.ajax({
+                url:"{:url('Videos/comment_pl_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+      }
+
+    layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+
+    /*删除*/
+    function member_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            var ids = [];
+            ids.push(id);
+            $.ajax({
+                url:"{:url('Videos/comment_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(obj).parents("tr").remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    $(function(){
+        // 初始化值
+        initValueListen()
+    })
+    // 开始处理
+    function initValueListen(){
+      // 监听值 拿取值
+      var obj = localStorage.getItem('video_comment_list_new')
+      if(obj && obj.length > 4){
+        obj = JSON.parse(obj)
+        if(obj.type_id) $("select[name=type_id]").find("option[value="+obj.type_id+"]").prop("selected",true);
+        if(obj.is_reply) $("select[name=is_reply]").find("option[value="+obj.is_reply+"]").prop("selected",true);
+        setTimeout(function(){
+            layui.form.render('select')
+        },250)
+        setInterval(function(){
+          listenVal()
+        },1000)
+      }else{
+        setInterval(function(){
+          listenVal()
+        },1000)
+      }
+    }
+
+    // 监听值-并修改
+    function listenVal(){
+      var obj = {}
+      // 分类
+      var type_id = $("#type_id").select().val()
+      if(type_id) obj.type_id = type_id
+      // 回复
+      var is_reply = $("#is_reply").select().val()
+      if(is_reply) obj.is_reply = is_reply
+      localStorage.setItem('video_comment_list_new',JSON.stringify(obj))
+    }
+</script>
+<script>
+    function copyCode(title){
+        $("#copyText").val(title)
+        setTimeout(function(){
+            var copy=document.getElementById("copyText");
+            copy.select(); // 选择对象
+          document.execCommand("Copy"); // 执行浏览器复制命令
+        },50)
+      layer.msg('复制成功：'+title,{icon: 6})
+    }
+  </script>
+  <input id="copyText" type="text" style="width: 1px;opacity: 0;height:1px;position: absolute;"/>
+{include file='common/scroll' /}
+{include file='common/footer' /}

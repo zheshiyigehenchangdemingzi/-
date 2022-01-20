@@ -1,0 +1,118 @@
+{include file='common/head' /}
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <body>
+        <div class="x-nav">
+            <span class="layui-breadcrumb" style="visibility: visible;">
+              <a><cite>商品管理</cite></a><span lay-separator="">/</span>
+              <a><cite>品牌列表</cite></a>
+          </span>
+            <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+                <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+            </a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="name"  placeholder="品牌名称" autocomplete="off" class="layui-input" value="{$get.name|default=''}">
+                                </div>
+                                <!-- 分页数据 -->
+                                <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                    <select name="limit">
+                                        <option value="" selected>分页数据</option>
+                                        <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                        <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                        <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                        <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                        <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                                        <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                                        <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                                    </select>
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-header">
+                            <button class="layui-btn" onclick="xadmin.open('添加商品品牌','/admin/product/brand_edit','','',true)">
+                                <i class="layui-icon"></i>商品品牌</button>
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body ">
+                            <table class="layui-table layui-form">
+                              <thead>
+                                <tr>
+                                  <th style="text-align: center;">品牌图片</th>
+                                  <th style="text-align: center;">品牌名称</th>
+                                  <th style="text-align: center;">品牌描述</th>
+                                  <th style="text-align: center;">添加时间</th>
+                                  <th style="width:140px;text-align: center;">操作</th>
+                              </thead>
+                              <tbody class="x-cate">
+                              {volist name="list" id="v"}
+                              <tr>
+                                  <td style="text-align: center;">
+                                      {if condition="$v['cover']"}
+                                      <a href="{$v.cover}" target="_blank"><img src="{$v.cover}" height="50"></a>
+                                      {/if}
+                                  </td>
+                                  <td style="text-align: center;">{$v.name}</td>
+                                  <td style="text-align: center;">{$v.desc}</td>
+                                  <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                                  <td style="text-align: center;" class="td-manage">
+                                      <button class="layui-btn layui-btn layui-btn-xs" title="编辑"  onclick="xadmin.open('编辑','/admin/product/brand_edit?id={$v.id}','','',true)" href="javascript:;">
+                                          <i class="layui-icon">&#xe642;</i>编辑
+                                      </button>
+                                      <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="brand_del(this,{$v['id']})" href="javascript:;">
+                                          <i class="layui-icon">&#xe640;</i>删除
+                                      </button>
+                                  </td>
+                              </tr>
+                              {/volist}
+                              </tbody>
+                            </table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+          layui.use(['form'], function(){
+            form = layui.form;
+          });
+
+           /*删除*/
+          function brand_del(obj,id){
+              layer.confirm('确认要删除吗？',function(index){
+                  $.ajax({
+                      url:"{:url('Product/brand_del')}",
+                      type: "post",
+                      data:{id:id},
+                      dataType:"json",
+                      success:function (res) {
+                          if(res.code == 200){
+                              $(obj).parents("tr").remove();
+                              layer.msg(res.msg, {icon: 1,time:1000});
+                          }else{
+                              layer.alert(res.msg, {icon:2,time:1000});
+                          }
+                      },
+                      error:function(e){
+                          layer.alert("网络错误", {icon:5,time:1000});
+                      },
+                  });
+              });
+          }
+        </script>
+    </body>
+{include file='common/scroll' /}
+{include file='common/footer' /}

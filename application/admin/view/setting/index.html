@@ -1,0 +1,86 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="wechat">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            小程序账号
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="appid" required="" autocomplete="off" class="layui-input" value="{$config.appid|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            小程序Appid
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            小程序密钥
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="appsecret" required="" autocomplete="off" class="layui-input" value="{$config.appsecret|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            小程序AppSecret
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商家号
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="mchid" required="" autocomplete="off" class="layui-input" value="{$config.mchid|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            微信支付商家号mchid
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商家号密钥
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="key" required="" autocomplete="off" class="layui-input" value="{$config.key|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            微信支付商家号秘钥 key
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Setting/index')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

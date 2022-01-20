@@ -1,0 +1,31 @@
+<div id="scrollFiexBox" style="position: fixed;right: 50px;bottom: 50px;">
+    <button onclick="gundongScroll(false)" title="向上滚动" style="margin-bottom: 10px;" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-up"></i>向上</button>
+    <br>
+    <button onclick="gundongScroll(true)" title="向下滚动" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-down"></i>向下</button>
+</div>
+<script>
+    window.SCROLL_OBJ = {
+        height:  window.innerHeight,
+        val: 200,
+        height_dom: 'body',
+        scroll_dom: 'body'
+    }
+    setTimeout(function(){
+        $(SCROLL_OBJ.height_dom).height() - SCROLL_OBJ.height < SCROLL_OBJ.val && $("#scrollFiexBox").hide(300)
+    },1500)
+    // 向上或者向下滚动
+    var boolScrollTop = false;
+    function gundongScroll(bool = true){
+        if(boolScrollTop) return false;
+        boolScrollTop = true;
+        var height = $(window.SCROLL_OBJ.height_dom).height()
+        var num = (3 + (height/7500))
+        if(num > 15) num = 15;
+        var top = height/ num;
+        if(top < 1000) top = 1000;
+        $(window.SCROLL_OBJ.scroll_dom == 'body' ? "html,body" : window.SCROLL_OBJ.scroll_dom).animate({ scrollTop: (bool ? '+':'-')+"="+ top}, 300);
+        setTimeout(function(){
+            boolScrollTop = false;
+        },300)
+    }
+</script>

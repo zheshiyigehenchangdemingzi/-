@@ -1,0 +1,618 @@
+{include file='common/head' /}
+<body>
+　　
+<script src="__LAYUI__/jq.js"></script>
+<div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>新热门管理</cite></a>
+              <a><cite>新热门列表</cite></a>
+          </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="name" placeholder="视频名称" autocomplete="off" class="layui-input"
+                                   value="{$get.name|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="number" name="uid" placeholder="用户序号" autocomplete="off" class="layui-input"
+                                   value="{$get.uid|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="nickname" placeholder="用户昵称" autocomplete="off" class="layui-input"
+                                   value="{$get.nickname|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="status">
+                                <option value="">状态筛选</option>
+                                <option value="1" {if condition="$get['status'] == 1" }selected{
+                                /if}>上架</option>
+                                <option value="0" {if condition="strlen($get['is_hot']) >= 1 && $get['status'] == 0"
+                                        }selected{
+                                /if}>下架</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="is_check">
+                                <option value="">视频审核</option>
+                                {volist name="is_checks" id="v"}
+                                <option value="{$key}" {if
+                                        condition="strlen($get['is_check']) >= 1 && $get['is_check'] == $key" }selected{
+                                /if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="is_hot">
+                                <option value="">推荐</option>
+                                <option value="1" {if condition="$get['is_hot'] == 1" }selected{
+                                /if}>是</option>
+                                <option value="0" {if condition="strlen($get['is_hot']) >= 1 && $get['is_hot'] == 0"
+                                        }selected{
+                                /if}>否</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="type_id" lay-verify="" lay-search>
+                                <option value="">类型筛选</option>
+                                {volist name="type" id="v"}
+                                <option value="{$key}" {if condition="$get['type_id'] == $key" }selected{
+                                /if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 分页数据 -->
+                        <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                            <select name="limit">
+                                <option value="" selected>分页数据</option>
+                                <option value="10" {if condition="$get['limit'] == 10" }selected{
+                                /if}>10条</option>
+                                <option value="20" {if condition="$get['limit'] == 20" }selected{
+                                /if}>20条</option>
+                                <option value="30" {if condition="$get['limit'] == 30" }selected{
+                                /if}>30条</option>
+                                <option value="50" {if condition="$get['limit'] == 50" }selected{
+                                /if}>50条</option>
+                                <option value="100" {if condition="$get['limit'] == 100" }selected{
+                                /if}>100条</option>
+                                <option value="150" {if condition="$get['limit'] == 150" }selected{
+                                /if}>150条</option>
+                                <option value="200" {if condition="$get['limit'] == 200" }selected{
+                                /if}>200条</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input" autocomplete="off" placeholder="发布时间开始" name="start" id="start"
+                                   value="{$get.start|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input" autocomplete="off" placeholder="发布时间截止" name="end" id="end"
+                                   value="{$get.end|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i
+                                    class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-header">
+                    <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('status')">
+                        批量上架/下架
+                    </button>
+                    <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_hot')">
+                        批量推荐/不推荐
+                    </button>
+                    <button class="layui-btn layui-btn-normal" title="点我批量审核" onclick="checkFunAll()">批量审核</button>
+                    <button class="layui-btn" onclick="xadmin.open('发布视频','/admin/videos/edit','','',true)">
+                        <i class="layui-icon"></i>视频
+                    </button>
+                    <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">
+                                <input type="checkbox" lay-filter="checkall" name="" lay-skin="primary">
+                            </th>
+                            <th style="text-align: center;">视频标题</th>
+                            <th style="text-align: center;">视频封面</th>
+                            <th style="text-align: center;">视频分类</th>
+                            <th>详情数量</th>
+                            <th style="text-align: center;">关联信息</th>
+                            <th style="text-align: center;">发布</th>
+                            <th style="text-align: center;">推荐</th>
+                            <th style="text-align: center;">审核</th>
+                            <th>排序</th>
+                            <th style="text-align: center;">时间</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" name="id" value="{$v.id}" lay-skin="primary">
+                            </td>
+                            <td style="text-align: center;">{$v.title}</td>
+                            <td style="text-align: center;"><a href="{$v.cover}" target="_blank"><img src="{$v.cover}"
+                                                                                                      height="50"></a>
+                            </td>
+                            <td style="text-align: center;">{$type[$v['type_id']]|default='暂无分类'}</td>
+                            <td>
+                                点赞数:<span style="color: steelblue;">{$v.likes}</span>
+                                <hr>
+                                分享数:<span style="color: steelblue;">{$v.shares}</span>
+                                <hr>
+                                评论数:<span style="color: steelblue;">{$v.comments}</span>
+                                <hr>
+                            </td>
+                            <td style="text-align: center;">
+                                <p onclick="copyCode('{$v.oneUser->nickname|default=0}')"><span style="color:#01AAED;">用户:</span>：{$v.oneUser->nickname|default=''}
+                                </p>
+                                <p onclick="copyCode('{$v.oneUser->id|default=0}')"><span
+                                        style="color:#01AAED;">用户序号:</span>：{$v.oneUser->id|default=0}</p>
+                                <p><span style="color:#01AAED;">{$v.type == 1 ? '商品' : '活动'}</span>：{$v.relation_id}</p>
+                            </td>
+                            <!-- 上架 -->
+                            <td class="clickStatus" style="text-align: center;" data-id={$v.id}
+                                data-title="{$v.status == 1 ? '取消上架' : '上架'}" data-key="status"
+                                data-val="{$v.status == 1 ? 0 : 1}">
+                                {$v.status == 1 ?
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i
+                                        class="layui-icon ">&#xe605;</i></button>
+                                ' :
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i
+                                        class="layui-icon">&#x1006;</i></button>
+                                ';
+                                }
+                            </td>
+                            <!-- 精选 -->
+                            <td class="clickStatus" style="text-align: center;" data-id={$v.id}
+                                data-title="{$v.is_hot == 1 ? '取消精选' : '确定精选'}" data-key="is_hot"
+                                data-val="{$v.is_hot == 1 ? 0 : 1}">
+                                {$v.is_hot == 1 ?
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i
+                                        class="layui-icon ">&#xe605;</i></button>
+                                ' :
+                                '
+                                <button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i
+                                        class="layui-icon">&#x1006;</i></button>
+                                ';
+                                }
+                            </td>
+                            <!--                            审核-->
+                            <td>
+                                <span id="check_box_{$v.id}">
+                                    {if $v.is_check == 0}
+                                        <button type="button" title="点我审核通过" onclick="checkFun({$v.id},'{$v.title}')"
+                                                class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe650;</i>审核</button>
+                                    {else}
+                                        {$is_checks[$v.is_check]}
+                                    {/if}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="sortClick" title="排序"
+                                      style="cursor: pointer; color:steelblue;">{$v.sort}</span>
+                                <div style="display: none;">
+                                    <input type="number" value="{$v.sort}" class="layui-input" placeholder="输入排序值"
+                                           style="width: 60px;">
+                                    <button data-id="{$v.id}" title="点我改变" type="button"
+                                            class="sortBtn layui-btn layui-btn-sm layui-btn-normal"><i
+                                            class="layui-icon layui-icon-edit"></i></button>
+                                </div>
+                            </td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td style="text-align: center;">
+                                <a class="layui-btn layui-btn layui-btn-xs" href="{$v.video}" target="_blank">查看视频</a>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"
+                                        onclick="xadmin.open('评论详情','/admin/videos/comment?id={$v.id}','','',true)"
+                                        href="javascript:;">
+                                    评论详情
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn layui-btn layui-btn-xs"
+                                        onclick="xadmin.open('编辑','/admin/videos/edit?id={$v.id}','','',true)"
+                                        href="javascript:;">
+                                    编辑
+                                </button>
+                                <br/>
+                                <div style="margin-top: 10px;"></div>
+                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除"
+                                        onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                    <i class="layui-icon">&#xe640;</i>删除
+                                </button>
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form', 'laydate'], function () {
+        var laydate = layui.laydate;
+        var form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function (data) {
+            if (data.elem.checked) {
+                $('tbody input').prop('checked', true);
+            } else {
+                $('tbody input').prop('checked', false);
+            }
+            form.render('checkbox');
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+
+
+        $(".sortClick").click(function () {
+            $(this).parent().find('div').css('display', 'flex')
+            $(this).hide(300)
+        })
+
+        $(".sortBtn").click(function () {
+            var id = $(this).attr('data-id')
+            if (!id) return layer.msg('没有该选项', {icon: 5})
+            var sort = $(this).prev().val()
+            if (!sort || sort < 0) return layer.msg('排序输入错误', {icon: 5})
+            var oldSort = $(this).parent().parent().find('.sortClick').text()
+            if (oldSort - 0 == sort - 0) return layer.msg('值不能相同', {icon: 5})
+            var self = this
+            $.ajax({
+                url: '/admin/videos/sortEdit',
+                data: {id, sort},
+                dataType: 'json',
+                success: function (res) {
+                    layer.msg(res.msg || '操作ok', {icon: res.code == 200 ? 6 : 5})
+                    if (res && res.data) {
+                        $(self).parent().parent().find('.sortClick').text(sort).show(300)
+                        console.log($(self).parent().parent())
+                        $(self).parent().css('display', 'none')
+                    }
+                },
+                error: function (err) {
+                    layer.msg('输入错误', {icon: 5})
+                }
+            })
+        })
+    });
+
+    /*删除*/
+    function member_del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            var ids = [];
+            ids.push(id);
+            $.ajax({
+                url: "{:url('Videos/video_del')}",
+                type: "post",
+                data: {id: ids},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        layer.msg('删除成功', {icon: 1, time: 1000});
+                        $(obj).parents("tr").remove();
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                },
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                },
+            });
+        });
+    }
+
+    // 状态值 
+    var objKeys = {
+        // 是否精选  
+        is_hot: {  // 下标  0 表示 不开启  1 表示开启
+            val: [0, 1],
+            title: ['不推荐', '推荐']
+        },
+        // 是否上架
+        status: {  // 下标    0 不上架  1 表示 上架
+            val: [0, 1],
+            title: ['不上架', '上架']
+        },
+    }
+
+    var btnStrs = [
+        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">ဆ</i></button>', // 不开启
+        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon "></i></button>' // 开启
+    ];
+
+    function start(obj, id) {
+        layer.confirm('确认要上架此视频吗？', function (index) {
+            $.ajax({
+                url: "{:url('Videos/status')}",
+                type: "post",
+                data: {id: id, 'type': 'start'},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        $(obj).attr('onclick', 'end(this,' + id + ')');
+                        $(obj).html('下架视频');
+                        $(obj).addClass('layui-btn-danger');
+                        $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-danger').addClass('layui-btn-normal').html('上架');
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                },
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                },
+            });
+        });
+    }
+
+    function end(obj, id) {
+        layer.confirm('确认要下架此视频吗？', function (index) {
+            $.ajax({
+                url: "{:url('Videos/status')}",
+                type: "post",
+                data: {id: id, 'type': 'end'},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        $(obj).attr('onclick', 'start(this,' + id + ')');
+                        $(obj).html('上架视频');
+                        $(obj).removeClass('layui-btn-danger');
+                        $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-normal').addClass('layui-btn-danger').html('下架');
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                },
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                },
+            });
+        });
+    }
+
+    $(function () {
+        bindClickBtn()
+    })
+
+    // 绑定事件
+    function bindClickBtn() {
+        $("table tbody .clickStatus button").off('click');
+        $("table tbody .clickStatus button").click(function (e) {
+            var self = this;
+            // 拿取到tb
+            var tb = $(this).parent()
+            var data = {
+                id: $(tb).attr('data-id'),
+                val: $(tb).attr('data-val'),
+                key: $(tb).attr('data-key')
+            }
+            clickStatusBtn('/admin/videos/video_list_status.html', data, {
+                msg: '此视频序号:' + data.id + "-状态为:" + $(tb).attr('data-title') + '？',
+                elem: self
+            }, toggleBtn);
+        })
+    }
+
+    /**
+     *  将按钮更改为相反的状态
+     */
+    function toggleBtn(data, self) {
+        if (self && objKeys[data.key]) {
+            var i = objKeys[data.key].val.indexOf(data.val - 0)
+            if (i >= 0) {
+                var tb = $(self).parent()
+                $(self).hide(500, function () {
+                    $(tb).html(btnStrs[i])
+                    setTimeout(function () {
+                        $(self).show(400, function () {
+                            bindClickBtn();
+                        })
+                    }, 300)
+                })
+                // 目前只有两种状态
+                $(tb).attr('data-val', objKeys[data.key].val[i == 0 ? 1 : 0])
+                $(tb).attr('data-title', objKeys[data.key].title[i == 0 ? 1 : 0])
+            }
+        }
+    }
+
+    // 三个按钮操作 等
+    function pinLiangStatusBtn(key) {
+        if (!objKeys[key]) return layer.msg('必须选择一项', {icon: 5});
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function (index, el) {
+            if ($(this).prop('checked')) {
+                ids.push($(this).val())
+            }
+        });
+        if (!ids || ids.length == 0) return layer.msg('必须选择一项', {icon: 4});
+        // 数据
+        var obj = {
+            ids,
+            key
+        }
+        layer.confirm('确认批量操作？', {
+            title: '批量操作',
+            icon: 3,
+            btn: [objKeys[key].title[1], objKeys[key].title[0], '取消']
+        }, function (index) {
+            obj.val = objKeys[key].val[1]
+            ajaxFun('/admin/videos/video_list_status_pl.html', obj, 'post', function () {
+                window.location.href = window.location.href
+            })
+            layer.close(index)
+        }, function (index) {
+            obj.val = objKeys[key].val[0]
+            ajaxFun('/admin/videos/video_list_status_pl.html', obj, 'post', function () {
+                window.location.href = window.location.href
+            })
+        })
+    }
+
+
+    // ajax封装
+    function ajaxFun(url, obj, type = 'post', fun, errFun, elem) {
+        var s = layer.msg('加载中...', {icon: 4, time: 999999})
+        $.ajax({
+            url,
+            type,
+            data: obj,
+            dataType: "json",
+            success: function (res) {
+                if (res.code == 200) {
+                    layer.msg(res.msg ? res.msg : '操作ok', {icon: 1, time: 1000});
+                } else {
+                    layer.alert(res.msg, {icon: 2, time: 1000});
+                }
+                layer.close(s)
+                if (fun) fun(res.data, elem);
+            },
+            error: function (e) {
+                layer.close(s)
+                layer.alert("网络错误", {icon: 5, time: 1000});
+                if (errFun) errFun(res);
+            },
+        });
+    }
+
+
+    /**
+     * 封装弹窗中的数据信息
+     * 参数：  请求地址， 请求数据， 标题，成功回调函数，错误回调函数
+     */
+    function clickStatusBtn(url, obj, options, fun = false, errFun = false) {
+        var s = layer.msg('加载中...', {icon: 4, time: 999999})
+        layer.confirm(options.msg, {
+            title: options.title ? options.title : '操作提示',
+            icon: options.icon ? options.icon : 3
+        }, function (index) {
+            $.ajax({
+                url,
+                type: "post",
+                data: obj,
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1, time: 1000});
+                        //$(".layui-form-checked").not('.header').parents('tr').remove();
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                    layer.close(s)
+                    if (fun) fun(res.data, options.elem);
+                },
+                error: function (e) {
+                    layer.close(s)
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                    if (errFun) errFun(res);
+                },
+            });
+        });
+    }
+
+    /**
+     * 点此确认进行审核操作
+     */
+    function checkFun(id, title) {
+        layer.confirm('确认要审核通过视频' + title + '吗？', {title: '视频审核-' + title, icon: 3}, function (index) {
+            $.ajax({
+                url: "/admin/videos/videoCheck",
+                type: "post",
+                data: {id: id},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        $("#check_box_" + id).html('审核通过')
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                },
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                },
+            });
+        });
+    }
+
+    /**
+     * 批量审核
+     */
+    function checkFunAll() {
+        var ids = [];
+        // 获取选中的id
+        $('tbody input').each(function (index, el) {
+            if ($(this).prop('checked')) {
+                ids.push($(this).val())
+            }
+        });
+        if (!ids || ids.length == 0) return layer.msg('必须选择一项', {icon: 4});
+        layer.confirm('确认批量审核通过吗？', {title: '视频审核-批量', icon: 3}, function (index) {
+            $.ajax({
+                url: "/admin/videos/videoCheckAll",
+                type: "post",
+                data: {ids: ids},
+                dataType: "json",
+                success: function (res) {
+                    if (res.code == 200) {
+                        window.location = window.location
+                        layer.msg(res.msg, {icon: 1, time: 1000});
+                    } else {
+                        layer.alert(res.msg, {icon: 2, time: 1000});
+                    }
+                },
+                error: function (e) {
+                    layer.alert("网络错误", {icon: 5, time: 1000});
+                },
+            });
+        });
+    }
+</script>
+{include file='common/copyCode' /}
+{include file='common/scroll' /}
+{include file='common/footer' /}

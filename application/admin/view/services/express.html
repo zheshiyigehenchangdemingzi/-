@@ -1,0 +1,76 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$data.id}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            物流公司
+                        </label>
+                        <div class="layui-input-block">
+                            <select name="company" lay-verify="required">
+                                <option value="0">请选择</option>
+                                {volist name="express" id="v"}
+                                <option value="{$key}" {if condition="$data['company'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            物流单号
+                        </label>
+                        <div class="layui-input-block">
+                            <input type="text" name="express_sn" required="" autocomplete="off" class="layui-input" value="{$data.express_sn|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            注意：
+                        </label>
+                        <div class="layui-input-block">
+                            <p>一旦确认收货，则无法编辑</p>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Services/express')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

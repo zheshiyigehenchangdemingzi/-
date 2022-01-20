@@ -1,0 +1,134 @@
+{include file='common/head' /}
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form layui-form-pane">
+            <input type="hidden" name="id" value="{$data.id|default=''}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">文本</label>
+                <div class="layui-input-block">
+                    <input type="text" name="text" required="请输入文本" autocomplete="off" class="layui-input" value="{$data.text|default=''}">
+                </div>
+            </div>
+
+            <!--选择用户-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    选择用户
+                </label>
+                <div class="layui-input-inline">
+                    <!--<input type="text" name="uname" required="" autocomplete="off" class="layui-input" value="{$data.uname|default=''}">-->
+                    <select name="uname_select" lay-verify="required" lay-search>
+                        <option value="0">选择用户</option>
+                        {volist name="type" id="v"}
+                        <option value="{$v.id}" >{$v.nickname}</option>
+                        {{//   {if condition="$data['pid'] == $key"}selected{/if}}}
+                        {/volist}
+                    </select>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    用户必须选择
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    用户名
+                </label>
+                <div class="layui-input-block">
+                    <input type="text" name="uname" required="" autocomplete="off" class="layui-input" value="{$data.uname|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    排序
+                </label>
+                <div class="layui-input-block">
+                    <input type="number" name="sort" required="" autocomplete="off" class="layui-input" value="{$data.sort|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    是否显示
+                </label>
+                <div class="layui-input-block">
+                    {if !isset($data['show'])}
+                    <input type="radio" name="show" value="1" title="是" checked>
+                    <input type="radio" name="show" value="0" title="否">
+                    {else /}
+                    <input type="radio" name="show" value="1" title="是" {if $data.show == 1}checked{/if}>
+                    <input type="radio" name="show" value="0" title="否" {if $data.show == 0}checked{/if}>
+                    {/if}
+                </div>
+            </div>
+            <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('Setting/view_text_edit')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+
+
+        // 绑定事件
+        $("dl dd").click(function(){
+            var className = $(this).prop("className")
+            var val = $(this).text()
+            var inputVal = $("input[name=uname]").val()
+            // 添加操作
+            if (className.indexOf('layui-disabled') == -1){
+                $(this).addClass('layui-disabled')
+                $("input[name=uname]").val(inputVal +(inputVal && inputVal.trim().length > 0 ? ',' : '') + val)
+            // 删除操作
+            }else{
+                // 存在当前值
+                if(inputVal.indexOf(val) >= 0){
+                    var s = inputVal.split(',')
+                    var index = s.indexOf(val)
+                    s.splice(index,1)
+                    $("input[name=uname]").val(s.join(','))
+                }
+                // 移除类
+                $(this).removeClass('layui-disabled')
+            }
+        })
+
+
+    });
+
+</script>
+{include file='common/footer' /}

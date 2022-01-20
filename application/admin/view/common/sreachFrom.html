@@ -1,0 +1,25 @@
+<div class="layui-card-body ">
+    <form class="layui-form layui-col-space5">
+        <!--                        表单输入-->
+        {volist name="viewData['serch_form']" id="v"}
+        <!--                        {$viewData['key_titles'][$v['key']]}-->
+        <div class="layui-inline layui-show-xs-block">
+            {if $v.type == 'text' || $v.type == 'number' }
+            <input type="{$v.type}" name="{$v.key}"  placeholder="{$viewData['key_titles'][$v['key']]}" autocomplete="off" class="layui-input" value="{$get[$v.key]|default=''}">
+            {elseif $v.type == 'select'}
+            <select name="{$v.key}">
+                <option value="">{$viewData['key_titles'][$v.key]}</option>
+                {volist name="viewData['select_list'][$v.key]" id="vv" key="kk"}
+                <option value="{$key}" {if condition="isset($get[$v.key]) && strlen($get[$v.key]) >= 1 && $key == $get[$v.key]"}selected {/if}>{$vv}</option>
+                {/volist}
+            </select>
+            {elseif $v.type == 'time'}
+            <input class="layui-input"  autocomplete="off" placeholder="{$viewData['key_titles'][$v['key']]}" name="{$v.key}" id="{$v.key}" value="{$get[$v.key]|default=''}">
+            {/if}
+        </div>
+        {/volist}
+        <div class="layui-inline layui-show-xs-block">
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+        </div>
+    </form>
+</div>

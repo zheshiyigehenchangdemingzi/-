@@ -1,0 +1,539 @@
+{include file='common/head' /}
+　　<script src="__LAYUI__/jq.js"></script>
+    <body>
+        <div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>商品管理</cite></a>
+              <a><cite>商品评论</cite></a>
+          </span>
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <div style="width:50px;" class="layui-inline layui-show-xs-block">
+                                    <input  type="text" name="goods_id"  placeholder="商品ID" autocomplete="off" class="layui-input" value="{$get.goods_id|default=''}">
+                                </div>
+                                <div style="width:50px;" class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="uid"  placeholder="会员ID" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                                </div>
+                                <!-- 商品名称 -->
+                                <div class="layui-inline layui-show-xs-block">
+                                  <input type="text" name="name"  placeholder="商品名称" autocomplete="off" class="layui-input" value="{$get.name|default=''}">
+                                </div>
+                                <!-- 用户昵称 -->
+                                <div class="layui-inline layui-show-xs-block">
+                                  <input type="text" name="nickname"  placeholder="用户昵称" autocomplete="off" class="layui-input" value="{$get.nickname|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                  <input type="text" name="discuss"  placeholder="评论内容" autocomplete="off" class="layui-input" value="{$get.discuss|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                  <input type="text" name="reply"  placeholder="回复内容" autocomplete="off" class="layui-input" value="{$get.reply|default=''}">
+                                </div>
+                                <!-- 分类 -->
+                                <div style="width: 100px;" class="layui-inline layui-show-xs-block">
+                                  <select id="goods_cid" style="width:150px;" name="cid" lay-verify="" lay-search>
+                                      <option selected value="">分类-可输入搜索值</option>
+                                      {volist name="goodtypes" id="v"}
+                                      <option value="{$key}" {if condition="strlen($get['cid']) >= 1 && $get['cid'] == $key"}selected{/if} >{$v}</option>
+                                      {/volist}
+                                  </select>
+                              </div>
+                              <!-- 选择品牌 -->
+                              <div style="width: 100px;" class="layui-inline layui-show-xs-block">
+                                  <select id="goods_bid" style="width:150px;" name="bid" lay-verify="" lay-search>
+                                      <option selected value="">品牌-可输入搜索值</option>
+                                      {volist name="goodBs" id="v"}
+                                          <option value="{$key}" {if condition="strlen($get['bid']) >= 1 && $get['bid'] == $key"}selected{/if} >{$v}</option>
+                                      {/volist}
+                                  </select>
+                              </div>
+                                <!-- 是否回复 -->
+                                  <div  style="width: 100px;" class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                    <select id="is_reply" name="is_reply">
+                                        <option value="" selected>回复</option>
+                                        <option value="0" {if condition="strlen($get['is_reply']) >= 1 && $get['is_reply'] == 0"}selected{/if}>未回复</option>
+                                        <option value="1" {if condition="$get['is_reply'] == 1"}selected{/if}>已回复</option>
+                                    </select>
+                                </div>
+                                <!-- 是否匿名 -->
+                                <div style="width: 100px;" class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                  <select id="is_anonymous" name="is_anonymous">
+                                      <option value="" selected>匿名</option>
+                                      <option value="0" {if condition="strlen($get['is_anonymous']) >= 1 && $get['is_anonymous'] == 0"}selected{/if}>匿名昵称</option>
+                                      <option value="1" {if condition="$get['is_anonymous'] == 1"}selected{/if}>正常昵称</option>
+                                  </select>
+                              </div>
+                                <!-- 分页数据 -->
+                                <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                  <select name="limit">
+                                      <option value="" selected>分页数据</option>
+                                      <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                      <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                      <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                      <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                      <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                                      <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                                      <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                                  </select>
+                              </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-header">
+                            <span class="layui-badge layui-bg-gray">状态</span>
+                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="iconfont">&#xe69d;</i> 批量删除</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_display')"><i class="layui-icon layui-icon-edit"></i>批量显示/不显示</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_anonymous')"><i class="layui-icon layui-icon-edit"></i>批量匿名/不匿名</button>
+                            &nbsp;<span class="layui-badge layui-bg-gray">添加</span>
+                            <button class="layui-btn" onclick="xadmin.open('添加商品评论','/admin/product/comment_add','','',true)"><i class="layui-icon"></i>商品评论</button>
+                            <button class="layui-btn" onclick="xadmin.open('批量添加商品评论','/admin/product/comment_add_pl','','',true)"><i class="layui-icon"></i>批量商品评论</button>
+                            <button class="layui-btn layui-btn-normal" onclick="xadmin.open('批量商品评论-无图片','/admin/product/comment_add_text_pl','','',true)"><i class="layui-icon"></i>批量商品评论-无图片</button>
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <thead>
+                                  <tr>
+                                    <th style="text-align: center;width: 3%">
+                                      <input type="checkbox" lay-filter="checkall" name="" lay-skin="primary">
+                                    </th>
+                                    <th style="text-align: center;width:170px;">商品信息</th>
+                                    <th style="text-align: center;">会员昵称</th>
+                                    <th style="text-align: center;">评星等级</th>
+                                    <th style="text-align: center;">评论内容/图片</th>
+                                    <th style="text-align: center;">回复内容</th>
+                                    <th style="text-align: center;">排序</th>
+                                    <th style="text-align: center;">显示</th>
+                                    <th style="text-align: center;">匿名</th>
+                                    <th style="text-align: center;">评论时间</th>
+                                    <th style="text-align: center;width:140px;">操作</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {volist name="list" id="v"}
+                                  <tr>
+                                    <td style="text-align: center;">
+                                      <input type="checkbox" name="id" value="{$v.id}"   lay-skin="primary">
+                                    </td>
+                                    <td style="text-align: left;">
+                                      名称：<span style="cursor: pointer;color:#1E9FFF;" title="点我复制-{$v.name}" onclick="copyCode('{$v.name}')">{$v.name}</span>
+                                      <hr>
+                                      <span style="display: none;">{$cidname = isset($goodtypes[$v.cid]) ? $goodtypes[$v.cid] : '无此分类'}</span>
+                                      分类：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$cidname}')">{$cidname}</span>
+                                      <hr>
+                                      <span style="display: none;">{$bidname = isset($goodBs[$v.bid]) ? $goodBs[$v.bid] : '无此品牌'}</span>
+                                      品牌：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$bidname}')">{$bidname}</span>
+                                      <hr>
+                                      序号：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$v.goods_id}')">{$v.goods_id}</span>
+                                      &nbsp;
+                                      <img title="点我查看图片" onclick="lookImg('{$v.cover}','图片信息')" style="max-height:100px;max-width:100px;cursor: pointer;" src="{$v.cover}" alt="" />
+                                    </td>
+                                    <td style="text-align: left;">
+                                      昵称：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$v.nickname}')">{$v.nickname}</span>
+                                      <hr>
+                                      序号：<span style="cursor: pointer;color:#1E9FFF;" onclick="copyCode('{$v.uid}')">{$v.uid}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <?php
+                                            for($i = 0; $i < $v['level'];$i++){
+                                              echo '<i class="layui-icon layui-icon-rate-solid" style="color:#ffb800;"></i>';
+                                            }
+                                        ?>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span style="cursor: pointer;" onclick="copyCode('{$v.discuss}')">{$v.discuss}</span>
+                                        {if isset($v.ccover) && is_array($v.ccover)}
+                                        <hr>
+                                          {volist name="v.ccover" id="vc"}
+                                            <img style="cursor: pointer;" title="点我查看图片" onclick="lookImg('{$vc}','评论图片详情')" src="{$vc}"/>
+                                          {/volist}
+                                        {/if}
+                                    </td>
+                                    <td style="text-align: center;">{$v.reply}</td>
+                                    <!-- 排序 -->
+                                    <td style="text-align: center;">
+                                      <span class="sortClick" title="排序" style="cursor: pointer; color:steelblue;">{$v.sort}</span>
+                                      <div style="display: none;">
+                                          <input type="number" value="{$v.sort}" class="layui-input" placeholder="输入排序值" style="width: 60px;">
+                                          <button data-id="{$v.id}" title="点我改变" type="button" class="sortBtn layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon layui-icon-edit"></i></button>
+                                      </div>  
+                                    </td>
+                                    <!-- 显示 -->
+                                    <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_display == 1 ? '不显示' : '确定显示'}" data-key="is_display" data-val="{$v.is_display == 1 ? 0 : 1}">
+                                      {$v.is_display == 1 ?
+                                      '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                      '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                      }
+                                    </td>
+                                    <!-- 匿名 -->
+                                    <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_anonymous == 1 ? '正常昵称' : '匿名评论'}" data-key="is_anonymous" data-val="{$v.is_anonymous == 1 ? 0 : 1}">
+                                      {$v.is_anonymous == 1 ?
+                                      '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                      '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                      }
+                                    </td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                                    <td style="text-align: center;" class="td-manage">
+                                      <button class="layui-btn layui-btn layui-btn-xs" title="回复"  onclick="xadmin.open('回复','/admin/product/comment_add?id={$v.id}','','',true)" href="javascript:;">
+                                        <i class="layui-icon">&#xe642;</i>编辑
+                                      </button>
+                                      <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                        <i class="layui-icon">&#xe640;</i>删除
+                                      </button>
+                                    </td>
+                                  </tr>
+                                {/volist}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+    <script>
+      layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+          if(data.elem.checked){
+            $('tbody input').prop('checked',true);
+          }else{
+            $('tbody input').prop('checked',false);
+          }
+          form.render('checkbox');
+        }); 
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+      /*删除*/
+      function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              var ids = [];
+              ids.push(id);
+              $.ajax({
+                  url:"{:url('Product/comment_del')}",
+                  type: "post",
+                  data:{id:ids},
+                  dataType:"json",
+                  success:function (res) {
+                      if(res.code == 200){
+                          layer.msg('删除成功', {icon: 1,time:1000});
+                          $(obj).parents("tr").remove();
+                      }else{
+                          layer.alert(res.msg, {icon:2,time:1000});
+                      }
+                  },
+                  error:function(e){
+                      layer.alert("网络错误", {icon:5,time:1000});
+                  },
+              });
+          });
+      }
+
+      //批量删除
+      function delAll (argument) {
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+  
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url:"{:url('Product/comment_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+      }
+
+      // 状态值 
+      var objKeys = {
+        // 是否显示  
+        is_display: {  // 下标  0 表示 不开启  1 表示开启
+            val: [0,1],
+            title: ['不显示','显示']
+        },
+        // 是否匿名
+        is_anonymous: {  // 下标   1 匿名  0 不匿名
+            val: [0,1],
+            title: ['不匿名','匿名']
+        },
+        url: {
+          // 按钮状态改变
+          'change_btn' : '/admin/product/comment_list_status.html',
+          // 排序值改变
+          'sort_btn': '/admin/product/comment_sortEdit',
+          // 批量值改变操作
+          'piliang_btn': '/admin/product/comment_pinliang_status.html'
+        }
+      }
+
+      var btnStrs = [
+          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">ဆ</i></button>', // 不开启
+          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon "></i></button>' // 开启
+      ];
+
+      $(function(){
+        bindClickBtn()
+        $(".sortClick").click(function(){
+            $(this).parent().find('div').css('display','flex')
+            $(this).hide(300)
+        })
+
+        $(".sortBtn").click(function(){
+            var id = $(this).attr('data-id')
+            if(!id) return layer.msg('没有该选项',{icon:5})
+            var sort = $(this).prev().val()
+            if(!sort || sort < 0) return layer.msg('排序输入错误',{icon:5})
+            var oldSort = $(this).parent().parent().find('.sortClick').text()
+            if(oldSort - 0 == sort - 0) return layer.msg('值不能相同',{icon:5})
+            var self = this
+            $.ajax({
+                url: objKeys.url.sort_btn,
+                data:{id,sort},
+                dataType: 'json',
+                success:function(res){
+                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
+                    if(res && res.data){
+                        $(self).parent().parent().find('span').text(sort).show(300)
+                        $(self).parent().css('display','none')
+                    }
+                },
+                error:function(err){
+                    layer.msg('输入错误',{icon:5})
+                }
+            })
+        })
+        // 初始化值
+        initValueListen()
+        
+    })
+
+    // 开始处理
+    function initValueListen(){
+      // 监听值 拿取值
+      var obj = localStorage.getItem('goods_comment_list')
+      if(obj && obj.length > 4){
+        obj = JSON.parse(obj)
+        if(obj.cid) $("select[name=cid]").find("option[value="+obj.cid+"]").prop("selected",true);
+        if(obj.bid) $("select[name=bid]").find("option[value="+obj.bid+"]").prop("selected",true);
+        if(obj.is_reply) $("select[name=is_reply]").find("option[value="+obj.is_reply+"]").prop("selected",true);
+        if(obj.is_anonymous) $("select[name=is_anonymous]").find("option[value="+obj.is_anonymous+"]").prop("selected",true);
+        setTimeout(function(){
+            layui.form.render('select')
+        },250)
+        setInterval(function(){
+          listenVal()
+        },1000)
+      }else{
+        setInterval(function(){
+          listenVal()
+        },1000)
+      }
+    }
+
+    // 监听值-并修改
+    function listenVal(){
+      var obj = {}
+      // 分类
+      var cid = $("#goods_cid").select().val()
+      if(cid) obj.cid = cid
+      // 品牌
+      var bid = $("#goods_bid").select().val()
+      if(bid) obj.bid = bid
+      // 回复
+      var is_reply = $("#is_reply").select().val()
+      if(is_reply) obj.is_reply = is_reply
+      // 匿名
+      var is_anonymous = $("#is_anonymous").select().val()
+      if(is_anonymous) obj.is_anonymous = is_anonymous
+      localStorage.setItem('goods_comment_list',JSON.stringify(obj))
+    }
+
+      // 绑定事件
+      function bindClickBtn()
+      {
+        $("table tbody .clickStatus button").off('click');
+        $("table tbody .clickStatus button").click(function(e){
+            var self  = this;
+            // 拿取到tb
+            var tb = $(this).parent()
+            var data = {
+                id: $(tb).attr('data-id'),
+                val: $(tb).attr('data-val'),
+                key: $(tb).attr('data-key')
+            }
+            clickStatusBtn(objKeys.url.change_btn,data,{
+                msg: '此评论序号:'+data.id+"-状态为:"+$(tb).attr('data-title')+'？',
+                elem: self
+            },toggleBtn);
+          })
+      }
+
+      /**
+       *  将按钮更改为相反的状态
+       */
+      function toggleBtn(data,self){
+        if(self && objKeys[data.key]){
+            var i = objKeys[data.key].val.indexOf(data.val - 0)
+            if(i >= 0){
+                var tb = $(self).parent()
+                $(self).hide(500,function(){
+                    $(tb).html(btnStrs[i])
+                    setTimeout(function(){
+                        $(self).show(400,function(){
+                            bindClickBtn();
+                        })
+                    },300)
+                })
+                // 目前只有两种状态
+                $(tb).attr('data-val',objKeys[data.key].val[i == 0 ? 1 : 0])
+                $(tb).attr('data-title',objKeys[data.key].title[i == 0 ? 1 : 0])
+            }
+        }
+      }
+
+      // 三个按钮操作 等
+      function pinLiangStatusBtn(key){
+        if(!objKeys[key]) return layer.msg('必须选择一项',{icon:5});
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+        if(!ids || ids.length == 0) return layer.msg('必须选择一项',{icon:4});
+        // 数据
+        var obj = {
+            ids,
+            key
+        }  
+        layer.confirm('确认批量操作？',{title:'批量操作',icon:3,btn:[objKeys[key].title[1],objKeys[key].title[0],'取消']},function(index){
+            obj.val = objKeys[key].val[1]
+            // comment_list_status
+            // comment_pinliang_status
+            ajaxFun(objKeys.url.piliang_btn,obj,'post',function(){
+                window.location.href = window.location.href
+            })
+            layer.close(index)
+        },function(index){
+            obj.val = objKeys[key].val[0]
+            ajaxFun(objKeys.url.piliang_btn,obj,'post',function(){
+                window.location.href = window.location.href
+            })
+        })
+      }
+
+
+
+      // ajax封装
+      function ajaxFun(url,obj,type = 'post',fun,errFun,elem){
+        var s = layer.msg('加载中...',{icon:4,time:999999})
+        $.ajax({
+                url,
+                type,
+                data:obj,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                    layer.close(s)
+                    if(fun) fun(res.data,elem);
+                },
+                error:function(e){
+                    layer.close(s)
+                    layer.alert("网络错误", {icon:5,time:1000});
+                    if(errFun) errFun(res);
+                },
+            });
+      }
+
+
+      /**
+       * 封装弹窗中的数据信息
+       * 参数：  请求地址， 请求数据， 标题，成功回调函数，错误回调函数
+       */
+      function clickStatusBtn(url,obj,options,fun= false,errFun = false){
+        var s = layer.msg('加载中...',{icon:4,time:999999})
+        layer.confirm(options.msg,{title: options.title ? options.title : '操作提示',icon: options.icon ? options.icon : 3},function(index){
+            $.ajax({
+                url,
+                type: "post",
+                data:obj,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
+                        //$(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                    layer.close(s)
+                    if(fun) fun(res.data,options.elem);
+                },
+                error:function(e){
+                    layer.close(s)
+                    layer.alert("网络错误", {icon:5,time:1000});
+                    if(errFun) errFun(res);
+                },
+            });
+        });
+      }
+    </script>
+    <script>
+      function copyCode(title){
+          $("#copyText").val(title)
+          setTimeout(function(){
+              var copy=document.getElementById("copyText");
+              copy.select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+          },50)
+        layer.msg('复制成功：'+title,{icon: 6})
+      }
+    </script>
+    <input id="copyText" type="text" style="width: 1px;opacity: 0;height:1px;position: absolute;"/>
+{include file='common/scroll' /}
+{include file='common/footer' /}

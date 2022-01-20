@@ -1,0 +1,412 @@
+{include file='common/head' /}
+<style>
+    .custom {
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+    }
+    .custom_button {
+        width: 50px;
+        height: 30px;
+        line-height: 30px;
+        background: forestgreen;
+        margin-left: 5px;
+    }
+    .custom_margin {
+        margin-top: 10px;
+    }
+</style>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" id="id" value="{$data.id}">
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    用户名
+                </div>
+                <div class="layui-col-md1 custom" id="nickname">
+                    {$data.name}
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="text" id="username" placeholder="更改会员昵称" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_name()">
+                        确定
+                    </button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    用户头像
+                </div>
+                <div class="layui-col-md1 custom">
+                    <a href="{$data.avatarurl}" target="_blank"><img src="{$data.avatarurl}" height="50"></a>
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    推荐人
+                </div>
+                <div class="layui-col-md1 custom" id="invite">
+                    {$data.invite_id}
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="text" id="invite_id" placeholder="更改推荐人，填写会员id" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_invite()">
+                        确定
+                    </button>
+                </div>
+                <div class="layui-col-md4 custom">
+                    <input type="number" placeholder="手动修改关系链可能会造成会员关系链异常，从而会导致分红、分销问题，请谨慎修改" readonly="readonly" class="layui-input custom_margin" style="background:none;border: none;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    会员等级
+                </div>
+                <div class="layui-col-md1 custom">
+                    {if condition="$data['level'] eq 0"}
+                    游客
+                    {else /}
+                    {$level[$data['level']]}
+                    {/if}
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    手机号码
+                </div>
+                <div class="layui-col-md1 custom">
+                    {$data.phone|default='没有保存号码'}
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    邀请码
+                </div>
+                <div class="layui-col-md1 custom">
+                    {$data.invite_code}
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    购物券余额
+                </div>
+                <div class="layui-col-md1 custom" id="volume">
+                    {$data.volume_num}元
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="number" id="volume_num" placeholder="填入增送购物券，整数（分）" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_volume()">
+                        确定
+                    </button>
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('购物券记录','/admin/users/volume_log?id={$data.id}','','',true)" >
+                        购物券记录
+                    </button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    积分
+                </div>
+                <div class="layui-col-md1 custom" id="int">
+                    {$data.integral}
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="number" id="int_num" placeholder="填入增送积分，整数" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_int()">
+                        确定
+                    </button>
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('积分记录','/admin/users/integral_log?id={$data.id}','','',true)" href="javascript:;">
+                        积分记录
+                    </button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    余额
+                </div>
+                <div class="layui-col-md1 custom" id="balance">
+                    {$data.balance}元
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="number" id="balance_num" placeholder="填入增送余额，整数（分）" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_balance()">
+                        确定
+                    </button>
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('余额记录','/admin/users/balance?id={$data.id}','','',true)" href="javascript:;">
+                        余额记录
+                    </button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    注册时间
+                </div>
+                <div class="layui-col-md1 custom">
+                    {:date('Y-m-d H:i:s',$data['add_time'])}
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    已完成订单金额
+                </div>
+                <div class="layui-col-md1 custom">
+                    {$data.order_total}
+                </div>
+                <div class="layui-col-md10 custom">
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md1 custom">
+                    备注
+                </div>
+                <div class="layui-col-md1 custom" id="remark">
+                    {$data.remarks}
+                </div>
+                <div class="layui-col-md2 custom">
+                    <input type="text" id="remarks" placeholder="填入用户备注" class="layui-input custom_margin">
+                </div>
+                <div class="layui-col-md1 custom">
+                    <button type="button" class="layui-btn layui-btn layui-btn-xs"  onclick="edit_remarks()">
+                        确定
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var layer = layui.layer;
+    });
+
+    //昵称
+    function edit_name(){
+        layer.confirm('确认要更改此会员的昵称吗？',function(index){
+            var id = $('#id').val(),
+                    username = $('#username').val();
+            if(username==null || username==undefined || username==""){
+                layer.msg('请输入新的昵称', {icon: 5,time:1000});
+                return false;
+            }
+
+            $.ajax({
+                url:"{:url('Users/nickname_edit')}",
+                type: "post",
+                data:{id:id,'username':username},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#username').val('');
+                        $('#nickname').html(res.data.username);
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //推荐人
+    function edit_invite(){
+        layer.confirm('确认要更改此会员的推荐人吗？',function(index){
+            var id = $('#id').val(),
+                invite_id = $('#invite_id').val();
+            if(invite_id==null || invite_id==undefined || invite_id==""){
+                layer.msg('请输入推荐人ID', {icon: 5,time:1000});
+                return false;
+            }
+
+            $.ajax({
+                url:"{:url('Users/invite_edit')}",
+                type: "post",
+                data:{id:id,'invite_id':invite_id},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#invite_id').val('');
+                        $('#invite').html(res.data.invite);
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //购物券
+    function edit_volume(){
+        layer.confirm('确认要增加此会员的购物券额度吗？',function(index){
+            var id = $('#id').val(),
+                volume_num = $('#volume_num').val();
+            if(volume_num==null || volume_num==undefined || volume_num==""){
+                layer.msg('请输入购物券额度', {icon: 5,time:1000});
+                return false;
+            }
+            if(volume_num <= 0){
+                layer.msg('请输入正确的购物券额度', {icon: 5,time:1000});
+                return false;
+            }
+            $.ajax({
+                url:"{:url('Users/volume_edit')}",
+                type: "post",
+                data:{id:id,'volume_num':volume_num},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#volume_num').val('');
+                        $('#invite').html(res.data.volume);
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //积分
+    function edit_int(){
+        layer.confirm('确认要增加此会员的积分额度吗？',function(index){
+            var id = $('#id').val(),
+                int_num = $('#int_num').val();
+            if(int_num==null || int_num==undefined || int_num==""){
+                layer.msg('请输入积分额度', {icon: 5,time:1000});
+                return false;
+            }
+            if(int_num <= 0 || (int_num<1 && int_num>0)){
+                layer.msg('请输入正确的积分额度', {icon: 5,time:1000});
+                return false;
+            }
+            $.ajax({
+                url:"{:url('Users/int_edit')}",
+                type: "post",
+                data:{id:id,'int_num':int_num},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#int_num').val('');
+                        $('#int').html(res.data.int_num);
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //余额
+    function edit_balance(){
+        layer.confirm('确认要增加此会员的余额吗？',function(index){
+            var id = $('#id').val(),
+                    balance_num = $('#balance_num').val();
+            if(balance_num==null || balance_num==undefined || balance_num==""){
+                layer.msg('请输入余额', {icon: 5,time:1000});
+                return false;
+            }
+            if(balance_num <= 0 || (balance_num<1 && balance_num>0)){
+                layer.msg('请输入正确的余额', {icon: 5,time:1000});
+                return false;
+            }
+            $.ajax({
+                url:"{:url('Users/balance_edit')}",
+                type: "post",
+                data:{id:id,'balance_num':balance_num},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#balance_num').val('');
+                        $('#balance').html(res.data.balance_num+'元');
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+
+    //备注
+    function edit_remarks(){
+        layer.confirm('确认要修改此会员的备注吗？',function(index){
+            var id = $('#id').val(),
+                remarks = $('#remarks').val();
+            if(remarks==null || remarks==undefined || remarks==""){
+                layer.msg('请输入备注', {icon: 5,time:1000});
+                return false;
+            }
+            $.ajax({
+                url:"{:url('Users/remarks_edit')}",
+                type: "post",
+                data:{id:id,'remarks':remarks},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        $('#remarks').val('');
+                        $('#remark').html(res.data.remarks);
+                        layer.msg(res.msg, {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+    }
+</script>
+{include file='common/footer' /}

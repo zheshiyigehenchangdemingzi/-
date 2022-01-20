@@ -1,0 +1,92 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="relation_id" value="{$id}">
+            <input type="hidden" name="fid" value="{$fid}">
+            <input type="hidden" name="upid" value="{$upid}">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 120px;">
+                    选择评论用户
+                </label>
+                <div class="layui-input-inline">
+                    <select name="uid" lay-verify="required">
+                        <option value="0">选择虚拟用户</option>
+                        {volist name="users" id="v"}
+                        <option value="{$v.id}">{$v.nickname}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            {if condition="$child_user"}
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 120px;">
+                    选择想要评论的用户
+                </label>
+                <div class="layui-input-inline">
+                    <select name="upid" lay-verify="required">
+                        <option value="0">选择用户</option>
+                        {volist name="child_user" id="v"}
+                        <option value="{$v.id}">{$v.nickname}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            {/if}
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 120px;">
+                    评论内容
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="content" required="" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定添加</button></div>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery','laydate'],
+    function() {
+        var laydate = layui.laydate;
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            var num = $('[lay-submit]').index($(this));
+            var formData = new FormData($('form')[num]);
+            //发异步，把数据提交给php
+            $.ajax({
+                url:"{:url('Videos/add_comment')}",
+                type: "post",
+                data:formData,
+                dataType:"json",
+                cache: false,                      // 不缓存
+                processData: false,                // jQuery不要去处理发送的数据
+                contentType: false,                // jQuery不要去设置Content-Type请求头
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon: 5});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon: 5});
+                },
+            });
+            return false;
+        });
+    });
+</script>
+{include file='common/footer' /}

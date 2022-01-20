@@ -1,0 +1,62 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$data.id}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            回复内容
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="请输入内容" name="reply" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            是否显示
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_display" value="1" title="显示" {if condition="$data['is_display'] eq 1"}checked{/if}>
+                            <input type="radio" name="is_display" value="0" title="隐藏" {if condition="$data['is_display'] eq 0"}checked{/if}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            layui.use(['form', 'layer','jquery'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Product/comment_add')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+            });
+        </script>
+{include file='common/footer' /}

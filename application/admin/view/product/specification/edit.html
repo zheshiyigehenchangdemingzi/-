@@ -1,0 +1,154 @@
+{include file='common/head' /}
+    <script src="/static/pluring/jq.js" charset="utf-8"></script>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id" value="{$data.id|default=''}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            <span class="x-red">*</span>规格名
+                        </label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="title" required="" autocomplete="off" class="layui-input" value="{$data.title|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            <span class="x-red">*</span>不允许为空
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            <span class="x-red">*</span>规格值
+                        </label>
+                        <div class="layui-col-md6" id="nameArrs">
+                            {if empty($childList)}
+                            <div style="padding-bottom:14px;">
+                                <input class="layui-input layui-input-inline layui-col-md1" type="text" name="value[]" required="" autocomplete="off" class="layui-input" value="{$data.value|default=''}">
+                                <button type="button" class="layui-btn layui-btn-normal layui-btn-mini"><i class="layui-icon">&#xe654;</i>添加</button>
+                                <button type="button" class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#xe640;</i>删除</button>
+                            </div>
+                            {else /}
+                            {volist name="childList" id="v"}
+                            <div style="padding-bottom:14px;">
+                                <input class="layui-input layui-input-inline layui-col-md1" type="text" name="value[]" required="" autocomplete="off" class="layui-input" value="{$v.value|default=''}">
+                                <button type="button" class="layui-btn layui-btn-normal layui-btn-mini"><i class="layui-icon">&#xe654;</i>添加</button>
+                                <button type="button" class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#xe640;</i>删除</button>
+                            </div>
+                            {/volist}
+                            {/if}
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            <span class="x-red">*</span>不允许为空
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            排序
+                        </label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="sort" required="" autocomplete="off" class="layui-input" value="{$data.sort|default='0'}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            <span class="x-red">*</span>值大的拍在前面，最高99999，不填默认0
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            是否显示
+                        </label>
+                        <div class="layui-input-inline">
+                            {if empty($data['is_show'])}
+                            <input type="radio" name="is_show" value="1" title="是" checked>
+                            <input type="radio" name="is_show" value="0" title="否">
+                            {else /}
+                            <input type="radio" name="is_show" value="1" title="是" {if $data['is_show'] == 1}checked{/if}>
+                            <input type="radio" name="is_show" value="0" title="否" {if $data['is_show'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" type="submit" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    var num = $('[lay-submit]').index($(this));
+                    var formData = new FormData($('form')[num]);
+                    //发异步，把数据提交给php
+                    $.ajax({
+                        url:"{:url('Product/specificationEdit')}",
+                        type: "post",
+                        data:formData,
+                        dataType:"json",
+                        cache: false,                      // 不缓存
+                        processData: false,                // jQuery不要去处理发送的数据
+                        contentType: false,                // jQuery不要去设置Content-Type请求头
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon: 5});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon: 5});
+                        },
+                    });
+                    return false;
+                });
+
+                //图片阅览
+                $('#test1').click(function(){
+                    $('#test1s').click();
+                })
+                $('#test1s').change(function(e){
+                    var imgBox = e.target;
+                    var img = getObjectURL(imgBox.files[0]);
+                    $('#img').attr('src',img);
+                });
+
+
+                listenBtnFun()
+            });
+        // 监听添加，删除按钮函数
+        function listenBtnFun(){
+            // 避免多次调用 实行解绑机制
+            $("#nameArrs  button").unbind("click")
+            $("#nameArrs  button").click(function(){
+                var btnText =  $(this).text()
+                btnText.indexOf('添加') >= 0 ?  addValue(this) : deleteValue(this)
+            })
+        }
+
+        // 点击添加操作
+        function addValue(self)
+        {
+            // 获取到父级html
+            $("#nameArrs").append('<div style="padding-bottom:14px;">' + $(self).parent().html() +'</div>')
+            listenBtnFun()
+        }
+
+
+        // 点击删除操作
+        function deleteValue(self){
+            if($("#nameArrs").find('div').length == 1)
+                return layer.msg('最后一个不能删除',{icon: 5})
+            // 删除即可
+            $(self).parent().remove()
+        }
+
+        </script>
+{include file='common/footer' /}

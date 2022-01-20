@@ -1,0 +1,139 @@
+{include file='common/head' /}
+<style>
+    .custom {
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+    }
+    .custom_button {
+        width: 50px;
+        height: 30px;
+        line-height: 30px;
+        background: forestgreen;
+        margin-left: 5px;
+    }
+    .custom_margin {
+        margin-top: 10px;
+    }
+</style>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uid"  placeholder="会员ID" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="uname"  placeholder="会员名称" autocomplete="off" class="layui-input" value="{$get.uname|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="type">
+                                <option value="">类型筛选</option>
+                                {volist name="statusMap" id="v"}
+                                <option value="{$key}" {if condition="!empty($get['type']) and $get['type'] == $key"}selected{/if}>{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="status">
+                                <option value="" selected>状态筛选</option>
+                                <option value="1" {if condition="!empty($get.status) and $get.status == 1"}selected{/if}>预估</option>
+                                <option value="2" {if condition="!empty($get.status) and $get.status == 2"}selected{/if}>待结算</option>
+                                <option value="3" {if condition="!empty($get.status) and $get.status == 3"}selected{/if}>已结算</option>
+                                <option value="4" {if condition="!empty($get.status) and $get.status == 4"}selected{/if}>已撤销</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="开始时间" name="start" id="start" value="{$get.start|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input class="layui-input"  autocomplete="off" placeholder="截止时间" name="end" id="end" value="{$get.end|default=''}">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-header">
+                    <span style="line-height:40px;float: right;">
+                        联币总额：{$sum} ,
+                        共有数据：{$count} 条
+                    </span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">用户名</th>
+                            <th style="text-align: center;">类型</th>
+                            <th style="text-align: center;">喵呗奖励(分)</th>
+                            <th style="text-align: center;">状态</th>
+                            <th style="text-align: center;">添加时间</th>
+                            <th style="text-align: center;">结算时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">
+                                {$v.nickname}
+                            </td>
+                            <td style="text-align: center;">
+                                {$statusMap[$v.type]}
+                            </td>
+                            <td style="text-align: center;">{$v.reward}</td>
+                            <td style="text-align: center;">
+                                {switch name="v.status" }
+                                {case value="1"}预估{/case}
+                                {case value="2"}待结算{/case}
+                                {case value="3"}已结算{/case}
+                                {case value="4"}已撤销{/case}
+                                {/switch}
+                            </td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                            <td style="text-align: center;">{if condition="$v['end_time'] eq 0"}--{else /}{:date('Y-m-d H:i:s',$v['end_time'])}{/if}</td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form','laydate'], function(){
+        var laydate = layui.laydate;
+        var  form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+</script>
+{include file='common/footer' /}

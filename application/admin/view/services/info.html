@@ -1,0 +1,136 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <tbody>
+                        <tr>
+                            <td style="text-align: center;width:20%;">申请用户</td>
+                            <td style="text-align: center;">{$data.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;width:20%;">订单号</td>
+                            <td style="text-align: center;">{$data.order_sn}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">售后单号</td>
+                            <td style="text-align: center;">{$data.service_sn}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">售后类型</td>
+                            <td style="text-align: center;">
+                                {if condition="$data['type'] eq 1"}换货{else /}退货退款{/if}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">售后图片</td>
+                            <td style="text-align: center;">
+                                {volist name="data['cover']" id="v"}
+                                <a href="{$v}" target="_blank"><img src="{$v}" height="50"></a>
+                                {/volist}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">申请理由</td>
+                            <td style="text-align: center;">{$data.apply_reason}</td>
+                        </tr>
+                        {if condition="$data['status'] eq 5"}
+                        <tr>
+                            <td style="text-align: center;">拒绝理由</td>
+                            <td style="text-align: center;">{$data.reply_reason}</td>
+                        </tr>
+                        {/if}
+                        <tr>
+                            <td style="text-align: center;">售后状态</td>
+                            <td style="text-align: center;">{$status[$data.status]}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">申请退款金额</td>
+                            <td style="text-align: center;">{$data.price}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">使用购物券金额：</td>
+                            <td style="text-align: center;">{$data.volume}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">最终退款金额</td>
+                            <td style="text-align: center;">{$data.refund}</td>
+                        </tr>
+                        {if $data.status == 5}
+                        <tr>
+                            <td style="text-align: center;">购物券退还金额</td>
+                            <td style="text-align: center;">{$data.volume}</td>
+                        </tr>
+                        {/if}
+                        <tr>
+                            <td style="text-align: center;">申请时间</td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$data.add_time)}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">商品图片</th>
+                            <th style="text-align: center;">商品名称</th>
+                            <th style="text-align: center;">商品规格</th>
+                            <th style="text-align: center;">商品单价</th>
+                            <th style="text-align: center;">退换货数量</th>
+                            <th style="text-align: center;">申请退款金额</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="data['goods']" id="vo"}
+                        <tr>
+                            <td style="text-align: center;"><a href="{$vo.img}" target="_blank"><img src="{$vo.img}" height="50"></a></td>
+                            <td style="text-align: center;">{$vo.title}</td>
+                            <td style="text-align: center;">{$vo.attr_str}</td>
+                            <td style="text-align: center;">{$vo.price}</td>
+                            <td style="text-align: center;">{$vo.num}</td>
+                            <td style="text-align: center;">
+                                <span style="color:red;">{$vo.return_price / 100}元</span>
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+
+                {if condition="$data['status'] eq 3 and $data['type'] eq 1"}
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <tbody>
+                        <tr>
+                            <td style="text-align: center;width:20%;">快递公司（买家）</td>
+                            <td style="text-align: center;">{$express[data['company']]}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">快递单号（买家）</td>
+                            <td style="text-align: center;">{$data.express_sn}</td>
+                        </tr>
+                        {if condition="$data['status'] eq 4 and $data['type'] eq 1"}
+                        <tr>
+                            <td style="text-align: center;">快递公司（卖家）</td>
+                            <td style="text-align: center;">{$express[data['company1']]}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">快递单号（卖家）</td>
+                            <td style="text-align: center;">{$data.express_sn1}</td>
+                        </tr>
+                        {/if}
+                        </tbody>
+                    </table>
+                </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+{include file='common/footer' /}

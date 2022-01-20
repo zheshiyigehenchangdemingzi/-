@@ -1,0 +1,180 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$role.id|default=''}">
+            <input type="hidden" name="style" value="role">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    会员权限
+                </label>
+                <div class="layui-col-md6 live">
+                    <input type="radio" name="is_role" value="1" title="开启" {if condition="$role['is_role'] eq 1"}checked{/if}>
+                    <input type="radio" name="is_role" value="0" title="关闭" {if condition="$role['is_role'] eq 0"}checked{/if}>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+
+                </div>
+            </div>
+            <div class="live1" {if condition="$role['is_role'] eq 0"}style="display:none;"{/if}>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        单次限购
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="number" name="limit" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_def']['limit']|default=0}">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        每次下单限购数量,0默认不限制
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        总数限购
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="number" name="count" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_def']['count']|default=0}">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        会员限购总数量,0默认不限制
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        每日限购
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="number" name="day" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_def']['day']|default=0}">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        会员每日限购数量,0默认不限制
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        每周限购
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="number" name="week" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_def']['week']|default=0}">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        会员每周限购数量,0默认不限制
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        每月限购
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="number" name="mouth" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_def']['mouth']|default=0}">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        会员每月限购数量,0默认不限制
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        独立权限
+                    </label>
+                    <div class="layui-col-md6 goods_role">
+                        <input type="radio" name="is_role_odd" value="1" title="开启" {if condition="$role['is_role_odd'] eq 1"}checked{/if}>
+                        <input type="radio" name="is_role_odd" value="0" title="关闭" {if condition="$role['is_role_odd'] eq 0"}checked{/if}>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+
+                    </div>
+                </div>
+                <div class="role" {if condition="$role['is_role_odd'] eq 0"}style="display:none;"{/if}>
+                <div class="layui-form-item" style="margin-top: 30px;">
+                    <label class="layui-form-label">
+                        等级设置
+                    </label>
+                    <div class="layui-col-md9">
+                        <table class="layui-table layui-form">
+                            <thead>
+                            <tr>
+                                <th style="text-align: center;">会员等级</th>
+                                <th style="text-align: center;">单次限购</th>
+                                <th style="text-align: center;">总数限购</th>
+                                <th style="text-align: center;">每日限购</th>
+                                <th style="text-align: center;">每周限购</th>
+                                <th style="text-align: center;">每月限购</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name="level" id="v"}
+                            <tr>
+                                <td><input type="hidden" name="key[]" value="{$key}">{$v}</td>
+                                <td><input type="number" name="limits[]" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_conf'][$key]['limit']|default=0}"></td>
+                                <td><input type="number" name="counts[]" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_conf'][$key]['count']|default=0}"></td>
+                                <td><input type="number" name="days[]" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_conf'][$key]['day']|default=0}"></td>
+                                <td><input type="number" name="weeks[]" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_conf'][$key]['week']|default=0}"></td>
+                                <td><input type="number" name="mouths[]" lay-verify="required" autocomplete="off" class="layui-input" value="{$role['role_conf'][$key]['mouth']|default=0}"></td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+            </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer','jquery'],function() {
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+
+        $('.goods_role').click(function () {
+            var val = $('input[name="is_role_odd"]:checked').val();
+            if(val == 1){
+                $('.role').css('display','');
+            }else{
+                $('.role').css('display','none');
+            }
+        })
+
+        $('.live').click(function () {
+            var val = $('input[name="is_role"]:checked').val();
+            if(val == 1){
+                $('.live1').css('display','');
+            }else{
+                $('.live1').css('display','none');
+            }
+        })
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('Product/role')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+    });
+</script>
+{include file='common/footer' /}

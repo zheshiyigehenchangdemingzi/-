@@ -1,0 +1,1125 @@
+{include file='common/head' /}
+<!-- 表情开始 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Begin emoji-picker Stylesheets -->
+<link href="__PLURING__/emoji/lib/css/nanoscroller.css" rel="stylesheet">
+<link href="__PLURING__/emoji/lib/css/emoji.css" rel="stylesheet">
+<!-- End emoji-picker Stylesheets -->
+<!-- 表情结束 -->
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="cover" id="cover" value="{$data.cover|default=''}">
+            <input type="hidden" name="id"  value="{$data.id|default=0}">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>商品选择操作：</legend>
+            </fieldset>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    选择商品分类
+                </label>
+                <!-- 分类 -->
+                <div class="layui-col-md1">
+                    <select id="goods_cid" style="width:150px;" name="cid" lay-verify="" lay-search>
+                        <option selected value="">分类-可输入搜索值</option>
+                        {volist name="goodtypes" id="v"}
+                        <option value="{$key}">{$v}</option>
+                        {/volist}
+                    </select>
+                </div>
+                <!-- 选择品牌 -->
+                <div class="layui-col-md1">
+                    <select id="goods_bid" style="width:150px;" name="bid" lay-verify="" lay-search>
+                        <option selected value="">品牌-可输入搜索值</option>
+                        {volist name="goodBs" id="v"}
+                        <option value="{$key}">{$v}</option>
+                        {/volist}
+                    </select>
+                </div>
+                <!-- 商品名称 -->
+                <div class="layui-col-md1">
+                    <input id="goods_name" placeholder="商品标题" type="text" name="goods_name" value="" autocomplete="off" class="layui-input">
+                </div>
+                <!-- 商品序号 -->
+                <div class="layui-col-md1">
+                    <input id="goods_id" placeholder="商品序号" type="number" name="goods_id" value="" autocomplete="off" class="layui-input">
+                </div>
+                &nbsp;&nbsp;
+                <div class="layui-col-md1">
+                    <button onclick="getGoodsList()" title="搜索商品" class="layui-btn"  type="button" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                </div>
+                <div class="layui-col-md3">
+                    <button onclick="allCheckClik(true)" title="商品全选" class="layui-btn layui-btn-normal"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品当前全选</button>
+                    <button onclick="allCheckClik(false)" title="商品取消全选" class="layui-btn layui-btn-warm"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品取消全选</button>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    需要先搜索才能显示商品
+                    <input id="copyText" type="text" name="copyText" style="width: 10px;opacity: 0;" value=""/>
+                </div>
+            </div>
+            <!-- 选择商品 -->
+            <div class="layui-col-md11">
+                <div id="goodsList" style="
+                        overflow-y: auto;
+                        max-height: 400px;
+                        padding: 10px;
+                        border: 1px solid #01AAED;
+                        border-left: none;
+                        border-right: none;">
+                </div>
+            </div>
+            <style>
+                .yulanClickGoods > div {
+                    border:1px dashed #999;
+                    margin-right:10px;
+                    /* padding-left:8px; */
+                    padding: 5px;
+                    text-align: center;
+                    border-radius: 6px;
+                    width:300px;
+                }
+            </style>
+            <script>
+
+                function getGoodsList(obj = null){
+                    if(!obj) {
+                        obj = {
+                            cid:  $("#goods_cid").select().val(),
+                            bid:  $("#goods_bid").select().val(),
+                            name: $("#goods_name").val(),
+                            goods_id: $("input[name=goods_id]").val()
+                        }
+                    }
+
+                    var num = layer.msg('加载中',{icon:4})
+                    $.ajax({
+                        url:"{:url('Product/getGoods')}",
+                        type: "get",
+                        data:obj,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200 && res.data){
+                                layer.msg('加载商品成功',{icon:6})
+                                var html = ``;
+                                var data = res.data.data
+                                if(data.length == 0){
+                                    $("#goodsList").html('')
+                                    $(".yulanClickGoods").html('')
+                                    return layer.msg('抱歉，搜索不到该商品信息',{icon:5})
+                                    //return layer.alert('抱歉，搜索不到该商品信息')
+                                }
+                                window.GOODS_DATA_LIST = {}
+                                for(var i = 0; i < data.length;i++){
+                                    //onclick="checkIdClick(${data[i].id})"
+                                    html += `
+                                                    <div class="goodsItem" title="${data[i].name}" style="float: left;
+    cursor: pointer;
+    border: 1px solid #b9c2c5;
+    padding: 8px;
+    border-radius: 5px;
+    border-style: dashed;
+    margin-right: 10px;
+    margin-bottom:10px;">
+                                                            <div class="goodsCheckBox">
+                                                                <input lay-filter="goodsIds" id="${'goodsId_'+data[i].id}" type="checkbox" value="${data[i].id}" title="${data[i].name ? data[i].name.substr(0,10)+'...' : ''}" name="goods_ids" lay-skin="primary">
+                                                                <img style="height:80px;width:80px;border:1px solid #999;padding:3px;border-radius:4px;" src="${data[i].cover.split(',')[0]}"/>
+                                                            </div>
+                                                            <hr/>
+                                                            <div>
+                                                                <button type="button" onclick="copyCode('${data[i].name}')" title="点我复制名称" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                                                                <button type="button" onclick="copyCode('${data[i].id}')" title="点我复制序号" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                                                                <button type="button" onclick="openUrl('${data[i].supply_url}')" title="点我打开货源链接" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                                                            </div>
+                                                    </div>
+                                            `;
+                                    window.GOODS_DATA_LIST[data[i].id] = data[i]
+                                }
+                                if(html){
+                                    setTimeout(function(){
+                                        // 监听复选框
+                                        $("#goodsList").html(html)
+                                        $(".yulanClickGoods").html('')
+                                        layui.form.render()
+                                        setTimeout(function(){
+                                            //监听复选框-单个
+                                            LAYUI_FORM.on('checkbox(goodsIds)', function(data){
+                                                // console.log(data,data.elem.checked,data.value)
+                                                // if(data.elem.checked==true){
+
+                                                // }else{
+
+                                                // }
+                                                viewGoodIdsList()
+                                            });
+                                        },100)
+                                    },50)
+                                }
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                }
+
+                function copyCode(title){
+                    $("#copyText").val(title)
+                    setTimeout(function(){
+                        var copy=document.getElementById("copyText");
+                        copy.select(); // 选择对象
+                        document.execCommand("Copy"); // 执行浏览器复制命令
+                    },50)
+                    layer.msg('复制成功：'+title,{icon: 6})
+                }
+
+                // 选择表单
+                function checkIdClick(id){
+                    // $('#goodsId_'+id).prop('checked') ?  $('#goodsId_'+id).attr('checked',false) : $('#goodsId_'+id).attr('checked',true)//$('#goodsId_'+id).click()
+                }
+
+                // 全选
+                function allCheckClik(bool = true){
+                    layer.msg(bool ? '全选成功' : '取消成功',{icon: 6});
+                    bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').prop('checked',false),$('input[name="goods_ids"]').removeAttr('checked')
+                    // bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').removeAttr('checked')
+                    setTimeout(function(){
+                        layui.form.render('checkbox')
+                        setTimeout(function(){
+                            bool ? viewGoodIdsList() : $(".yulanClickGoods").html('')
+                        },100)
+                    },50)
+                }
+            </script>
+            <hr>
+            <!-- 预览选中商品 -->
+            <div id="yuLanShangPinView" class="layui-form-item">
+                <label class="layui-form-label">
+                    预览商品
+                </label>
+                <div class="layui-col-md10">
+                    <div style="overflow: auto;max-height: 300px;" class="yulanClickGoods">
+
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>用户选择操作：</legend>
+            </fieldset>
+            <!-- 选择会员快捷操作 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    选择会员操作
+                </label>
+                <div class="layui-col-md9">
+                    <div class="layui-col-md3">
+                        <input name="user_id" placeholder="随机用户人数" class="layui-input" value="1" type="number" />
+                    </div>
+                    <div class="layui-col-md6">
+                        <button onclick="suijiUser(true)" title="随机用户" class="layui-btn layui-btn-danger"  type="button" ><i class="layui-icon layui-icon-edit"></i>随机用户</button>
+                        <button onclick="suijiUser(false)" title="新增随机用户" class="layui-btn layui-btn-normal"  type="button"><i class="layui-icon layui-icon-addition"></i>新增用户</button>
+                        <!-- <button onclick="allCheckClikUser(true)" title="用户全选" class="layui-btn layui-btn-normal"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>用户全选</button> -->
+                        <button onclick="allCheckClikUser(false)" title="用户取消全选" class="layui-btn layui-btn-warm"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>用户取消全选</button>
+                        用户数量：<span class="layui-badge layui-bg-blue">{$count}</span>
+                    </div>
+                </div>
+            </div>
+            <!--                    间隔日期-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    间隔日期
+                </label>
+                <div class="layui-col-md9">
+                    <div class="layui-col-md3">
+                        <input name="comment_num_min" placeholder="填写间隔日期" class="layui-input layui-input-inline" value="2" type="number" />
+                        <input name="comment_num_max" placeholder="填写间隔日期" class="layui-input layui-input-inline" value="4" type="number" />
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        第一个是最小间隔天数，第二个是最大间隔天数
+                    </div>
+                </div>
+            </div>
+            <!--                    开始日期-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    开始评论日期
+                </label>
+                <div class="layui-col-md1">
+                    <input lay-filter="comment_start_time" id="comment_start_time" type="text" name="comment_start_time" autocomplete="off" class="layui-input" value="">
+
+                </div>
+                <div class="layui-col-md1">
+                    <button type="button" class="layui-btn layui-btn-normal" onclick="commentStartDates()">随机日期</button>
+                </div>
+            </div>
+            <!--                    评论类型-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    开始评论日期
+                </label>
+                <div class="layui-col-md3">
+                    <input title="间隔日期" checked lay-filter="comment_status"  type="radio" name="comment_status" autocomplete="off" class="layui-input" value="1" placeholder="间隔日期">
+                    <input title="随机日期" lay-filter="comment_status"  type="radio" name="comment_status" autocomplete="off" class="layui-input" value="2" placeholder="随机日期">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    间隔日期为随着开始评论日期时间往前，随机日期则根据随机天数进行随机，仅限于随机用户按钮使用
+                </div>
+            </div>
+            <!-- 选择会员 -->
+            <div class="layui-form-item">
+                <div class="layui-col-md11" style="position: relative;padding-bottom: 20px;">
+                    <div class="userListBox" style="overflow-y: auto;max-height: 400px;padding: 10px;border: 1px solid #1E9FFF;border-left: none;border-right: none;">
+                        {volist name="users" id="v"}
+                        <div>
+                            <input lay-filter="usersIds" id="userId_{$v.id}" type="checkbox" name="uids" value="{$v.id}" title="{$v.nickname}" lay-skin="primary">
+                            <img src="{$v.avatarurl}" style="width:50px;height:50px;"/>
+                        </div>
+                        {/volist}
+                        <div style="
+                                display: none;
+                                position: absolute;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                width: 100%;
+                                height: 26px;
+                                box-sizing: border-box;
+                                background: rgb(173, 251, 244);
+                                border-radius: 2px;
+                                cursor: pointer;
+                                text-align: center;
+                                line-height: 13px;
+                                bottom: -6px;" title="点我加载更多"
+                             onclick="$('.userListBoxItem').show(),layer.msg('加载用户信息ok',{icon: 6})">
+                            加载更多...
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .userListBox div {
+                        float: left;
+                        border: 1px solid #999;
+                        padding: 6px;
+                        margin-right: 6px;
+                        margin-bottom: 6px;
+                        border-style: dashed;
+                        border-radius: 5px;
+                    }
+                </style>
+            </div>
+            <hr>
+            <!-- 预览用户 -->
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>用户评论列表：</legend>
+            </fieldset>
+            <div class="layui-col-md11">
+                <div style="overflow: auto;max-height: 500px;" class="yuLanUSERViewCLICK">
+
+                </div>
+            </div>
+            <style>
+                .yuLanUSERViewCLICK > div {
+                    border: 1px dashed #999;
+                    margin-right: 10px;
+                    padding: 5px;
+                    text-align: center;
+                    border-radius: 6px;
+                }
+            </style>
+            <hr>
+            <script>
+                window.USERLIST = {:json_encode($users)};
+                window.USERLISTOBJ = {}
+                if(window.USERLIST && window.USERLIST.length > 0)
+                    for(var i  =0;i < window.USERLIST.length;i++) window.USERLISTOBJ[window.USERLIST[i].id] = window.USERLIST[i]
+                // 随机用户
+                function suijiUser(bool = true){
+                    //var num = Math.floor(USERLIST.length / 10) + Math.floor(Math.random() *  (USERLIST.length / 10 + 5))
+                    var num = Math.floor($("input[name=user_id]").val())
+                    var list =  getRandomArrayElements(USERLIST, num)
+                    if(bool){
+                        $("input[name='uids']").prop('checked',false)
+                        window.CLICKUSERDATA = {}
+                    }
+                    var uids = []
+                    for(var i = 0; i <list.length;i++){
+                        $("#userId_"+list[i].id).prop('checked',true)
+                        uids.push(list[i].id)
+                        if(bool) window.CLICKUSERDATA[list[i].id] = list[i]
+                    }
+                    setTimeout(function(){
+                        layui.form.render('checkbox')
+                        setTimeout(function(){
+                            // 渲染用户
+                            viewUsersIdsList(uids,!bool)
+                        },100)
+                    },50)
+                    layer.msg('随机成功',{icon:6})
+                }
+
+                // 取消全选或者  当前全选
+                function allCheckClikUser(bool = true){
+                    bool ? $("input[name='uids']").prop('checked',true) : $("input[name='uids']").prop('checked',false)
+                    var uids = []
+                    if(bool) for(var i = 0; i < window.USERLIST.length;i++) if(window.USERLIST[i].id) uids.push(window.USERLIST[i].id),window.CLICKUSERDATA[window.USERLIST[i].id] = window.USERLIST[i]
+                    setTimeout(function(){
+                        layui.form.render('checkbox')
+                        setTimeout(function(){
+                            // 渲染用户
+                            viewUsersIdsList(uids)
+                            !bool && $(".yuLanUSERViewCLICK").html(''),window.CLICKUSERDATA = {};
+                        },100)
+                    },50)
+                    layer.msg(bool ? '全选用户成功' : '取消全选成功',{icon:6})
+                }
+
+                function getRandomArrayElements(arr, count) {
+                    arr = arr.sort(randomsort);
+                    var shuffled = arr.slice(0), i = arr.length, min = i - count, temp, index;
+                    while (i-- > min) {
+                        index = Math.floor((i + 1) * Math.random());
+                        temp = shuffled[index];
+                        shuffled[index] = shuffled[i];
+                        shuffled[i] = temp;
+                    }
+                    return shuffled.slice(min);
+                }
+
+                // 随机打乱用户
+                function randomsort(a, b) {
+                    return Math.random()>.5 ? -1 : 1;
+                    //用Math.random()函数生成0~1之间的随机数与0.5比较，返回-1或1
+                }
+
+            </script>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>常规操作如下：</legend>
+            </fieldset>
+            <!-- 最近天数 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    随机天数
+                </label>
+                <div class="layui-col-md3">
+                    <input type="number" class="layui-input" id="min_day" value="15">
+                    <input type="number" class="layui-input" id="max_day" value="200">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    第一个是最近天数，第二个是最早天数
+                </div>
+            </div>
+            <!-- 评论内容 -->
+            <style>
+                .emoji-wysiwyg-editor.layui-textarea {
+                    height:100px;
+                }
+            </style>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    参考评论
+                </label>
+                <div class="layui-col-md6">
+                    <input style="height:100px;" id="discussTxt" style="height:100px;" placeholder="请输入内容" name="discuss" class="layui-textarea" value="{$data.discuss|default=''}" data-emojiable="true"/>
+                </div>
+            </div>
+
+            <!-- 表情开始--- -->
+            <script src="__PLURING__/jq.js"></script>
+            <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+            <!-- Begin emoji-picker JavaScript -->
+            <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+            <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+            <script src="__PLURING__/emoji/lib/js/config.js"></script>
+            <script src="__PLURING__/emoji/lib/js/util.js"></script>
+            <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+            <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+            <!-- End emoji-picker JavaScript -->
+            <script>
+                $(function() {
+                    // Initializes and creates emoji set from sprite sheet
+                    window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                    });
+                    // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                    // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                    // It can be called as many times as necessary; previously converted input fields will not be converted again
+                    window.emojiPicker.discover();
+                });
+            </script>
+            <!-- 表情结束--- -->
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">回复内容</label>
+                <div class="layui-col-md9">
+                    <input style="height:100px;" placeholder="请输入内容" name="reply" class="layui-textarea" value="{$data.reply|default=''}" data-emojiable="true"/>
+                </div>
+            </div>
+            <!-- 表情开始--- -->
+            <script src="__PLURING__/jq.js"></script>
+            <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+            <!-- Begin emoji-picker JavaScript -->
+            <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+            <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+            <script src="__PLURING__/emoji/lib/js/config.js"></script>
+            <script src="__PLURING__/emoji/lib/js/util.js"></script>
+            <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+            <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+            <!-- End emoji-picker JavaScript -->
+            <script>
+                $(function() {
+                    // Initializes and creates emoji set from sprite sheet
+                    window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                    });
+                    // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                    // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                    // It can be called as many times as necessary; previously converted input fields will not be converted again
+                    window.emojiPicker.discover();
+                });
+            </script>
+            <!-- 表情结束--- -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-col-md9">
+                    <input type="number" name="sort" value="{$data.sort|default=0}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">快捷操作</label>
+                <div class="layui-col-md9">
+                    <button type="button" class="layui-btn layui-btn-normal" onclick="cunweiCaoGaoClick()">存为草稿</button>
+                    <button type="button" class="layui-btn layui-btn-normal" onclick="loadCaoGaoObj()">加载草稿</button>
+                </div>
+            </div>
+
+            <!--                    草稿本-->
+            <div id="caokaoBen" class="layui-form-item" style="display: none">
+                <label class="layui-form-label">草稿内容</label>
+                <div class="layui-col-md9">
+                    <input type="text" name="caogao" disabled value="{$data.sort|default=0}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    是否显示
+                </label>
+                <div class="layui-input-inline">
+                    {if empty($data['is_display'])}
+                    <input type="radio" name="is_display" value="1" title="是" checked>
+                    <input type="radio" name="is_display" value="0" title="否" >
+                    {else /}
+                    <input type="radio" name="is_display" value="1" title="是" {if $data['is_display'] == 1}checked{/if}>
+                    <input type="radio" name="is_display" value="0" title="否" {if $data['is_display'] == 0}checked{/if}>
+                    {/if}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+                <button type="button" class="layui-btn layui-btn-normal" onclick="tijiaoCaoGao()">提交草稿</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var level = 5;
+    var reply = "<?php echo isset($data) && isset($data->discuss) && $data->discuss ? $data->discuss : '' ?>";
+</script>
+<script>
+    layui.use(['form', 'layer','jquery','rate','laydate'],function() {
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+        window.LAYUI_FORM = form;
+        var rate = layui.rate;
+        setTimeout(function(){
+            initGoods()
+        },1)
+        reply && $("textarea").val(reply)
+
+        var laydate = layui.laydate;
+        //日期时间选择器
+        laydate.render({
+            elem: '#comment_start_time', value:  new Date(new Date().getTime() - Math.round(15 + Math.random() * 200) * 3600 * 24 * 1000)
+        });
+
+        //监听下拉框-单个
+        //   LAYUI_FORM.on('select(pinglun_types)', function(data){
+        //       viewHaoPingList(data.value)
+        //         // console.log(data,data.elem.checked,data.value)
+        //         // if(data.elem.checked==true){
+        //
+        //         // }else{
+        //
+        //         // }
+        // });
+
+        // 监听用户组列表
+        setTimeout(function(){
+            //监听复选框-单个
+            LAYUI_FORM.on('checkbox(usersIds)', function(data){
+                // console.log(data,data.elem.checked,data.value)
+                // if(data.elem.checked==true){
+
+                // }else{
+
+                // }
+                // 选中
+                if(data.elem.checked==true){
+                    viewUsersIdsList([data.value],true)
+                }else{
+                    $(".yulanuserviewclickitemid_"+data.value).remove();
+                    window.CLICKUSERDATA[data.value] && delete window.CLICKUSERDATA[data.value];
+                }
+            });
+        },100)
+
+
+        //显示文字
+        // rate.render({
+        //     elem: '#rote-level'
+        //     ,value: level
+        //     ,text: true //开启文本
+        // });
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            if(window.AJAX_BOOL && window.AJAX_BOOL){
+                return layer.msg('当前请求加载数据中，稍等片刻',{icon:5});
+            }
+            var layui = layer;
+
+            var goodsIds = []
+            var goods = $("input[name=goods_ids]")
+            if(goods.length == 0 ) {layer.msg('必须选择商品',{icon:5});return false;}
+            // alert('商品ok')
+            for(var i = 0; i < goods.length;i++){
+                if($(goods[i]).next() && $(goods[i]).next().attr('class').indexOf('layui-form-checked') >= 0) {
+                    goodsIds.push($(goods[i]).val())
+                }
+            }
+            // alert('选取完毕')
+            if(goodsIds.length ==0) {layer.msg('必须选择商品',{icon:5});return false;}
+
+            var userList = {}
+            var listUserdom = $(".yuLanUSERViewCLICKItem")
+            if(!listUserdom || listUserdom.length  == 0){layer.msg('必须选择用户');return false;}
+            for(var i = 0; i < listUserdom.length;i++){
+                var id = $(listUserdom[i]).attr('data-id')
+                // 评论
+                var pinglun_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-pinglun').val()
+                if(!pinglun_item || pinglun_item.length <= 1) { layer.msg("第"+(i+1)+'个评论列表,用户信息'+$(listUserdom[i]).attr('title') + '，评论不得为空，且长度不得小于1',{icon:5});return false;}
+                // 评分
+                var pingfen_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-pingfen').val()
+                if(!pingfen_item) pingfen_item = 4;
+                if(pingfen_item < 0) pingfen_item = 0;
+                if(pingfen_item > 5)pingfen_item = 5;
+                // 匿名
+                var niming_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-niming:checked').val()
+                // 日期
+                var date_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-datestr').val()
+                userList[id] = {
+                    discuss: pinglun_item,
+                    level: pingfen_item - 0,
+                    is_anonymous: niming_item - 0,
+                    date: date_item
+                }
+            }
+
+            // data.field.goodsIds = goodsIds
+            // data.field.userList = JSON.stringify(userList)
+            var newData = {
+                goodsIds: JSON.stringify(goodsIds),
+                userList: JSON.stringify(userList),
+                is_display: data.field.is_display,
+                sort: data.field.sort,
+                reply: data.field.reply
+            }
+            window.AJAX_BOOL = true;
+            $.ajax({
+                url:"/admin/product/comment_add_text_pl.html",
+                type: "post",
+                data: createFormData(newData),
+                dataType:"json",
+                cache: false,                      // 不缓存
+                processData: false,                // jQuery不要去处理发送的数据
+                contentType: false,                // jQuery不要去设置Content-Type请求头
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                    window.AJAX_BOOL = false;
+                },
+                error:function(e){
+                    window.AJAX_BOOL = false;
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+    });
+
+
+
+    window.onload = function(){
+        // $("#rote-level ul > li").click(function(){
+        //     $("input[name=level]").val($         ("#rote-level > span").text()[0] - 0)
+        // })
+    }
+
+
+    // 存为草稿
+    function cunweiCaoGaoClick(){
+        var obj = getDataFun();
+        if(!obj) return layer.msg('当前没有可存的数据',{icon:5});
+        $("input[name='caogao']").val(JSON.stringify(obj));
+        $("#caokaoBen").show(300);
+        localStorage.setItem('comment_add_text_pl_caogao_list',JSON.stringify(obj))
+        layer.msg('保存草稿成功',{icon:6});
+    }
+
+    // 加载草稿数据
+    function loadCaoGaoObj(){
+        var obj =  localStorage.getItem('comment_add_text_pl_caogao_list')
+        if(!obj) return layer.msg('没有草稿数据抱歉',{icon:5});
+        $("input[name='caogao']").val(JSON.stringify(obj));
+        $("#caokaoBen").show(300);
+        layer.msg('加载草稿成功',{icon:6});
+    }
+
+
+    /**
+     *    保存数据
+     */
+    function getDataFun(){
+        var goodsIds = []
+        var goods = $("input[name=goods_ids]")
+        if(goods.length == 0 ) {layer.msg('必须选择商品',{icon:5});return false;}
+        // alert('商品ok')
+        for(var i = 0; i < goods.length;i++){
+            if($(goods[i]).next() && $(goods[i]).next().attr('class').indexOf('layui-form-checked') >= 0) {
+                goodsIds.push($(goods[i]).val())
+            }
+        }
+        // alert('选取完毕')
+        if(goodsIds.length ==0) {layer.msg('必须选择商品',{icon:5});return false;}
+
+        var userList = {}
+        var listUserdom = $(".yuLanUSERViewCLICKItem")
+        if(!listUserdom || listUserdom.length  == 0){layer.msg('必须选择用户');return false;}
+        for(var i = 0; i < listUserdom.length;i++){
+            var id = $(listUserdom[i]).attr('data-id')
+            // 评论
+            var pinglun_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-pinglun').val()
+            if(!pinglun_item || pinglun_item.length <= 1) { layer.msg("第"+(i+1)+'个评论列表,用户信息'+$(listUserdom[i]).attr('title') + '，评论不得为空，且长度不得小于1',{icon:5});return false;}
+            // 评分
+            var pingfen_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-pingfen').val()
+            if(!pingfen_item) pingfen_item = 4;
+            if(pingfen_item < 0) pingfen_item = 0;
+            if(pingfen_item > 5)pingfen_item = 5;
+            // 匿名
+            var niming_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-niming:checked').val()
+            // 日期
+            var date_item = $(listUserdom[i]).find('.yuLanUSERViewCLICKItem-datestr').val()
+            userList[id] = {
+                discuss: pinglun_item,
+                level: pingfen_item - 0,
+                is_anonymous: niming_item - 0,
+                date: date_item
+            }
+        }
+        // data.field.goodsIds = goodsIds
+        // data.field.userList = JSON.stringify(userList)
+        var newData = {
+            goodsIds: JSON.stringify(goodsIds),
+            userList: JSON.stringify(userList),
+            is_display: $("input[name='is_display']:checked").val() - 0,
+            sort: $("input[name='sort']").val() ? $("input[name='sort']").val() - 0 : 0,
+            reply: $("input[name='reply']").val() ? $("input[name='reply']").val() : ''
+        }
+        return newData;
+    }
+
+    // 提交草稿
+    function tijiaoCaoGao(newData = null){
+        if(!newData){
+            var obj =  $("input[name='caogao']").val();
+            newData = JSON.parse(obj);
+        }
+        $.ajax({
+            url:"/admin/product/comment_add_text_pl.html",
+            type: "post",
+            data: newData,
+            dataType:"json",
+            cache: false,                      // 不缓存
+            processData: false,                // jQuery不要去处理发送的数据
+            // contentType: false,                // jQuery不要去设置Content-Type请求头
+            success:function (res) {
+                if(res.code == 200){
+                    layer.alert(res.msg, {icon: 1},function () {
+                        //关闭当前frame
+                        xadmin.close();
+                        // 可以对父窗口进行刷新
+                        xadmin.father_reload();
+                    });
+                }else{
+                    layer.alert(res.msg, {icon:2,time:1000});
+                }
+                window.AJAX_BOOL = false;
+            },
+            error:function(e){
+                window.AJAX_BOOL = false;
+                layer.alert("网络错误", {icon:5,time:1000});
+            },
+        });
+    }
+
+    // 根据数据封装了 表单提交对象
+    function createFormData(obj){
+        var form = new FormData();
+        for(var i in obj){
+            form.append(i,obj[i]);
+        }
+        return form;
+    }
+
+    /**
+     * 进行切割为需要的日期
+     */
+    function getDateYmdStr(str = ''){
+        if(!str) return false;
+        var dateList = str.split('/');
+        return dateList[0] + '-' + getNumShiJinZhi(dateList[1]) + '-' + getNumShiJinZhi(dateList[2]);
+    }
+
+    // 获取到随机数
+    function randomNum(minNum,maxNum){
+        switch(arguments.length){
+            case 1:
+                return parseInt(Math.random()*minNum+1,10);
+                break;
+            case 2:
+                return parseInt(Math.random()*(maxNum-minNum+1)+minNum,10);
+                break;
+            default:
+                return 0;
+                break;
+        }
+    }
+
+    /**
+     * 获取随机日期对象
+     * @returns {Date}
+     */
+    function getRandomDateBetween(min = 1,max = 5) { // 生成当前时间一个月内的随bai机时du间。
+        var date = new Date();
+        var e = date.getTime()-(min*24*60*60*1000);//当前时间的秒数
+        var f = date.getTime()-(max*24*60*60*1000); //30天之前的秒数，
+        return new Date(RandomNumBoth(f,e))
+    }
+
+    /**
+     * 根据范围随机数生成
+     * @param Min
+     * @param Max
+     * @returns {*}
+     * @constructor
+     */
+    function RandomNumBoth(Min,Max){
+        var Range = Max - Min;
+        var Rand = Math.random();
+        var num = Min + Math.round(Rand * Range); //四舍五入
+        return num;
+    }
+</script>
+
+<script>
+    // 渲染选中商品
+    function viewGoodIdsList(){
+        //if(!window.GOODS_DATA_LIST) return   layui.msg('麻烦先搜下商品',{icon:5});
+        var layui = layer
+        var goodsIds = []
+        var goods = $("input[name=goods_ids]")
+        if(goods.length == 0 ) return   layui.msg('必须选择商品');
+        // alert('商品ok')
+        for(var i = 0; i < goods.length;i++)
+            if($(goods[i]).next() && $(goods[i]).next().attr('class').indexOf('layui-form-checked') >= 0) goodsIds.push($(goods[i]).val())
+        if(goodsIds && goodsIds.length >0){
+            var html = ``;
+            for(var i = 0;i < goodsIds.length;i++){
+                var id = goodsIds[i]
+                if(!window.GOODS_DATA_LIST || !window.GOODS_DATA_LIST[id]) continue;
+                var linshiData = window.GOODS_DATA_LIST[id]
+                html += `
+                <div class="yulanClickGoodsItem" title="${linshiData.name}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                        <div title="${linshiData.id}-${linshiData.name}" onclick="openUrl('${linshiData.supply_url}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                名称：<span style="color:#1E9FFF;">${linshiData.name ? linshiData.name.substr(0,10)+'...' : ''}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                            </span>
+                            <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="${linshiData.cover.split(',')[0]}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.name}')" title="点我复制名称" ><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.id}')" title="点我复制序号" ><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="openUrl('${linshiData.supply_url}')" title="点我跳转货源链接" ><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                            <button data-id="${linshiData.id}" onclick="clickGoods(this,${linshiData.id})" type="button" class="layui-btn layui-btn-danger"  title="点我删除" ><i class="layui-icon layui-icon-delete"></i>删除</button>
+                        </div>
+                </div>
+                `;
+            }
+            if(html){
+                layer.msg('生成预览商品列表ok',{icon: 6})
+                $(".yulanClickGoods").html(html)
+            }else{
+                $(".yulanClickGoods").html('')
+            }
+        }
+    }
+
+    // 删除列表中的商品
+    function clickGoods(self,id){
+        if(!id || !self) return layer.msg('错误值，刷新重试',{icon:5})
+        $("#goodsId_"+id).prop('checked',false)
+        setTimeout(function(){
+            $(self).parents('.yulanClickGoodsItem').remove()
+            layui.form.render('checkbox')
+            layer.msg('删除成功',{icon:6})
+        },100)
+    }
+
+    // 删除列表中的用户
+    function clickUsersdel(self,id){
+        if(!id || !self) return layer.msg('错误值，刷新重试',{icon:5})
+        $("#userId_"+id).prop('checked',false)
+        setTimeout(function(){
+            $(self).parents('.yuLanUSERViewCLICKItem').remove()
+            layui.form.render('checkbox')
+            layer.msg('删除成功',{icon:6})
+        },100)
+    }
+
+    // 当前选中的用户数据
+    window.CLICKUSERDATA = {}
+
+    // 选中用户列表渲染
+    function viewUsersIdsList(uids = null,bool = false){
+        var min = $("#min_day").val()
+        if(!min || min < 0 ) min = 1;
+        var max = $("#max_day").val()
+        if(!max || max > 999) max = 999;
+        //if(!window.GOODS_DATA_LIST) return   layui.msg('麻烦先搜下商品',{icon:5});
+        var layui = layer
+        if(!uids || uids.length == 0) {
+            var udiDoms = $("input[name=uids]")
+            if (udiDoms.length == 0) return layui.msg('必须选择用户');
+            for (var i = 0; i < udiDoms.length; i++) if ($(udiDoms[i]).prop('checked')) uids.push($(udiDoms[i]).val())
+        }
+        if(uids.length ==0) return layui.msg('必须选择用户')
+        var youhuaBool = uids && uids.length >= 500;
+        var dateLinshi = {}
+        if(uids && uids.length >0){
+            // 是否为间隔日期
+            var jiangeBool = $("input[name='comment_status']:checked").val() == 1;
+            if(jiangeBool){
+                // 获取到开始评论时间
+                var start_time_str =  $("#comment_start_time").val()
+                var start_time_date = new Date(start_time_str);
+                var start_time_num = start_time_date.getTime();
+                // 获取到间隔时间
+                var start_jian_num = $("input[name='comment_num_min']").val();
+                if(!start_jian_num) start_jian_num = 2;
+                if(start_jian_num < 0) start_jian_num = 0;
+                var end_jian_num = $("input[name='comment_num_max']").val();
+                if(!end_jian_num) end_jian_num = 4;
+                if(end_jian_num > 60) end_jian_num = 60;
+                if(start_jian_num > end_jian_num){
+                    var linshi = start_jian_num;
+                    start_jian_num = end_jian_num;
+                    end_jian_num = linshi;
+                }
+                // 保存 当前的时间戳日期
+                var timenums = [start_time_num];
+            }
+
+
+
+            var html = ``;
+            for(var i = 0;i < uids.length;i++){
+                var time = null;
+                if(jiangeBool){
+                    if(i == 0 && uids.length > 1){
+                        time = timenums[0]
+                    }else{
+                        var day = randomNum(start_jian_num - 0,end_jian_num - 0)
+                        time = timenums[timenums.length - 1] - day * 24 * 3600 * 1000 - 3600 * 1000;
+                        timenums.push(time);
+                    }
+                }
+                var id = uids[i]
+                if(!window.USERLISTOBJ || !window.USERLISTOBJ[id]) continue;
+                var linshiData = window.USERLISTOBJ[id]
+                //var min = Math.round(Math.random() * 20)
+                var datestr = time && time > 0 ? new Date(time).toLocaleDateString() : getDateYmdStr(getRandomDateBetween(min,max).toLocaleDateString())
+                // var datestr = getDateYmdStr(getRandomDateBetween(min,max).toLocaleDateString())
+                // if(dateLinshi[datestr]) datestr =  getDateYmdStr(getRandomDateBetween(10+min,160).toLocaleDateString())
+                html += `
+                <div data-id="${id}" class="yuLanUSERViewCLICKItem yulanuserviewclickitemid_${id}" title="昵称：${linshiData.nickname}-序号：${linshiData.id}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                        <div title="昵称：${linshiData.nickname}-序号：${linshiData.id}" onclick="openUrl('${linshiData.avatarurl}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                昵称：<span style="color:#1E9FFF;">${linshiData.nickname}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                            </span>
+                            <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="${linshiData.avatarurl}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.nickname}')" title="点我复制昵称" ><i class="layui-icon layui-icon-snowflake"></i>昵称</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.id}')" title="点我复制序号" ><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                            <button data-id="${linshiData.id}" onclick="clickUsersdel(this,${linshiData.id})" type="button" class="layui-btn layui-btn-danger"  title="点我删除" ><i class="layui-icon layui-icon-delete"></i>删除</button>
+                        </div>
+                        <hr>
+                        <div>
+                            <textarea name="desc" placeholder="请输入评论" class="yuLanUSERViewCLICKItem-pinglun layui-textarea"></textarea>
+                            <!-- <input class="yuLanUSERViewCLICKItem-pinglun layui-input" type="text" value="" placeholder="请输入评论" /> -->
+                        </div>
+                        <hr>
+                        <div style="display: flex">
+                              <input style="width: 150px" type="text" class="layui-input yuLanUSERViewCLICKItem-datestr" id="yulanuserviewclickitemdate_id_${id}" value="${datestr}" placeholder="${datestr}"/>
+                              <!--<button type="button" class="layui-btn layui-btn-normal" onclick="dateStrRandom(${id},'${linshiData.nickname}')" title="点我随机" ><i class="layui-icon layui-icon-snowflake"></i>随机</button>-->
+                              <button type="button" class="layui-btn layui-btn-normal" onclick="dateStrRandom(${id},'${linshiData.nickname}')" title="点我随机" ><i class="layui-icon layui-icon-snowflake"></i>随机</button>
+                        </div>
+                        <hr>
+                        <div style="display: flex;align-items: center;">
+                            <span>匿名：</span>
+                            <input lay-ignore type="radio" title="点我匿名" style="display:block;width:20px;height: 16px;cursor: pointer;" name="yuLanUSERViewCLICKItem-niming_${id}" class="yuLanUSERViewCLICKItem-niming" value="1" title="是">是
+                            &nbsp;&nbsp;
+                            <input lay-ignore type="radio" title="取消匿名" style="display: block;width:20px;height: 16px;cursor: pointer;" name="yuLanUSERViewCLICKItem-niming_${id}" class="yuLanUSERViewCLICKItem-niming" value="0" title="否" checked>否
+                            &nbsp;|&nbsp;评分：<input style="width: 50px;" type="number" class="yuLanUSERViewCLICKItem-pingfen layui-input" title="评分" value="5" placeholder="请输入评分" />
+                        </div>
+                </div>
+                `;
+                /*
+                let sId = id;
+                setTimeout(()=>{
+                    viewUsersDates(sId)
+                },Math.round(100 + Math.random() * 100 + Math.random() * 100 + (youhuaBool ? 3500 +Math.random() * 5000 : 0)))
+                */
+            }
+            if(html){
+                layer.msg('生成预览用户列表ok',{icon: 6})
+                bool ? $(".yuLanUSERViewCLICK").append(html) : $(".yuLanUSERViewCLICK").html(html)
+            }else{
+                $(".yuLanUSERViewCLICK").html('')
+            }
+        }
+    }
+
+        // 随机日期
+        function dateStrRandom(id,title){
+            var min = $("#min_day").val()
+            if(!min || min < 0 ) min = 1;
+            var max = $("#max_day").val()
+            if(!max || max > 999) max = 999;
+            var datestr = getDateYmdStr(getRandomDateBetween(min,max).toLocaleDateString())
+            layer.msg('用户昵称:'+title + '，切换日期为：' + datestr,{icon: 6})
+            $('#yulanuserviewclickitemdate_id_'+id).attr('value',datestr).attr('placeholder',datestr).val(datestr)
+            // layui.laydate.render({
+            //     elem:'#yulanuserviewclickitemdate_id_'+id
+            // })
+        }
+
+        // 渲染时间
+        function viewUsersDates(id){
+            layui.laydate.render({
+                elem:'#yulanuserviewclickitemdate_id_'+id
+            })
+        }
+
+        // 随机日期 开始评论 日期
+        function commentStartDates(){
+            var min = $("#min_day").val()
+            if(!min || min < 0 ) min = 1;
+            var max = $("#max_day").val()
+            if(!max || max > 999) max = 999;
+            var datestr = getDateYmdStr(getRandomDateBetween(min,max).toLocaleDateString())
+            layer.msg('开始评论日期，切换日期为：' + datestr,{icon: 6})
+            $('#comment_start_time').attr('value',datestr).attr('placeholder',datestr).val(datestr)
+        }
+</script>
+
+<script>
+    // 跳转地址
+    function openUrl(url){
+        if(url && url.indexOf('http') >= 0)
+            window.open(url,'_tagert');
+        else
+            layer.msg('链接为空，跳转失败',{icon: 5})
+    }
+</script>
+
+<script>
+    // 初始化商品数据
+    function initGoods(){
+        var obj = localStorage.getItem('comment_add_pl_caogaoList_text')
+        if(obj) obj = JSON.parse(obj);
+        if(obj && (obj.bid|| obj.cid)){
+            if(obj.bid){
+                $("select[name=bid]").find("option[value="+obj.bid+"]").prop("selected",true);
+            }
+            if(obj.cid){
+                $("select[name=cid]").find("option[value="+obj.cid+"]").prop("selected",true);
+            }
+            layui.form.render('select')
+            getGoodsList(obj)
+            if(window.JISHIQI_comment_add_pl_caogaoList_text){
+                window.clearInterval(JISHIQI_comment_add_pl_caogaoList_text)
+            }
+            // 监听数据 开始
+            setInterval(function(){
+                jianTingListForm()
+            },500)
+        }else{
+            // 监听数据 开始
+            if(window.JISHIQI_comment_add_pl_caogaoList_text){
+                window.clearInterval(JISHIQI_comment_add_pl_caogaoList_text)
+            }
+            window.JISHIQI_comment_add_pl_caogaoList_text = setInterval(function(){
+                jianTingListForm()
+            },500)
+        }
+    }
+
+    // 监听存储数据开始
+    function jianTingListForm(){
+        var obj = {
+            // 分类
+            cid: $("#goods_cid").select().val(),
+            // 品牌
+            bid: $("#goods_bid").select().val()
+        }
+        if(!obj.bid && !obj.cid) return console.log('返回了')
+        localStorage.setItem('comment_add_pl_caogaoList_text',JSON.stringify(obj))
+    }
+</script>
+
+{include file='common/scroll' /}
+{include file='common/footer' /}

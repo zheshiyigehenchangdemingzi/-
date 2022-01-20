@@ -1,0 +1,98 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="wechat">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第一天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="1" required="" autocomplete="off" class="layui-input" value="{$config.1|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第二天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="2" required="" autocomplete="off" class="layui-input" value="{$config.2|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第三天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="3" required="" autocomplete="off" class="layui-input" value="{$config.3|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第四天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="4" required="" autocomplete="off" class="layui-input" value="{$config.4|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第五天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="5" required="" autocomplete="off" class="layui-input" value="{$config.5|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第六天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="6" required="" autocomplete="off" class="layui-input" value="{$config.6|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            第七天打卡奖励额度
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="7" required="" autocomplete="off" class="layui-input" value="{$config.7|default=''}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Sign/sing_in_reward_edit')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

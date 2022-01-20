@@ -1,0 +1,82 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$data.id}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    购物券退还金额
+                </label>
+                <div class="layui-input-block">
+                    <input type="number" readonly="" autocomplete="off" class="layui-input" disabled value="{$data.volume}">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    申请退款金额
+                </label>
+                <div class="layui-input-block">
+                    <input type="text" readonly="" autocomplete="off" class="layui-input" disabled value="{$data.price}">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    退款金额
+                </label>
+                <div class="layui-input-block">
+                    <input type="text" name="refund" required="" autocomplete="off" class="layui-input" value="">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    说明
+                </label>
+                <div class="layui-input-block">
+                    <p>1.此处填写的退款金额会直接返回到用户余额中</p>
+                    <hr>
+                    <p>2.用户购物券抵扣的金额也会原有金额返回</p>
+                    <hr>
+                    <p>3.如果是店铺订单，则店铺退回成交金额</p>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('Services/refund')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+    });
+</script>
+{include file='common/footer' /}

@@ -1,0 +1,69 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$data.id|default=''}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    物流公司
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="company" required="" autocomplete="off" class="layui-input" value="{$data.company|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    名称唯一，不能重复
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    排序
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="sort" required="" autocomplete="off" class="layui-input" value="{$data.sort|default=''}">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    值越高，排名越前
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+        </form>
+    </div>
+</div>
+<script>layui.use(['form', 'layer','jquery'],
+    function() {
+        $ = layui.jquery;
+        var form = layui.form,
+            layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('Setting/express_edit')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+
+    });
+</script>
+{include file='common/footer' /}

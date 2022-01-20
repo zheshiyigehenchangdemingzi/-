@@ -1,0 +1,126 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="business">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            导师微信号
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="teacher" required="" autocomplete="off" class="layui-input" value="{$config.teacher|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            支付超时
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="overtime" required="" autocomplete="off" class="layui-input" value="{$config.overtime|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            未支付订单超时时间，单位分
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            自动收货
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="receipt" required="" autocomplete="off" class="layui-input" value="{$config.receipt|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            自动确认收货时间，单位天
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            售后时间
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="service" required="" autocomplete="off" class="layui-input" value="{$config.service|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            确认收货后，可以申请售后时间，单位天
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            支付方式
+                        </label>
+                        <div class="layui-col-md9">
+                            {volist name="pay" id="v"}
+                            <input type="checkbox" name="pay[]" title="{$v.name}" value="{$key}" {if condition="$v['checked'] eq 1"}checked{/if}>
+                            {/volist}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            发货方式
+                        </label>
+                        <div class="layui-col-md6">
+                            <div class="layui-col-md9">
+                                {volist name="express" id="v"}
+                                <input type="checkbox" name="express[]" title="{$v.name}" value="{$key}" {if condition="$v['checked'] eq 1"}checked{/if}>
+                                {/volist}
+                            </div>
+                        </div>
+                    </div>
+<!--                    自购-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            自-购
+                        </label>
+                        <div class="layui-col-md3">
+                            {if !isset($config['purchase_volume'])}
+                            <input type="radio" name="purchase_volume" value="1" title="开启" checked>
+                            <input type="radio" name="purchase_volume" value="0" title="关闭">
+                            {else /}
+                            <input type="radio" name="purchase_volume" value="1" title="开启" {if $config['purchase_volume'] == 1}checked{/if}>
+                            <input type="radio" name="purchase_volume" value="0" title="关闭" {if $config['purchase_volume'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            如果开启则表示 使用了购物券后 也可以使用 自购省。 关闭则使用了购物券后，不可以使用自购省
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Setting/business')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

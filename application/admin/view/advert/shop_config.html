@@ -1,0 +1,71 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <fieldset class="layui-elem-field layui-field-title">
+                    <legend>首页商城 - 爆款，福利，新品配置</legend>
+                </fieldset>
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="shopConfig">
+                    {volist name="viewData" id="v"}
+                    <!--                    {$v.title}-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            {$v.title}数量
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="{$v.key}_num" required="" autocomplete="off" class="layui-input" value="{$config[$v['key'].'_num']|default=$v.default_num}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            商城首页显示{$v.title}数量
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            {$v.title}文字提示
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="{$v.key}_title" required="" autocomplete="off" class="layui-input" value="{$config[$v['key'].'_title']|default=$v.default_title}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            商城首页显示{$v.title}的文字提示
+                        </div>
+                    </div>
+                    <hr>
+                    {/volist}
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"/admin/advert/shopConfig",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

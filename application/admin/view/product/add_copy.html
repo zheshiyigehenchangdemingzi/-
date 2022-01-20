@@ -1,0 +1,2052 @@
+{include file='common/head' /}
+<!--多图上传样式-->
+<link rel="stylesheet" href="__UPLOAD__/control/css/zyUpload.css" type="text/css">
+<!-- 引用控制层插件样式 -->
+<link rel="stylesheet" href="__UPLOAD__/control/css/zyUpload.css" type="text/css">
+　　<script src="__LAYUI__/jq.js"></script>
+<!-- 　　<script src="__LAYUI__/jq.js"></script> -->
+<!-- 引用核心层插件 -->
+<script type="text/javascript" src="__UPLOAD__/core/zyFile.js"></script>
+<script type="text/javascript" src="__UPLOAD__/dan/upload.js"></script>
+<!-- 引用控制层插件 -->
+<script type="text/javascript" src="__UPLOAD__/control/js/zyUpload.js"></script>
+<!-- 引用初始化JS -->
+<!--<script type="text/javascript" src="demo.js"></script>-->
+<script type="text/javascript" src="__UPLOAD__/control/js/jqueryrotate.js"></script>
+<script type="text/javascript" src="__UPLOAD__/index.js"></script>
+
+
+
+<!--百度编辑器-->
+<script type="text/javascript" charset="utf-8" src="__UEDITOR__/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="__UEDITOR__/ueditor.all.min.js"> </script>
+<!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+<!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+<script type="text/javascript" charset="utf-8" src="__UEDITOR__/lang/zh-cn/zh-cn.js"></script>
+　　<script src="__LAYUI__/axios.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+
+<!--样式美化-->
+<style>
+
+    /*规格组-规格值组*/
+    .attrGuiGeListValues {
+        padding-bottom:12px;
+    }
+
+    #drop_area_share   img {
+        width:80px;
+    }
+
+
+    .upload_oper_box {
+        position: relative;
+        top: -40px;
+    }
+
+    .upload_oper_box span {
+        z-index: 20;
+        background: #a0dbf7;
+        padding: 2px 6px;
+        border-radius: 5px;
+        color: #101010;
+    }
+
+
+    #demo {
+        height:auto!important;
+    }
+
+    .layui-table img {
+        max-width: 150px;
+        border: 1px solid #999;
+        padding: 3px;
+        border-radius: 4px;
+    }
+</style>
+<script>
+    var uploadWith;
+    var uploadWithArrs = [];
+    layui.use('upload', function() {
+        var $ = layui.jquery;
+                uploadWith = layui.upload;
+        setTimeout(function(){
+            reloadImgs(0);
+            reloadImgsPl();
+        },2500)
+    })
+
+    /**
+     * 渲染上传图片
+     */
+    function reloadImgs(index){
+        //普通图片上传
+        uploadWithArrs[index] = uploadWith.render({
+            elem: '#uploadsImgs' + index,
+            data:{prefix:'product/goods/attrImg'}
+            , url: '/admin/uploads/cosFiles' //改成您自己的上传接口
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#uploadsImgs'+index).parent().find('img').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                layer.msg('商品规格：'+(index+1)+"，上传图片ok-"+res.msg || 'ok' ,{icon: res.code == 200 ? 6 : 6})
+                //上传成功
+                if(res.code == 200){
+                    //$('#uploadsImgs'+index).parent().find('img').attr('src', '/newUploads/'+res.data.url)
+                    //$('#uploadsImgs'+index).parent().find('input:last-child').val('/newUploads/' + res.data.url)
+                    $('#uploadsImgs'+index).parent().find('img').attr('src', res.data.url)
+                    $('#uploadsImgs'+index).parent().find('input:last-child').val(res.data.url)
+                }
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    }
+
+    // 渲染批量上传图片
+    /**
+     * 渲染上传图片
+     */
+     function reloadImgsPl(){
+        //普通图片上传
+        var s = uploadWith.render({
+            elem: '#uploadsImgs_pl',
+            data:{prefix:'product/goods/attrImg'}
+            , url: '/admin/uploads/cosFiles' //改成您自己的上传接口
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#uploadsImgs_pl').parent().find('img').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                layer.msg("商品属性批量：上传图片ok-"+res.msg || 'ok' ,{icon: res.code == 200 ? 6 : 6})
+                //上传成功
+                if(res.code == 200){
+                    // $('#uploadsImgs_pl').parent().find('img').attr('src', '/newUploads/'+res.data.url)
+                    // $('#uploadsImgs_pl').parent().find('input:last-child').val('/newUploads/' + res.data.url)
+
+                    $('#uploadsImgs_pl').parent().find('img').attr('src', res.data.url)
+                    $('#uploadsImgs_pl').parent().find('input:last-child').val(res.data.url)
+                }
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    }
+
+</script>
+
+
+<!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+
+
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="cover" id="cover" value="">
+
+                    <!-- 检测是否可用 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            检测是否可用
+                        </label>
+                        <div class="layui-col-md3">
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="checkAjax()">检测可用</button>
+                        </div>
+                        <div class="layui-col-md6">
+                            <span style="color:red;">
+                            一定要填写数据之前进行检测是否可用，
+                            ，否则数据丢失添加不了
+                            </span>
+                        </div>
+                    </div>
+                    <script>
+                        function checkAjax(){
+                            var data = {}
+                            $.ajax({
+                                url:"{:url('Product/add')}",
+                                type: "post",
+                                data:data,
+                                dataType:"json",
+                                cache: false,                      // 不缓存
+                                processData: false,                // jQuery不要去处理发送的数据
+                                contentType: false,                // jQuery不要去设置Content-Type请求头
+                                success:function (res) {
+                                    if(res.code == 200){
+                                        layer.alert(res.msg, {icon: 1},function () {
+                                            //关闭当前frame
+                                            xadmin.close();
+                                            localStorage.clear('product_add');
+                                            // 可以对父窗口进行刷新
+                                            xadmin.father_reload();
+                                        });
+                                    }else{
+                                        layer.alert('可以正常使用',{icon:6})
+                                        // layer.alert(res.msg, {icon: 5});
+                                    }
+                                },
+                                error:function(e){
+                                    layer.alert("网络错误，务必关闭此页面重新打开，否则数据丢失。可以按下刷新", {icon: 5});
+                                },
+                            });
+                        }
+                    </script>
+
+                    <!-- 商品类型 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品类型
+                        </label>
+                        <div class="layui-col-md6">
+                            <select name="cid" lay-verify="" lay-search>
+                                <option selected value="">请选择-可输入搜索值</option>
+                                {volist name="type" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!--上传-->
+                    <!--<div class="layui-form-item">-->
+                        <!--<label class="layui-form-label">-->
+                            <!--上传-->
+                        <!--</label>-->
+                        <!--<div class="layui-col-md6">-->
+                            <!--<div class="layui-upload">-->
+                                <!--<button type="button" class="layui-btn" id="uploadsImgs0">上传图片</button>-->
+                                <!--<div class="layui-upload-list">-->
+                                    <!--<img class="layui-upload-img" class="demoImg">-->
+                                    <!--<p id="demoText"></p>-->
+                                    <!--<input type="text" name="img[]" value="">-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品品牌
+                        </label>
+                        <div class="layui-col-md6">
+                            <select name="bid" lay-verify="" lay-search>
+                                <option selected value="">请选择-可输入搜索值</option>
+                                {volist name="brand" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品名称
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="name" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享标题
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="title" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享图
+                        </label>
+                        <!--<div class="layui-input-block layui-upload">-->
+                            <!--<button type="button" class="layui-btn layui-btn-normal file" id="test1" onclick="$('')"><i class="layui-icon"></i>上传图片</button>-->
+                            <!--<input class="layui-upload-file" type="file" accept="undefined" name="file" id="test1s">-->
+                            <!--<span class="layui-inline layui-upload-choose">支持 png、jpg、jpeg 格式文件</span>-->
+                            <!--<img style="width:70px" id="img" src="" alt="">-->
+                        <!--</div>-->
+                        <div class="layui-col-md6">
+                            <input type="hidden" name="share" />
+                            <div id="drop_area_share" style="width: 100px; height: auto; border: 1px solid rgb(204, 204, 204); padding: 10px; cursor: pointer;">
+                                <p>点我上传分享图片</p>
+                            </div>
+                            <script type="text/javascript">
+                                var dragImgUpload = new DragImgUpload("#drop_area_share",{
+                                    callback:function (files) {
+                                        //回调函数，可以传递给后台等等
+                                        var file = files[0];
+                                        var form = new FormData();
+                                        form.append('image',file)
+                                        form.append('prefix','product/goods/share')
+                                        axios.post('/admin/Uploads/cosFiles', form).then(function (response) {
+                                            if(response && response.data && response.data.code == 200){
+                                                //var s = '/' + response.data.data.fileName+'/'+response.data.data.url
+                                                //$("input[name='share']").val(s.replace(/\\/g,'/'))
+                                                $("input[name='share']").val(response.data.data.url)
+                                                $("#drop_area_share > p").hide(300)
+                                            }
+                                            layer.msg('成功',{icon: response.data.code == 200 ?  6 : 5})
+                                        }).catch(function (error) {
+                                            layer.msg('错误，尝试',{icon:5})
+                                        });
+                                    }
+                                })
+                            </script>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品货号
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="spu" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <!-- 货源连接 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            货源链接
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="supply_url" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <!-- <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品轮播图
+                        </label>
+                        <div class="layui-col-md9">
+                            <div id="demo" class="demo" style="width: 650px; height: 400px;"> </div>
+                        </div>
+                    </div> -->
+
+                    <!-- 轮播图 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            轮播图
+                        </label>
+                        <div class="layui-col-md9">
+                            <div id="bannerListImgs">
+                                <div>
+                                    <input name="bannerDataImgs" type="hidden" value=""/>
+                                    <!-- 添加 -->
+                                    <button title="添加新的轮播图-推荐" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                                        <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" id="bannerImgs_data_push" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                                        <i class="layui-icon layui-icon-praise"></i>
+                                        添加上传
+                                    </button>
+                                    <!-- 替换 -->
+                                    <button title="替换会删除原有的轮播图-不推荐" style="position: relative;" type="button" class="layui-btn layui-btn-warm">
+                                        <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" id="bannerImgs_data" type="file" size="30" name="bannerImgs_data[]" value="替换图片" multiple=true/>
+                                        <i class="layui-icon layui-icon-upload-circle"></i>
+                                        替换上传
+                                    </button>
+                                    <!-- 批量删除 -->
+                                    <button title="直接清空当前轮播图" type="button" onclick='bannerDelAll()' class="layui-btn layui-btn-danger"><i class="layui-icon layui-icon-delete"></i>清空</button>
+                                    <table class="layui-table">
+                                        <thead>
+                                            <th>图片</th>
+                                            <th>操作</th>
+                                        </thead>
+                                        <tbody id="bannerListImgs-tbody">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 产品模板 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            产品模板
+                        </label>
+                        <div class="layui-col-md9">
+                            <div class="layui-col-row">
+                                <div style="margin-right: 20px;" class="layui-col-md2">
+                                    <select name="" id="selectProduct" lay-verify="" lay-search>
+                                        <option value="" selected>选择模板-可输入</option>
+                                        {volist name="productList" id="vp"}
+                                        <option value="{$vp.id}" >{$vp.value}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <div class="layui-col-md3">
+                                    <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='productsEdits(true)'><i class="layui-icon layui-icon-addition"></i>&nbsp;添加产品组</button>
+                                    <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick='productsEdits(false)'><i class="layui-icon layui-icon-edit"></i>&nbsp;替换产品</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        function productsEdits(bool = true){
+                            var id = $("#selectProduct").val()
+                            if(!id || id - 0 < 1) return layer.msg('请选择产品模板',{icon:5})
+                            $.ajax({
+                                url: '/admin/product/productGet',
+                                type: 'get',
+                                data: {id},
+                                dataType:"json",
+                                success:function(res){
+                                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
+                                    if(res && res.data && res.data.length > 0){
+                                        var html = ``;
+                                        //$(".productsNamesListBox").append(html)
+                                        for(var i = 0; i < res.data.length;i++){
+                                            if(res.data[i].value){
+                                                html += `
+                                                <div class="productsNamesListBoxItem">
+                                                <!--输入产品名称-->
+                                                <input class="layui-input-inline layui-input" name="productsNames[]" value="${res.data[i].value}" placeholder="输入产品名称">
+                                                <!--输入产品值-->
+                                                <input class="layui-input-inline layui-input" name="productsVlas[]" value="" placeholder="输入产品值">
+                                                <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="$(this).parents(&quot;.productsNamesListBoxItem&quot;).remove()"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                                                <hr>
+                                                </div>
+                                                `;
+                                            }
+                                        }
+                                        if(html){
+                                            !bool ? $(".productsNamesListBox").html(html) : $(".productsNamesListBox").append(html)
+                                        }
+                                    }
+                                },
+                                error:function(data){
+                                    layer.msg('生成失败，麻烦重试')
+                                }
+                            })
+                        }
+                    </script>
+
+                    <!--添加产品参数-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            产品参数
+                        </label>
+                        <div class="layui-col-md9">
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='productsNamesAdd()'><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加产品名称</button>
+                        </div>
+                    </div>
+                    <!--产品组-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            产品-组：
+                        </label>
+                        <div class="layui-col-md9">
+                            <!--产品盒子-->
+                            <div class="productsNamesListBox">
+                                <div class="productsNamesListBoxItem">
+                                    <!--输入产品名称-->
+                                    <input class="layui-input-inline layui-input" name="productsNames[]" value="" placeholder="输入产品名称"/>
+                                    <!--输入产品值-->
+                                    <input class="layui-input-inline layui-input" name="productsVlas[]" value="" placeholder="输入产品值"/>
+                                    <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick='$(this).parents(".productsNamesListBoxItem").remove()'><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                                    <hr>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--添加规格名称-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            新增规格名
+                        </label>
+                        <div class="layui-col-md9">
+                            <!--输入规格名-->
+                            <input class="layui-input-inline layui-input" name="attrGuiGeName[]" value="" placeholder="输入规格名"/>
+                            <!--添加规格名规格值-->
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='attr_guigenameAdd(this)'><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加规格名</button>
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='attr_guigeCreate()'><i class="layui-icon layui-icon-ok"></i>&nbsp;立即生成</button>
+                        </div>
+                    </div>
+
+                    <!--规格组-->
+                    <div id="attrGuiGeList">
+                        <!--规格组1-->
+                        <!--<div class="layui-form-item attrGuiGeListBox">-->
+                            <!--<label class="layui-form-label">-->
+                                <!--<span class="attrGuiGeListBox-name" style="color:#01AAED;">颜色</span>：-->
+                            <!--</label>-->
+                            <!--<div class="layui-col-md9">-->
+                                <!--&lt;!&ndash;规格值组&ndash;&gt;-->
+                                <!--<div class="attrGuiGeListValues">-->
+                                    <!--&lt;!&ndash;输入规格名_规格值&ndash;&gt;-->
+                                    <!--<input data-fname="颜色" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="" placeholder="输入规格值"/>-->
+                                    <!--&lt;!&ndash;添加规格名_规格值&ndash;&gt;-->
+                                    <!--&lt;!&ndash;删除规格名&ndash;&gt;-->
+                                    <!--<button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick="attrGuiGeValueAdd(this)"><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加规格值</button>-->
+                                    <!--<button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" ><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+
+                    <!--规格模板,先不搞，后期加-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            规格模板
+                        </label>
+                        <div class="layui-col-md9">
+                            <div>
+                                <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='$("#treeAttrDataBoxList").show(300)'><i class="layui-icon layui-icon-ok"></i>&nbsp;显示模板</button>
+                                <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick='$("#treeAttrDataBoxList").hide(300)'><i class="layui-icon layui-icon-close"></i>&nbsp;隐藏模板</button>
+                            </div>
+                            <hr>
+                            <div id="treeAttrDataBoxList">
+                                <!--树插件-->
+                                <div id="treeAttrData" class="demo-tree"></div>
+                                <hr>
+                                <!--确定 进行渲染中....-->
+                                <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick='attr_click()'><i class="layui-icon layui-icon-praise"></i>&nbsp;去重合并</button>
+                                <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick='attr_click(true)'><i class="layui-icon layui-icon-tread"></i>&nbsp;替换</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--批量操作商品属性-->
+                    <div class="layui-form-item" style="margin-top: 30px;">
+                        <label class="layui-form-label">
+                            批量商品属性
+                        </label>
+                        <div class="layui-col-md9">
+                            <table class="layui-table layui-form" id="tableAttrPinLiang">
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;">批量-成本价</th>
+                                    <th style="text-align: center;">批量-商品价</th>
+                                    <th style="text-align: center;">批量-划线价</th>
+                                    <th style="text-align: center;">批量-直播价</th>
+                                    <th style="text-align: center;">批量-库存</th>
+                                    <th style="text-align: center;">批量-积分</th>
+                                    <th style="text-align: center">批量-图片</th>
+                                    <th style="min-width:150px;text-align: center;">批量-操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><input type="number" name="cost_price_pl" class="layui-input"></td>
+                                    <td><input type="number" name="price_pl" class="layui-input"></td>
+                                    <td><input type="number" name="discount_price_pl" class="layui-input"></td>
+                                    <td><input type="number" name="live_price_pl" class="layui-input"></td>
+                                    <td><input type="number" name="stock_pl" class="layui-input"></td>
+                                    <td><input type="number" name="integral_pl" class="layui-input"></td>
+                                    <td>
+                                        <div class="layui-upload">
+                                            <button type="button" class="layui-btn layui-btn-normal" id="uploadsImgs_pl"><i class="layui-icon layui-icon-add-1"></i>上传图片</button>
+                                            <div class="layui-upload-list">
+                                                <img class="layui-upload-img" class="demoImg">
+                                                <p id="demoText_pl"></p>
+                                                <input type="hidden" name="img_pl" value="">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button onclick="pinliangAttrGoods(this,false)" type="button" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-praise"></i>填充</button>
+                                        <button onclick="pinliangAttrGoods(this,true)" type="button" class="layui-btn layui-btn-danger"><i class="layui-icon layui-icon-face-smile"></i>替换</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <!--商品属性-->
+                    <div class="layui-form-item" style="margin-top: 30px;">
+                        <label class="layui-form-label">
+                            商品属性
+                        </label>
+                        <div class="layui-col-md9">
+                            <table class="layui-table layui-form" id="tableAttr">
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;">成本价</th>
+                                    <th style="text-align: center;">商品价</th>
+                                    <th style="text-align: center;">划线价</th>
+                                    <th style="text-align: center;">直播价</th>
+                                    <th style="text-align: center;">库存</th>
+                                    <th style="text-align: center;">积分</th>
+                                    <th style="text-align: center">图片</th>
+                                    <th style="text-align: center;">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><input type="number" name="cost_price[]" class="layui-input"></td>
+                                    <td><input type="number" name="price[]" class="layui-input"></td>
+                                    <td><input type="number" name="discount_price[]" class="layui-input"></td>
+                                    <td><input type="number" name="live_price[]" class="layui-input"></td>
+                                    <td><input type="number" name="stock[]" class="layui-input"></td>
+                                    <td><input type="number" name="integral[]" class="layui-input"></td>
+                                    <td>
+                                        <div class="layui-upload">
+                                            <button type="button" class="layui-btn" id="uploadsImgs0">上传图片</button>
+                                            <div class="layui-upload-list">
+                                                <img class="layui-upload-img" class="demoImg">
+                                                <p id="demoText"></p>
+                                                <input type="hidden" name="img[]" value="">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <a href="javascript:;" onclick="attr_add(this)"><i class="iconfont">&#xe6b9;</i>添加</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 提示信息 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            提示
+                        </label>
+                        <div class="layui-col-md6">
+                            <p>1.成本价用于财务计算</p>
+                            <p>2.基础价格，下单和自购省的价格计算</p>
+                            <p>3.划线价，用于展示页面</p>
+                            <p>4.直播价，直播时用户购买价格</p>
+                            <p>5.成本价，商品价，划线价，直播价，库存，积分必须填写</p>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            运费
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="freight" autocomplete="off" value="0" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            免运费写0
+                        </div>
+                    </div>
+                    <!--默认成本价-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            默认成本价
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="default_cost_price" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <!--默认划线价-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            默认划线价
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="default_price" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <!--默认商品价-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            默认商品价
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="default_discount_price" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <!--商品销量-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品销量
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="sales_volume" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            排序
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="sort" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            值越大，越靠前，最大值99999，不填默认0
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            精选商品
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_hot" value="1" title="可用">
+                            <input type="radio" name="is_hot" value="0" title="不可用" checked>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            购物券
+                        </label>
+                        <div class="layui-col-md6 is_use">
+                            <input type="radio" name="is_use" value="1" title="可用">
+                            <input type="radio" name="is_use" value="0" title="不可用" checked>
+                        </div>
+                    </div>
+                    <div class="layui-form-item" id="ticket">
+
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品状态
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="status" value="1" title="上架" checked>
+                            <input type="radio" name="status" value="2" title="下架">
+                            <input type="radio" name="status" value="3" title="缺货">
+                            <input type="radio" name="status" value="4" title="预售">
+                            <input type="radio" name="status" value="5" title="禁售">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品分销
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_sale" value="1" title="开启" checked>
+                            <input type="radio" name="is_sale" value="0" title="关闭">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            减库存方式
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_stock" value="1" title="拍下减库存" checked>
+                            <input type="radio" name="is_stock" value="2" title="付款减库存">
+                            <input type="radio" name="is_stock" value="3" title="永不减库存">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            禁止退货
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_refund" value="1" title="是">
+                            <input type="radio" name="is_refund" value="0" title="否" checked>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            选择是，不允许该商品订单退货退款
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            累计消费
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="radio" name="is_team" value="1" title="纳入" checked>
+                            <input type="radio" name="is_team" value="0" title="不纳入" >
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            选择不纳入，购买商品后不会统计到个人消费和团队消费
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商品详情
+                        </label>
+                        <div class="layui-input-block">
+                            <script id="editor" type="text/plain" style="width:1024px;height:500px;"></script>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+                        <button class="layui-btn layui-btn-normal" onclick="getCaoKaoList(true)" type="button"  >存为草稿</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // 添加产品组
+            function productsNamesAdd(val = ''){
+                var html = `
+                <div class="productsNamesListBoxItem">
+                            <!--输入产品名称-->
+                        <input class="layui-input-inline layui-input" name="productsNames[]" value="${val}" placeholder="输入产品名称">
+                            <!--输入产品值-->
+                        <input class="layui-input-inline layui-input"  name="productsVlas[]" value=""  placeholder="输入产品值">
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick='$(this).parents(".productsNamesListBoxItem").remove()'><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                    <hr>
+                </div>
+                `;
+                $(".productsNamesListBox").append(html)
+            }
+
+            // 拿取产品值，并且去重
+            function getProductsNamesListInput(){
+                var obj = {}
+                var bool = true;
+                var list = $(".productsNamesListBoxItem")
+                for(var i = 0; i <list.length;i++){
+                    var inputs =  $(list[i]).find("input")
+                    var key = $(inputs[0]).val() || ''
+                    var val = $(inputs[1]).val() || ''
+                    if(!key || key.trim() == '' || key.trim().length < 2 ){
+                        layer.msg('产品组-第'+(i+1)+'组，名称不得为空或者不得小于两个字符',{icon:5})
+                        return false
+                    }
+                    if(!val || val.trim() == '' || key.trim().length < 2 ){
+                        layer.msg('产品组-第'+(i+1)+'组，值不得为空或者不得小于两个字符',{icon:5})
+                        return false
+                    }
+                    if(obj[key.trim()]){
+                        layer.msg('产品组-第'+(i+1)+'组，值重复了或者麻烦更换一个值',{icon:5})
+                        return false
+                    }
+                    obj[key.trim()] = val.trim()
+                    bool = false;
+                }
+                if(bool){
+                    layer.msg('产品组必须填写，不得为空',{icon:5})
+                    return false
+                }
+                return obj;
+            }
+
+        </script>
+
+
+
+        <script>
+            var treeData = {:json_encode($specificationList)};
+            window.AttrCreateData = false;
+            // 将obj转换为数组数据
+            var newArrayList = [];
+            Object.keys(treeData).forEach(function(key){
+                newArrayList.push(treeData[key])
+            });
+            treeData = newArrayList
+        </script>
+        <script>
+            // 添加规格名（组）
+            function attr_guigenameAdd(self)
+            {
+                // 验证输入内容
+                var value = $(self).prev().val()
+                if (!value || value.trim().length == 0) {
+                    return layer.msg('规格名不得为空',{icon:5})
+                }
+                // 获取到 文本内容
+                var nameTexts =  $('.attrGuiGeListBox-name')
+                if(nameTexts){
+                    for(var i = 0; i < nameTexts.length;i++){
+                        if($(nameTexts[i]).text().trim() ==  value){
+                            $(self).prev().val('')
+                            return layer.msg('规格名已经存在',{icon:5})
+                        }
+                    }
+                }
+
+                var html = `
+            <div class="layui-form-item attrGuiGeListBox">
+                    <label class="layui-form-label">
+                    <span class="attrGuiGeListBox-name" style="color:#01AAED;">${value}</span>：
+            </label>
+            <div class="layui-col-md9">
+                        <!--规格值组-->
+                    <div class="attrGuiGeListValues" data-name="${value}">
+                        <!--输入规格名_规格值-->
+                        <input data-fname="${value}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="" placeholder="输入规格值"/>
+                        <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick="attrGuiGeValueAdd(this)"><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加规格值</button>
+                        <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                        <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="attr_guigenameDel(this)" ><i class="layui-icon layui-icon-delete"></i>&nbsp;删除规格名称</button>
+                        <hr/>
+                    </div>
+            </div>
+            </div>
+                `
+                $(self).prev().val('')
+                $("#attrGuiGeList").append(html);
+                layer.msg('成功添加规格名：' + value,{icon: 6})
+            }
+
+            // 删除规格名（组）
+            function attr_guigenameDel(self){
+                $(self).parents('.attrGuiGeListBox').remove()
+            }
+
+            // 添加规格值  attrGuiGeValueAdd
+            function attrGuiGeValueAdd(self){
+                // 验证输入内容
+                var input = $(self).prev()[0]
+                var value = $(input).val()
+                if (!value || value.trim().length == 0) {
+                    return layer.msg('规格值不得为空',{icon:5})
+                }
+
+                // 获取到规格名
+                var name = $(self).prev().attr('data-fname')
+
+                // 获取到 文本内容
+                var valueTexts = $('.attrGuiGeListValues[data-name="'+name+'"] input')
+                if(valueTexts){
+                    for(var i = 0; i < valueTexts.length;i++){
+                        if(input != valueTexts[i] &&  $(valueTexts[i]).val().trim() ==  value){
+                            $(self).prev().val('')
+                            return layer.msg('规格名：'+ name +'中规格值：'+value+'已经存在',{icon:5})
+                        }
+                    }
+                }
+                $(self).prev().val('')
+                var html = `
+                <!--规格值组-->
+            <div class="attrGuiGeListValues attrGuiGeListValues-arrs">
+                            <!--输入规格名_规格值-->
+                        <input data-fname="${name}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="${value}" placeholder="输入规格值"/>
+                            <!--添加规格名_规格值-->
+                            <!--删除规格名-->
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick='attrGuiGeValueDel(this)' ><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                </div>
+                `
+                $(self).parents('.attrGuiGeListValues').append(html)
+                layer.msg('成功添加规格名：'+ name +'-规格值：'+ value,{icon: 6})
+            }
+
+            // 删除规格值-单组
+            function attrGuiGeValueDel(self)
+            {
+                $(self).parents('.attrGuiGeListValues-arrs').remove()
+            }
+
+            // 获取到键值对关系--- 规则数据等  用户操作后获取的值
+            function attrGuiGeObjData(){
+                var list = $("#attrGuiGeList .attrGuiGeListBox")
+                var obj = {};
+                var key = [];
+                if (list && list.length > 0){
+                    for(var i =0; i < list.length;i++){
+                        // 获取到一级
+                        var name =  $(list[i]).find('.attrGuiGeListValues-arrs input').attr('data-fname')
+                        if(!obj[name]){
+                            key.indexOf(name) == -1 && key.push(name)
+                            obj[name] = []
+                        }
+                        var childListInputs = $(list[i]).find('.attrGuiGeListValues-arrs input')
+                        for(var j =0; j < childListInputs.length;j++){
+                            obj[name].push($(childListInputs[j]).val())
+                        }
+                    }
+                }
+                return {
+                    key:key,
+                    list:obj
+                };
+            }
+
+            // 组合数据中
+            function getCombinationToString(allData)
+            {
+                if(allData && allData.key && allData.list){
+                    window.Attr_data = []
+                    // 遍历
+                    for(var i in allData.list){
+                        // 首次一定会赋值
+                        if(Attr_data.length == 0){
+                            Attr_data = allData.list[i]
+                        }else{
+                            var linshiArr = [];
+                            for(var x = 0; x < Attr_data.length;x++){
+                                for(var y = 0; y < allData.list[i].length;y++){
+                                    linshiArr.push(Attr_data[x]+"_"+allData.list[i][y]);
+                                }
+                            }
+                            Attr_data = Attr_data.concat(linshiArr)
+                        }
+                    }
+                    // 删除多余数据
+                    for(var i = 0; i < Attr_data.length;i++){
+                        if(Attr_data[i] && Attr_data[i].split('_').length < allData.key.length){
+                            Attr_data.splice(i,1)
+                            i--;
+                        }
+                    }
+                    return Attr_data
+                }
+                return [];
+            }
+
+
+            // 生成商品规格属性操作
+            function attr_guigeCreate(AttrGGData)
+            {
+                var allData = AttrGGData ? AttrGGData : attrGuiGeObjData()
+                window.AttrCreateData = allData
+                // 组合数据中
+                if(allData){
+                    Attr_data = getCombinationToString(allData)
+
+                    var htmlThead = `
+                <tr>
+                    `
+
+                    // 头部渲染
+                    for(var i = 0; i < allData.key.length;i++){
+                        htmlThead += `
+                        <th>
+                            ${allData.key[i]}
+                        <input type="hidden" name="attrGuiGeGrounp[]" value="${allData.key[i]}"/>
+                        </th>
+                        `
+                    }
+                    htmlThead += `
+                <th style="text-align: center;">成本价</th>
+                            <th style="text-align: center;">商品价</th>
+                            <th style="text-align: center;">划线价</th>
+                            <th style="text-align: center;">直播价</th>
+                            <th style="text-align: center;">库存</th>
+                            <th style="text-align: center;">积分</th>
+                            <th style="text-align:center;">图片</th>
+                            <th style="text-align: center;">操作</th>
+                                    </tr>
+                    `
+                    $("#tableAttr thead").html(htmlThead)
+                    // 遍历 局部渲染
+                    var html = ``
+                    var numrender = 0;
+                    for(var i = 0; i < Attr_data.length;i++){
+                        html += '<tr>'
+                        if(Attr_data[i].indexOf('_') >= 1){
+                           var linshi = Attr_data[i].split('_')
+                            for(var j = 0; j < linshi.length;j++){
+                                html += `
+                                    <td>
+                                <input  data-fname="${allData.key[j]}" disabled="disabled" type="text" name="guiGeTableName[]" class="layui-input" value="${linshi[j]}">
+                                        </td>
+                                `
+                            }
+                        }else{
+                            html += `
+                        <td><input data-fname="${allData.key[0]}"  disabled="disabled" type="text" name="guiGeTableName[]" class="layui-input" value="${Attr_data[i]}"></td>
+                                `
+                        }
+                        html += '<td><input type="text" name="cost_price[]" class="layui-input"></td>';
+                        html += '<td><input type="text" name="price[]" class="layui-input"></td>';
+                        html += '<td><input type="text" name="discount_price[]" class="layui-input"></td>';
+                        html += '<td><input type="text" name="live_price[]" class="layui-input"></td>';
+                        html += '<td><input type="text" name="stock[]" class="layui-input"></td>';
+                        html += '<td><input type="text" name="integral[]" class="layui-input"></td>';
+                        html += `
+                        <td>
+                                <div class="layui-upload">
+                                    <button type="button" class="layui-btn" id="uploadsImgs${i}">上传图片</button>
+                                    <div class="layui-upload-list">
+                                        <img class="layui-upload-img" class="demoImg">
+                                        <p></p>
+                                        <input type="hidden" name="img[]" value="">
+                                    </div>
+                                </div>
+                                </td>
+                        `;
+                        html += '<td style="text-align: center;">';
+                        html += '<a href="javascript:;" onclick="attr_del(this)">';
+                        html += '<i class="iconfont">&#xe6fe;</i>删除';
+                        html += '</a>';
+                        html += '</td>';
+                        html += '</tr>';
+                        numrender++;
+                    }
+                    if(html){
+                        $("#tableAttr tbody").html(html)
+                        for(var i = 0; i < numrender;i++){
+                            reloadImgs(i)
+                        }
+                    }
+                }
+            }
+
+            // 获取到商品属性数据
+            function getAttrData(){
+                var data = {};
+                if(window.AttrCreateData){
+                    var trList =  $("#tableAttr tbody tr")
+                    var obj = [];
+                    for(var i = 0; i < trList.length;i++){
+                        var linshiObj = {}
+                        //var inputList =  $(trList[i]).find('input[name="guiGeTableName['+i+']"]')
+                        var inputList = $(trList[i]).find('input[disabled="disabled"]')
+                        for(var j = 0; j < AttrCreateData.key.length; j++){
+                            var value = $(inputList[j]).val()
+                            linshiObj[AttrCreateData.key[j]] = value
+                        }
+                        obj.push(linshiObj)
+                    }
+                    data = obj
+                }else{
+                    return false;
+                }
+                return data
+            }
+
+            //实例化编辑器
+            //建议使用工厂方法getEditor创建和引用编辑器实例，如果在某个闭包下引用该编辑器，直接调用UE.getEditor('editor')就能拿到相关的实例
+            var ue = UE.getEditor('editor');
+
+            // 监听图片上传功能
+            function onchangeImg(){
+                $("#tableAttr input[name=file]")
+            }
+
+
+
+            layui.use(['form', 'layer','jquery', "tree", 'util','upload'],function() {
+                var tree = layui.tree
+                //渲染
+                window.treeInit = tree.render({
+                    elem: '#treeAttrData',data: treeData,
+                    showCheckbox: true
+                    ,oncheck: function(obj){
+
+                    }
+                });
+
+                //基本演示
+
+//                tree.render({
+//                    elem: '#test7'
+//                    ,data: data2
+//                    ,showCheckbox: true  //是否显示复选框
+//                    ,click: function(obj){
+//                        var data = obj.data;  //获取当前点击的节点数据
+//                        layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+//                    }
+//                });
+
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    var num = $('[lay-submit]').index($(this));
+                    var formData = new FormData($('form')[num]);
+                    // 拿去到产品组信息
+                    var productsJson =  getProductsNamesListInput();
+                    if(!productsJson){
+                        window.event.returnValue = false;
+                        return false;
+                    }
+
+                    // 添加数据
+                    var attrObj = getAttrData()
+                    if(!attrObj){
+                        layer.msg('请选择商品规格',{icon:5})
+                        return false;
+                    } 
+
+                    // 获取图片数据
+                    var bannerImgStr =  bannerGetImgs()
+                    if(!bannerImgStr){
+                        layer.msg('请上传轮播图',{icon:5})
+                        return false;
+                    }
+                    formData.append('bannerImgStr',bannerImgStr)
+                    formData.append('getAttrData',JSON.stringify(attrObj))
+                    formData.append('products_json',JSON.stringify(productsJson))
+                    //发异步，把数据提交给php
+                    $.ajax({
+                        url:"{:url('Product/add')}",
+                        type: "post",
+                        data:formData,
+                        dataType:"json",
+                        cache: false,                      // 不缓存
+                        processData: false,                // jQuery不要去处理发送的数据
+                        contentType: false,                // jQuery不要去设置Content-Type请求头
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    localStorage.clear('product_add');
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon: 5});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon: 5});
+                        },
+                    });
+                    return false;
+                });
+            });
+
+            //添加商品属性
+            function attr_add(obj){
+                /*
+                var html = '';
+                html += '<tr>';
+                html += '<td><input type="text" name="color[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="size[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="cost_price[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="price[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="discount_price[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="live_price[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="stock[]" class="layui-input"></td>';
+                html += '<td><input type="text" name="integral[]" class="layui-input"></td>';
+                html += '<td style="text-align: center;">';
+                html += '<a href="javascript:;" onclick="attr_del(this)">';
+                html += '<i class="iconfont">&#xe6fe;</i>删除';
+                html += '</a>';
+                html += '</td>';
+                html += '</tr>';
+                $(obj).parents("tr").parents('tbody').append(html);
+                 */
+            }
+
+            //删除商品属性
+            function attr_del(obj){
+                $(obj).parents("tr").remove();
+            }
+
+            $('.is_use').click(function () {
+                var val = $('input[name="is_use"]:checked').val();
+                if(val == 1){
+                    var html = '<label class="layui-form-label">购物券抵扣</label>';
+                    html += '<div class="layui-col-md6">';
+                    html += '<input type="number" name="ticket" autocomplete="off" class="layui-input">';
+                    html += '</div>';
+                    html += '<div class="layui-form-mid layui-word-aux">';
+                    html += '购物券可抵商品价格额度，不填默认50%，填10-表示10%  需填写整数';
+                    html += '</div>';
+
+                    $('#ticket').html(html);
+                }else{
+                    $('#ticket').html('');
+                }
+            })
+
+            //图片阅览
+            $('#test1').click(function(){
+                $('#test1s').click();
+            })
+            $('#test1s').change(function(e){
+                var imgBox = e.target;
+                var img = getObjectURL(imgBox.files[0]);
+                $('#img').attr('src',img);
+            });
+
+            //建立一個可存取到該file的url
+            function getObjectURL(file) {
+                var url;
+                if (window.createObjectURL != undefined) { // basic
+                    url = window.createObjectURL(file);
+                } else if (window.URL != undefined) { // mozilla(firefox)
+                    url = window.URL.createObjectURL(file);
+                } else if (window.webkitURL != undefined) { // webkit or chrome
+                    url = window.webkitURL.createObjectURL(file);
+                }
+                return url;
+            }
+
+            /**
+             *  树形模板中。。。 选择模板后点击确定的操作  只可意会 不可传授
+             */
+            function attr_click(bool)
+            {
+                // bool 默认去重合并 否则直接替换
+                // 获取到值
+                var obj = treeInit.getChecked()
+                if(!obj || obj.length == 0)
+                    return layer.msg('当前没有选中数据',{icon:6})
+
+                // 新的组合数据
+                var allList = {
+                    key:[],
+                    list:{}
+                };
+
+                // 拿取到旧数据
+                var oldList = attrGuiGeObjData();
+                var oldBool = false;
+                // 如果有旧的数据
+                if(oldList && oldList.key && oldList.key.length > 0)
+                    oldBool = true;
+
+                // 统计已拿取的数据
+                var tongJiKeys = [];
+
+                // 迭代数据开始
+                for(var i = 0; i < obj.length;i++){
+                    // 查找是否 有存在旧的数据中 如果有旧的数据 则 直接将旧的list[键] 赋值过来
+                    if(!bool && oldBool){
+                        var index  = oldList.key.indexOf(obj[i].title)
+                        if(index >= 0){
+                            allList.list[obj[i].title] = oldList.list[oldList.key[index]]
+                            tongJiKeys.push(obj[i].title)
+                        }
+                    }
+
+                    // 父级的id  也就是键值  规格名
+                    allList.key.push(obj[i].title)
+                    // 如果没有 则新建一个数组
+                    if(!allList.list[obj[i].title])
+                        allList.list[obj[i].title] = [];
+                    // 一定有一个子级  值  规格名-对应的规格值
+                    if(obj[i].children){
+                        for(var j = 0; j < obj[i].children.length;j++){
+                            // 去重操作
+                            if(allList.list[obj[i].title].indexOf(obj[i].children[j].title) == -1)
+                                allList.list[obj[i].title].push(obj[i].children[j].title)
+                        }
+                    }
+                }
+
+                // 如果为去重合并 且有当前数据  且  已拿取不等于 旧的数据
+                if(!bool && oldBool && oldList.key.length > tongJiKeys.length){
+                    for(var i = 0; i < oldList.key.length;i++){
+                        if(tongJiKeys.indexOf(oldList.key[i]) == -1 && oldList.list[oldList.key[i]].length > 0){
+                            allList.key.push(oldList.key[i])
+                            allList.list[oldList.key[i]] = oldList.list[oldList.key[i]]
+                        }
+                    }
+                }
+
+                if(allList && allList.key.length > 0 && allList.list){
+                    viewGuiGeAttr(allList)
+                    attr_guigeCreate(allList)
+                }
+                layer.msg((!bool ? '去重合并' : '重新替换')+'-生成属性成功',{icon:6})
+            }
+
+            // 生成规格名-规格值
+            function viewGuiGeAttr(obj)
+            {
+                var html = ``;
+                for(var i = 0;i < obj.key.length;i++){
+                    html += `
+                <div class="layui-form-item attrGuiGeListBox">
+                            <label class="layui-form-label"> <span class="attrGuiGeListBox-name" style="color:#01AAED;">${obj.key[i]}</span>：</label>
+                    <div class="layui-col-md9">
+                                <!--规格值组-->
+                            <div class="attrGuiGeListValues" data-name="${obj.key[i]}">
+                                <!--输入规格名_规格值-->
+                            <input data-fname="${obj.key[i]}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="" placeholder="输入规格值">
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick="attrGuiGeValueAdd(this)"><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加规格值</button>
+                    <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                            <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                    <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="attr_guigenameDel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除规格名称</button>
+                    <hr>
+                    `;
+                    for(var j = 0; j < obj.list[obj.key[i]].length;j++){
+                            html += `
+                            <!--规格值组-->
+                        <div class="attrGuiGeListValues attrGuiGeListValues-arrs">
+                                        <!--输入规格名_规格值-->
+                                    <input data-fname="${obj.key[i]}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="${obj.list[obj.key[i]][j]}" placeholder="输入规格值">
+                                        <!--添加规格名_规格值-->
+                                        <!--删除规格名-->
+                                    <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="attrGuiGeValueDel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                            </div>`
+                    }
+                    html+='</div></div></div>';
+                }
+                $("#attrGuiGeList").html(html)
+            }
+
+            // 切换排序
+            function attrGuiGeValueSort(self,bool){
+                // 开始演员
+                var f = $(self).parents('.attrGuiGeListBox');
+                var tit = ''
+                var list = $("#attrGuiGeList .attrGuiGeListBox")
+                // 向上
+                if(bool){
+                    if(!(list.length <= 2 || $(list[0]).find('.attrGuiGeListValues').attr('data-name') != $(f).find('.attrGuiGeListValues').attr('data-name')))
+                        tit = '-已在最后面'
+                    $(f).hide(300,function() {
+                        setTimeout(function () {
+                            if (tit.length == 0) {
+                                $(f).show(300)
+                                return $(f).prev().insertAfter(f);
+                            }
+                            var html = $(f).html();$(f).remove()
+                            $("#attrGuiGeList").append('<div class="layui-form-item attrGuiGeListBox">' + html + '</div>')
+                        })
+                    })
+                // 向下
+                }else{
+                    if(!(list.length <= 2 || $(list[list.length - 1]).find('.attrGuiGeListValues').attr('data-name') != $(f).find('.attrGuiGeListValues').attr('data-name')))
+                        tit = '-已在最前面'
+                    $(f).hide(300,function() {
+                        setTimeout(function () {
+                            if (tit.length == 0) {
+                                $(f).show(300)
+                                return $(f).next().insertBefore(f);
+                            }
+                            var html = $(f).html();$(f).remove()
+                            $("#attrGuiGeList").prepend('<div class="layui-form-item attrGuiGeListBox">' + html + '</div>')
+                        }, 300)
+                    })
+                }
+                layer.msg('规格名称:' + $(f).find('.attrGuiGeListValues').attr('data-name')+  (bool ? ' 向上移动ok' : ' 向下移动ok')+tit,{icon:6})
+            }
+
+
+            // 批量商品属性操作 , 默认是批量替换 ，  为false 表示填充
+            function pinliangAttrGoods(self,bool = true){
+                var title = bool ? '替换' : '填充' + '操作'
+                layer.confirm('需要先生成商品规格,是否进行'+ title+'?',{
+                    title,
+                    icon: 3
+                },function(index){
+                    $("#tableAttr").hide(300)
+                    // 拿取当前的 输入内容
+                    var s = $(self).parents('tr').find('input')
+                    var len =  $("#tableAttr  tr:first-child > td").length
+                    // 从倒序开始算   
+                    // 1 操作 ， 2图片，  3积分， 4库存， 5直播价， 6划线价 ，  7商品价，  8成本价
+                    // 迭代  不取操作值
+                    for(var i = s.length - 1; i >= 0;i--){
+                        var val = $(s[i]).val()
+                        if(!val) continue;
+                        var name = $(s[i]).attr('name')
+                        name = name.substr(0,name.length - 3)
+                        var inputName = "#tableAttr  tr td input[name='"+name+"[]']"
+                        var a = $(inputName)
+                        if(!a) continue;
+                        // 替换 -  直接赋值
+                        if(bool){
+                            $(a).val(val)
+                            // 如果是图片
+                            if(name.indexOf('img') >= 0) $(inputName).parent().find('img').attr('src',val);
+                        // 填充 需要  迭代    
+                        }else{
+                            for(var ss = 0; ss < a.length;ss++){
+                                // 没有值
+                                if(!$(a[ss]).val()){
+                                    $(a[ss]).val(val)
+                                    // 如果是图片
+                                    if(name.indexOf('img') >= 0) $(a[ss]).parent().find('img').attr('src',val);
+                                }
+                            }
+                        }
+                    }
+                    setTimeout(function(){
+                        $("#tableAttr").show(500)
+                    },600)
+                    layer.close(i)
+                    layer.msg(title+'-ok',{icon:6})
+                })
+            }
+        </script>
+        <script>
+            // 存储信息
+            var bannerFilesObj = [];
+            // 绑定事件-替换
+            $("#bannerImgs_data").change(function(){
+                var files = document.querySelector("input[name='bannerImgs_data[]']").files
+                if(!files || files.length == 0) return layer.msg('请选择文件',{icon: 5})
+                var form  = new FormData();
+                form.append('prefix','product/goods/branner');
+                for(var i = 0; i < files.length;i++){
+                    bannerFilesObj.push({
+                        size: files[i].size / 1024 + 'KB',
+                        type: files[i].type,
+                        name: files[i].name
+                    })
+                    form.append('file[]',files[i]);
+                }
+                uploadsImgsMores(form);
+            })
+            // 添加 - 图片
+            $("#bannerImgs_data_push").change(function(){
+                var files = document.querySelector("input[name='bannerImgs_data_push']").files
+                if(!files || files.length == 0) return layer.msg('请选择文件',{icon: 5})
+                var form  = new FormData();
+                form.append('prefix','product/goods/branner');
+                for(var i = 0; i < files.length;i++){
+                    bannerFilesObj.push({
+                        size: files[i].size / 1024 + 'KB',
+                        type: files[i].type,
+                        name: files[i].name
+                    })
+                    form.append('file[]',files[i]);
+                }
+                uploadsImgsMores(form,true);
+            })
+
+            // ajax 多文件请求
+            function uploadsImgsMores(data,bool = false){
+                $.ajax({
+                    url: '/admin/Uploads/cosFilesPl',    
+                    type: 'post',
+                    data,
+                    dataType : "json",
+                    async: true, // 是否异步
+                    processData: false, //processData 默认为false，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+                    contentType: false, //
+                    success:function(res){
+                        if(res.code && res.code == 200 && res.data){
+                            bannerView(res.data,bool)
+                        }
+                        layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 :5 })
+                    }
+                })
+            }
+
+
+            // 渲染
+            function bannerView(data,bool){
+                if(!data || data.length == 0) return false;
+                var html = ``;
+                var sval = '';
+                for(var i = 0; i < data.length;i++){
+                    sval +=  data[i].url + (sval && sval.length > 0  ? ',' : '');
+                    html += `
+                        <tr data-name="${data[i].url}">
+                            <td> <img style="cursor: pointer;" title="点我预览图片" data-src="${decodeURIComponent(data[i].url)}" onclick="lookImg('${decodeURIComponent(data[i].url)}','商品-轮播图',this)" style="width:150px;"  src="${data[i].url}" /></td>
+                            <td>
+                                <button title="替换图片" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                                    <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" class="bannerList_tiHuan" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                                    <i class="layui-icon layui-icon-edit"></i>替换
+                                </button>
+                                <button title="向上排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                                <button title="向下排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                                <button title="删除" type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="bannerViewdel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                if(!bool){
+                    $("#bannerListImgs tbody").css('display','none').html(html)
+                    $("#bannerListImgs tbody").show(600); 
+                }else{
+                    var htmlTr = $("#bannerListImgs tbody").css('display','none').html()
+                    $("#bannerListImgs tbody").html(htmlTr + html).show(600); 
+                }
+                setTimeout(function(){
+                    bannerList_TiHuanBtn()
+                },500)
+                $("input[name='bannerDataImgs']").val(sval)
+            }
+
+            // 向上 或者向下
+            function bannerViewValueSort(self,bool){
+                // 开始演员
+                var f = $(self).parents('tr');
+                var tit = ''
+                var list = $("#bannerListImgs-tbody tr")
+                var fname = $(f).attr('data-name')
+                // 向上
+                if(bool){
+                    if(!(list.length <= 2 || $(list[0]).attr('data-name') != fname))
+                        tit = '-已在最后面'
+                    $(f).hide(500,function() {
+                        setTimeout(function () {
+                            if (tit.length == 0) {
+                                $(f).show(500)
+                                return $(f).prev().insertAfter(f);
+                            }
+                            var html = $(f).html();$(f).remove()
+                            $("#bannerListImgs-tbody").append('<tr data-name="' +fname+'">' + html + '</tr>')
+                        },500)
+                    })
+                // 向下
+                }else{
+                    if(!(list.length <= 2 || $(list[list.length - 1]).attr('data-name') != fname))
+                        tit = '-已在最前面'
+                    $(f).hide(500,function() {
+                        setTimeout(function () {
+                            if (tit.length == 0) {
+                                $(f).show(500)
+                                return $(f).next().insertBefore(f);
+                            }
+                            var html = $(f).html();$(f).remove()
+                            $("#bannerListImgs-tbody").prepend('<tr data-name="' +fname+'">' + html + '</tr>')
+                        }, 500)
+                    })
+                }
+                layer.msg('切换顺序-' +  (bool ? ' 向上移动ok' : ' 向下移动ok')+tit,{icon:6})
+            }
+
+            // 删除
+            function  bannerViewdel(self){
+                layer.confirm('确定删除此图片?',{
+                    icon:4,
+                    title:'轮播图-删除'
+                },function(index){
+                    $(self).parents('tr').remove();
+                    layer.msg('删除ok',{icon:6})
+                    layer.close(index)
+                })
+            }
+
+            // 拿取到 图片数据
+            function bannerGetImgs(){
+                var imgs =  $("#bannerListImgs-tbody").find('img')
+                if(!imgs || imgs.length == 0) return false;
+                var s = '';
+                for(var i = 0; i < imgs.length;i++){
+                    s += $(imgs[i]).attr('data-src') + (i == imgs.length - 1 ? '' : ',')
+                }
+                return s;
+            }
+
+
+            // 点我清空数据
+    function bannerDelAll(){
+        layer.confirm('是否清除当前轮播图数据?',{title:'轮播图操作',icon:3},function(index){
+            layer.close(index)
+            layer.msg('清除轮播图成功',{icon:6})
+            $("#bannerListImgs-tbody").hide(300,function(){
+                $("#bannerListImgs-tbody").html("")
+            })
+        })
+    }
+
+    // 绑定事件
+    function bannerList_TiHuanBtn(){
+                            $(".bannerList_tiHuan").off('change')
+                            $(".bannerList_tiHuan").change(function(){
+                                var f = $(this)[0].files
+                                var self = this
+                                if(f && f.length > 0){
+                                    var form = new FormData();
+                                    form.append('prefix','product/goods/branner');
+                                    form.append('file',f[0])
+                                    $.ajax({
+                                        url: '/admin/Uploads/cosFiles',    
+                                        type: 'post',
+                                        data: form,
+                                        dataType : "json",
+                                        async: true, // 是否异步
+                                        processData: false, //processData 默认为false，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+                                        contentType: false, //
+                                        success:function(res){
+                                            if(res.code && res.code == 200 && res.data){
+                                                var url = '/' + res.data.fileName + '/' + res.data.prefix+ '/' + res.data.url.replace("\\",'/') 
+                                                var fElem = $(self).parents('tr')
+                                                // $(fElem).find('img').attr('src',url).attr('data-src',url)
+                                                // $(fElem).attr('data-name',url)
+
+                                                $(fElem).find('img').attr('src',res.data.url).attr('data-src',res.data.url)
+                                                $(fElem).attr('data-name',res.data.url)
+                                            }
+                                            layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 :5 })
+                                        }
+                                    })
+                                }
+                            })
+                        }
+        </script>
+
+<script>
+    $(function(){
+        var objCaoGaoList = localStorage.getItem('product_add');
+        if(objCaoGaoList) objCaoGaoList = JSON.parse(objCaoGaoList);
+        if(objCaoGaoList && (objCaoGaoList.name || objCaoGaoList.title || objCaoGaoList.cid || objCaoGaoList.bid) ){
+            layer.confirm('亲~检测到你上次有为保存的商品信息，是否加载草稿？',{title: '草稿',icon:'6',btn:['加载草稿','清除草稿']},function(index){
+                console.log('加载草稿成功')
+                layer.close(index)
+                console.log(objCaoGaoList)
+                loadCaoGaoList(objCaoGaoList)
+            },function(){
+                layer.msg('清楚草稿成功',{icon:6})
+                localStorage.clear('product_add');
+                setInterval(function(){
+                    getCaoKaoList()
+                },1000)
+            })
+        }else{
+            setInterval(function(){
+                getCaoKaoList()
+            },1000)
+        }
+        // setTimeout(function(){
+        //     setInterval(function(){
+        //         // console.log('开始记录值')
+        //         // getCaoKaoList()
+        //     },1000)
+        // },500)
+    });
+
+    // 加载草稿中
+    function loadCaoGaoList(obj){
+        // 分类id
+        if(obj && obj.cid)
+            $("select[name=cid]").find("option[value="+obj.cid+"]").prop("selected",true); 
+        // 品牌id    
+        if(obj && obj.bid)
+            $("select[name=bid]").find("option[value="+obj.bid+"]").prop("selected",true); 
+        // 名称    
+        if(obj && obj.name) $("input[name=name]").val(obj.name)
+        // 分享标题
+        if(obj && obj.title) $("input[name=title]").val(obj.title)
+        // 分享图片
+        if(obj && obj.share){
+            $("input[name=share]").val(obj.share)
+            $("#previewShare").find('img').attr('src',obj.share)
+        } 
+        // 货号
+        if(obj && obj.spu) $("input[name=spu]").val(obj.spu)
+        // 货源连接
+        if(obj && obj.supply_url) $("input[name=supply_url]").val(obj.supply_url)
+        // 轮播图
+        if(obj && obj.supply_url){
+            $("input[name=bannerDataImgs]").val(obj.bannerDataImgs) 
+            var bannerList = obj.bannerDataImgs.split(',')
+            if(bannerList && bannerList.length){
+                var html = ``;
+                for(var i = 0; i < bannerList.length;i++){
+                    html += `
+                        <tr data-name="${bannerList[i]}">
+                            <td> <img style="cursor: pointer;" title="点我预览图片" data-src="${decodeURIComponent(bannerList[i])}" onclick="lookImg('${decodeURIComponent(bannerList[i])}','商品-轮播图',this)" style="width:150px;"  src="${bannerList[i]}" /></td>
+                            <td>
+                                <button title="替换图片" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                                    <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" class="bannerList_tiHuan" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                                    <i class="layui-icon layui-icon-edit"></i>替换
+                                </button>
+                                <button title="向上排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                                <button title="向下排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                                <button title="删除" type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="bannerViewdel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                $("#bannerListImgs-tbody").html(html)
+            }
+        }
+        // 产品组
+        if(obj && obj.productsNamesObj && obj.productsNamesObj.length > 0){
+            var html = ``;
+            for(var i = 0;i < obj.productsNamesObj.length;i++){
+                if(!obj.productsNamesObj[i].name) continue;
+                html += `
+                <div class="productsNamesListBoxItem">
+                            <!--输入产品名称-->
+                        <input class="layui-input-inline layui-input" name="productsNames[]" value="${obj.productsNamesObj[i].name}" placeholder="输入产品名称">
+                            <!--输入产品值-->
+                        <input class="layui-input-inline layui-input"  name="productsVlas[]" value="${obj.productsNamesObj[i].val}"  placeholder="输入产品值">
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick='$(this).parents(".productsNamesListBoxItem").remove()'><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                    <hr>
+                </div>
+                `;
+            }
+            $(".productsNamesListBox").html(html)
+        }
+        // 运费
+        if(obj && obj.freight) $("input[name=freight]").val(obj.freight)
+        // 默认成本价
+        if(obj && obj.default_cost_price) $("input[name=default_cost_price]").val(obj.default_cost_price)
+        // 默认划线价
+        if(obj && obj.default_price) $("input[name=default_price]").val(obj.default_price)
+        // 默认商品价
+        if(obj && obj.default_discount_price) $("input[name=default_discount_price]").val(obj.default_discount_price)
+        // 默认销量
+        if(obj && obj.sales_volume) $("input[name=sales_volume]").val(obj.sales_volume)
+        // 默认排序
+        if(obj && obj.sort) $("input[name=sort]").val(obj.sort)
+        // 精选商品
+        if(obj && obj.is_hot) $('input[name=is_hot][value='+obj.is_hot+']').attr('checked','checked')
+        // 购物券
+        if(obj && obj.is_use){
+            $('input[name=is_use][value='+obj.is_use+']').attr('checked','checked')   
+            // 购物券抵扣
+            if(obj.is_use == 1){
+                var html = '<label class="layui-form-label">购物券抵扣</label>';
+                    html += '<div class="layui-col-md6">';
+                    html += '<input type="number" name="ticket" value="'+obj.ticket+'" autocomplete="off" class="layui-input">';
+                    html += '</div>';
+                    html += '<div class="layui-form-mid layui-word-aux">';
+                    html += '购物券可抵商品价格额度，不填默认50%，填10-表示10%  需填写整数';
+                    html += '</div>';
+                $('#ticket').html(html);
+            }
+        }
+        // 商品状态
+        if(obj && obj.status >= 0) $('input[name=status][value='+obj.status+']').attr('checked','checked')
+        // 分销
+        if(obj && obj.is_sale >= 0) $('input[name=is_sale][value='+obj.is_sale+']').attr('checked','checked')
+        // 减库存方式
+        if(obj && obj.is_stock >= 0) $('input[name=is_stock][value='+obj.is_stock+']').attr('checked','checked')
+        // 禁止退货
+        if(obj && obj.is_refund >= 0) $('input[name=is_refund][value='+obj.is_refund+']').attr('checked','checked')
+        // 累计消费
+        if(obj && obj.is_team >= 0) $('input[name=is_team][value='+obj.is_team+']').attr('checked','checked')
+
+        // 渲染规格 展示数据
+        if(obj && obj.attrObjKeys && obj.attrObjKeys.key && obj.attrObjKeys.key.length > 0){
+            var newHtml = ``;
+            console.log(obj.attrObjKeys.key)
+            for(var i = 0; i < obj.attrObjKeys.key.length;i++){
+                var keyAttr = obj.attrObjKeys.key[i];
+                newHtml += `<div class="layui-form-item attrGuiGeListBox">
+                    <label class="layui-form-label">
+                    <span class="attrGuiGeListBox-name" style="color:#01AAED;">${keyAttr}</span>：
+            </label>
+            <div class="layui-col-md9">
+                        <!--规格值组-->
+                    <div class="attrGuiGeListValues" data-name="${keyAttr}">
+                        <!--输入规格名_规格值-->
+                        <input data-fname="${keyAttr}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="" placeholder="输入规格值">
+                        <button type="button" class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" onclick="attrGuiGeValueAdd(this)"><i class="layui-icon layui-icon-add-1"></i>&nbsp;添加规格值</button>
+                        <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                        <button type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="attrGuiGeValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="attr_guigenameDel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除规格名称</button>
+                        <hr>`;
+                for(var j = 0; j < obj.attrObjKeys.list[keyAttr].length;j++){
+                    newHtml += `
+                        <div class="attrGuiGeListValues attrGuiGeListValues-arrs">
+                            <!--输入规格名_规格值-->
+                        <input data-fname="${keyAttr}" class="layui-input-inline layui-input" name="attrGuiGeValue[]" value="${obj.attrObjKeys.list[keyAttr][j]}" placeholder="输入规格值">
+                            <!--添加规格名_规格值-->
+                            <!--删除规格名-->
+                        <button type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="attrGuiGeValueDel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                </div>
+                    `;
+                }
+                newHtml += `</div></div>
+`;
+            }
+            $("#attrGuiGeList").html(newHtml);
+        }
+
+        // 生成规格值渲染
+        if(obj && obj.attrTbodyList && obj.attrTbodyList.tbodys && obj.attrTbodyList.tbodys.length > 2) attr_createTbody(obj.attrTbodyList);
+
+
+        // 百度富文本
+        if(obj && obj.editorHtml) UE.getEditor('editor').execCommand('insertHtml', obj.editorHtml);
+        layui.form.render()
+        layer.msg('加载草稿成功',{icon:6})
+        setInterval(function(){
+            getCaoKaoList()
+        },1000)
+    }
+
+    // 获取到对应的值 并存为草稿
+    function getCaoKaoList(bool = false){
+        var obj = {}
+        // 商品类型
+        var cid = $("select[name=cid]").next().find('dd[class="layui-this"]').attr('lay-value')
+        if(cid) obj.cid = cid - 0
+        // 品牌
+        var bid = $("select[name=bid]").next().find('dd[class="layui-this"]').attr('lay-value')
+        if(bid) obj.bid = bid - 0
+        // 名称
+        var name = $("input[name=name]").val()
+        if(name) obj.name = name
+        // 分享标题
+        var title = $("input[name=title]").val()
+        if(title) obj.title = title
+        // 分享图片
+        var share = $("input[name=share]").val()
+        if(share) obj.share = share
+        // 商品货号
+        var spu = $("input[name=spu]").val()
+        if(spu) obj.spu = spu
+        // 货源链接
+        var supply_url = $("input[name=supply_url]").val()
+        if(supply_url) obj.supply_url = supply_url
+        // 轮播图
+        var bannerDataImgs = bannerGetImgs()
+        if(bannerDataImgs) obj.bannerDataImgs = bannerDataImgs
+        // 产品组
+        var productsNamesElems = $('input[name="productsNames[]"]')
+        var productsVlasElems = $('input[name="productsVlas[]"]')
+        if(productsNamesElems && productsNamesElems.length > 0 && productsVlasElems && productsVlasElems.length > 1){
+            productsNamesObj = [];
+            for(var i = 0; i < productsNamesElems.length;i++){
+                productsNamesObj.push({
+                    name: $(productsNamesElems[i]).val(),
+                    val: $(productsVlasElems[i]).val()
+                })
+            }  
+            // 产品组
+            if(productsNamesObj && productsNamesObj.length > 0) obj.productsNamesObj = productsNamesObj
+        }
+        // 运费 
+        var freight = $("input[name=freight]").val()
+        if(freight) obj.freight = freight - 0
+        // 默认成本价
+        var default_cost_price = $("input[name=default_cost_price]").val()
+        if(default_cost_price) obj.default_cost_price = default_cost_price - 0
+        // 默认划线价
+        var default_price = $("input[name=default_price]").val()
+        if(default_price) obj.default_price = default_price - 0
+        // 默认商品价
+        var default_discount_price = $("input[name=default_discount_price]").val()
+        if(default_discount_price) obj.default_discount_price = default_discount_price - 0
+        // 默认销量
+        var sales_volume = $("input[name=sales_volume]").val()
+        if(sales_volume) obj.sales_volume = sales_volume - 0
+        // 默认排序
+        var sort = $("input[name=sort]").val()
+        if(sort) obj.sort = sort - 0
+        // 精选商品
+        var is_hot = $("input[name=is_hot]:checked").val()
+        if(is_hot >= 0) obj.is_hot = is_hot - 0
+        // 购物券
+        var is_use = $("input[name=is_use]:checked").val()
+        if(is_use >= 0){
+            obj.is_use = is_use - 0
+            if(obj.is_use == 1){
+                var ticket = $("input[name=ticket]").val()
+                if(ticket) obj.ticket = ticket - 0
+            }
+        } 
+        // 商品状态
+        var status = $("input[name=status]:checked").val()
+        if(status >= 0) obj.status = status - 0
+        // 分销
+        var is_sale = $("input[name=is_sale]:checked").val()
+        if(is_sale >= 0) obj.is_sale = is_sale - 0
+        // 减库存方式
+        var is_stock = $("input[name=is_stock]:checked").val()
+        if(is_stock >= 0) obj.is_stock = is_stock - 0
+        // 禁止退货
+        var is_refund = $("input[name=is_refund]:checked").val()
+        if(is_refund >= 0) obj.is_refund = is_refund - 0
+        // 累计消费
+        var is_team = $("input[name=is_team]:checked").val()
+        if(is_team >= 0) obj.is_team = is_team - 0
+
+        // 规格展示数据
+        var attrObjKeys = attrGuiGeObjData();
+        if(attrObjKeys && attrObjKeys.key && attrObjKeys.key.length > 0) obj.attrObjKeys = attrObjKeys;
+
+        // 规格数据存储
+        var attrTbodyList = attr_getAttrList();
+        if(attrTbodyList && attrTbodyList.heads && attrTbodyList.length > 10, attrTbodyList.tbodys && attrTbodyList.tbodys.length > 1) obj.attrTbodyList =  attrTbodyList;
+
+        // 百度富文本
+        editorHtml = ue.body.innerHTML
+        if(editorHtml) obj.editorHtml = editorHtml
+        localStorage.setItem('product_add',JSON.stringify(obj))
+        if(bool){
+            var t = new Date();
+            var date_str =  t.getFullYear() +  "_" + t.getMonth() +"_"+ t.getDay() +"_" + t.getHours()+ "_" + t.getMinutes();
+            localStorage.setItem(date_str+'product_list_add_push',JSON.stringify(obj));
+            layer.alert("存为草稿成功，记得复制："+date_str+'product_list_add_push',{icon: 6});
+        }
+        return obj;
+    }
+</script>
+        <script>
+            // 拿取表格中填写的规格值
+            function attr_getAttrList(){
+                var attrListTbleData = {
+
+                };
+                // thead 数据获取
+                var trhs = $("#tableAttr thead th");
+                var heads = [];
+                for(var i = 0; i < trhs.length;i++){
+                    heads.push($(trhs[i]).text().trim());
+                }
+                attrListTbleData.heads = heads;
+                // tbody 数据获取
+                var trs = $("#tableAttr tbody tr")
+                var tbodys = [];
+                for(var i = 0;i < trs.length;i++){
+                    var tds =  $(trs[i]).find("td")
+                    var list = [];
+                    for(var j = 0; j < tds.length;j++){
+                        var inputs =  $(tds[j]).find('input')
+                        if(j == tds.length - 2){
+                            list.push($(inputs[1]).val())
+                            break;
+                        }else{
+                            var val = $(inputs).val()
+                            list.push(val ? val : 0);
+                        }
+                    }
+                    tbodys.push(list);
+                }
+                attrListTbleData.tbodys = tbodys;
+                return attrListTbleData;
+            }
+
+
+
+            // 生成表格规格值
+            function attr_createTbody(attrList){
+                var input_keys = [
+                    'cost_price[]',
+                    'price[]',
+                    'discount_price[]',
+                    'live_price[]',
+                    'stock[]',
+                    'integral[]'
+                ];
+
+                // 表头 生成 规格值
+                var thedhtml = `<tr>`;
+                for(var i = 0; i < attrList.heads.length;i++)thedhtml += `<th>${attrList.heads[i]}</th>`;
+                $("#tableAttr thead").html(thedhtml+'</tr>');
+
+                // 表体  生成数据
+                var bodyhtml = ``;
+                for(var i = 0; i < attrList.tbodys.length;i++){
+                    bodyhtml += `<tr>`;
+                    // 算出 是从第几个开始 统一的渲染变量
+                    // 最低也得有 8个
+                    var stratLen = attrList.tbodys[i].length - 7;
+                    for(var j = 0; j < attrList.tbodys[i].length;j++){
+                        if(j < stratLen){
+                            bodyhtml += `<td><input data-fname="${attrList.tbodys[i][j]}" disabled="disabled" type="text" name="guiGeTableName[]" class="layui-input" value="${attrList.tbodys[i][j]}"></td>`;
+                        }else if(j == attrList.tbodys[i].length - 1){
+                            bodyhtml += `
+				<td>
+									<div class="layui-upload">
+										<button type="button" class="layui-btn" id="uploadsImgs0">上传图片</button><input class="layui-upload-file" type="file" accept="" name="file">
+										<div class="layui-upload-list">
+											<img class="layui-upload-img" src="${attrList.tbodys[i][j]}">
+											<p></p>
+											<input type="hidden" name="img[]" value="${attrList.tbodys[i][j]}">
+										</div>
+									</div>
+								</td>
+								<td style="text-align: center;"><a href="javascript:;" onclick="attr_del(this)"><i class="iconfont"></i>删除</a></td></tr>`;
+                            break;
+                        }else{
+                            bodyhtml += `<td><input type="text" name="${input_keys[ j - stratLen]}" class="layui-input" value=${attrList.tbodys[i][j]}></td>`;
+                        }
+                    }
+                }
+                $("#tableAttr tbody").html(bodyhtml);
+            }
+
+        </script>
+{include file='common/scroll' /}
+{include file='common/footer' /}

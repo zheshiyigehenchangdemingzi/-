@@ -1,0 +1,614 @@
+{include file='common/head' /}
+    <body>
+        　　<script src="__LAYUI__/jq.js"></script>
+
+
+        <div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>商品管理</cite></a>
+              <a><cite>商品列表</cite></a>
+          </span>
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <!--搜索-->
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <!--id-->
+                                <div style="width:80px;" class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="id"  placeholder="商品ID" autocomplete="off" class="layui-input" value="{$get.id|default=''}">
+                                </div>
+                                <!--名称-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="name"  placeholder="商品名称" autocomplete="off" class="layui-input" value="{$get.name|default=''}">
+                                </div>
+                                <!-- 排序值 -->
+                                <div style="width:80px;" class="layui-inline layui-show-xs-block">
+                                    <input type="number" name="sort"  placeholder="排序值" autocomplete="off" class="layui-input" value="{$get.sort|default=''}">
+                                </div>
+                                <!--分类-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <select name="cid" lay-verify="" lay-search>
+                                        <?php ?>
+                                        <option value="">分类筛选</option>
+                                        {volist name="type" id="v"}
+                                        <option value="{$key}" {if condition="$get['cid'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <!--品牌-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <select name="bid" lay-verify="" lay-search>
+                                        <option value="">品牌筛选</option>
+                                        {volist name="brand" id="v"}
+                                        <option value="{$key}" {if condition="$get['bid'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+<!--                                状态类型-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <select name="status_type" lay-verify="" lay-search>
+                                        <option value="">类型选择</option>
+                                        {volist name="status_types" id="v"}
+                                        <option value="{$key}" {if condition="$get['status_type'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <!--状态-->
+                                <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                                    <select name="status_key">
+                                        <option value="" selected>选择状态</option>
+                                        <option value="0" {if condition="isset($get['status_key']) && strlen($get['status_key']) >= 1 && $get['status_key'] == 0"}selected{/if}>不是</option>
+                                        <option value="1" {if condition="$get['status_key'] == 1"}selected{/if}>是</option>
+                                    </select>
+                                </div>
+                                <!--选择排序-->
+                                <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                                    <select name="sort_type" lay-verify="" lay-search>
+                                        <option value="">选择排序</option>
+                                        {volist name="sort_types" id="v"}
+                                        <option value="{$key}" {if condition="$get['sort_type'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <!--排序类型-->
+                                <div class="layui-inline layui-show-xs-block" style="width: 100px;" width="100px">
+                                    <select name="sort_val">
+                                        <option value="DESC" {if condition="$get['sort_val'] == 'DESC'"}selected{/if}>大到小</option>
+                                        <option value="ASC" {if condition="$get['sort_val'] == 'ASC'"}selected{/if}>小到大</option>
+                                    </select>
+                                </div>
+                                <!-- 分页数据 -->
+                                <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                    <select name="limit">
+                                        <option value="" selected>分页数据</option>
+                                        <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                        <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                        <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                        <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                        <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                                        <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                                        <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                                    </select>
+                                </div>
+                                <!--日期选择-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="开始日" name="start" id="start" value="{$get.start|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="截止日" name="end" id="end" value="{$get.end|default=''}">
+                                </div>
+                                <!--按钮-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-header">
+                            <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="iconfont">&#xe69d;</i> 批量删除</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('status')">批量上架/下架</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_hot')">批量精选/取消</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_explosion')">批量爆款/取消</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_welfare')">批量福利/取消</button>
+                            <button class="layui-btn layui-btn-normal" title="点我批量改变" onclick="pinLiangStatusBtn('is_new')">批量新品/取消</button>
+                            <button class="layui-btn" onclick="xadmin.open('添加商品','/admin/product/add','','',true)">
+                                <i class="layui-icon"></i>商品
+                            </button>
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main" style="overflow: auto;height:calc(100vh - 280px);">
+                            <table class="layui-table layui-form">
+                                <thead>
+                                  <tr>
+                                    <th style="text-align: center;width: 3%">
+                                      <input type="checkbox" lay-filter="checkall" name="" lay-skin="primary">
+                                    </th>
+                                    <th style="text-align: center;width:5%">商品序号</th>
+                                    <th style="text-align: center;width:5%">分类/品牌</th>
+                                    <th style="text-align: center;width: 10%">商品名称</th>
+                                    <th style="text-align: center;width: 10%">商品图</th>
+                                    <th style="text-align: center;width: 10%">商品售价</th>
+                                    <th style="text-align: center;width: 15%">库存/销量</th>
+                                      <th style="text-align: center;width:5%">店铺信息</th>
+                                    <th style="text-align: center;width: 10%">活动</th>
+                                    <th style="text-align: center;width: 10%">精选</th>
+                                      <th style="text-align: center;width: 10%">爆款</th>
+                                      <th style="text-align: center;width: 10%">福利</th>
+                                      <th style="text-align: center;width: 10%">新品</th>
+                                    <th style="text-align: center;width: 10%">上架</th>
+                                    <th>排序</th>
+                                    <th style="text-align: center;width: 9%">发布时间</th>
+                                    <th style="text-align: center;width: 25%">操作</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {volist name="list" id="v"}
+                                  <tr>
+                                    <td style="text-align: center;">
+                                      <input type="checkbox" name="id" value="{$v.id}"   lay-skin="primary">
+                                    </td>
+                                     <td style="text-align: center;">
+                                        <span style="cursor: pointer;" onclick="copyCode('{$v.id}')">{$v.id}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <?php $typeName = isset($type[$v["cid"]]) ? $type[$v["cid"]] : '分类无'; ?>
+                                        <span style="cursor: pointer;" onclick='copyCode("{$typeName}")'>{$typeName}</span>
+                                        <hr>
+                                        <?php $brandName = isset($brand[$v['bid']]) ? $brand[$v['bid']] : '品牌无'; ?>
+                                        <span style="cursor: pointer;" onclick='copyCode("{$brandName}")'>{$brandName}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <p style="cursor: pointer;" onclick='copyCode("{$v.name}")' class="layui-badge layui-bg-blue">点我复制</p>
+                                        <hr>
+                                        <div style="height: 1px;width: 1px;"></div>
+                                        {if $v.supply_url && strlen($v.supply_url) >= 4}
+                                            <a title="货源连接" target="_blank" style="color:steelblue;" href="{$v.supply_url}">{$v.name}</a>
+                                        {else/}
+                                            {$v.name}
+                                        {/if}
+                                    </td>
+                                    <td style="text-align: center;"><a href="{$v.cover}" target="_blank"><img src="{$v.cover}" height="50"></a></td>
+                                    <td style="text-align: center;">
+                                        <p>成本：<span class="moneyFont">{$v['attr']['cost_price']}</span></p>
+                                        <p>折扣：<span class="moneyFont">{$v['attr']['price']}</span></p>
+                                        <p>划线：<span class="moneyFont">{$v['attr']['discount_price']}</span></p>
+                                        <p>直播：<span class="moneyFont">{$v['attr']['live_price']}</span></p>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <p>库存：<span class="moneyFont">{$v.stock}</span></p>
+                                        <p>销量：<span class="moneyFont">{$v.sale}</span></p>
+                                    </td>
+                                      <td>
+                                          {if isset($v.shop_id) && $v.shop_id > 0}
+                                            <span onclick="copyCode('{$v.shop_id}')">序号：{$v.shop_id}</span>
+                                            <hr>
+                                            <span onclick="copyCode('{$v.shopOne->name}')">店铺名称:{$v.shopOne->name}</span>
+                                          <hr>
+                                          <span>logo:</span>
+                                          <img style="height: 50px;width:50px;" src="{$v.shopOne->logo}" alt="">
+                                          {else/}
+                                            无
+                                          {/if}
+                                      </td>
+                                    <!-- 活动 -->
+                                      <td style="text-align: center;">
+                                          {$v.is_activity == 1 ?
+                                          '<button type="button" title="点击无效" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                          '<button type="button" title="点击无效" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                          }
+                                      </td>
+                                      <!-- 精选 -->
+                                      <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_hot == 1 ? '取消精选' : '确定精选'}" data-key="is_hot" data-val="{$v.is_hot == 1 ? 0 : 1}">
+                                        {$v.is_hot == 1 ?
+                                        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                        }
+                                      </td>
+<!--                                      爆款-->
+                                      <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_explosion == 1 ? '取消爆款' : '确定爆款'}" data-key="is_explosion" data-val="{$v.is_explosion == 1 ? 0 : 1}">
+                                          {$v.is_explosion == 1 ?
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                          }
+                                      </td>
+                                      <!--                                      福利-->
+                                      <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_welfare == 1 ? '取消福利' : '确定福利'}" data-key="is_welfare" data-val="{$v.is_welfare == 1 ? 0 : 1}">
+                                          {$v.is_welfare == 1 ?
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                          }
+                                      </td>
+                                      <!--                                      新品-->
+                                      <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.is_new == 1 ? '取消新品' : '确定新品'}" data-key="is_new" data-val="{$v.is_new == 1 ? 0 : 1}">
+                                          {$v.is_new == 1 ?
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                          }
+                                      </td>
+                                    <!-- 上架 -->
+                                    <td class="clickStatus" style="text-align: center;" data-id={$v.id} data-title="{$v.status == 1 ? '取消上架' : '上架'}" data-key="status" data-val="{$v.status == 1 ? 2 : 1}">
+                                        {$v.status == 1 ?
+                                        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon ">&#xe605;</i></button>' :
+                                        '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">&#x1006;</i></button>';
+                                        }
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="sortClick" title="排序" style="cursor: pointer; color:steelblue;">{$v.sort}</span>
+                                        <div style="display: none;">
+                                            <input type="number" value="{$v.sort}" class="layui-input" placeholder="输入排序值" style="width: 60px;">
+                                            <button data-id="{$v.id}" title="点我改变" type="button" class="sortBtn layui-btn layui-btn-sm layui-btn-normal"><i class="layui-icon layui-icon-edit"></i></button>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i',$v['add_time'])}</td>
+                                    <td style="text-align: center;" class="td-manage">
+                                        <ul class="layui-nav mySelf-lyaui-nav">
+                                            <li class="layui-nav-item">
+                                                <button class="layui-btn layui-btn layui-btn-xs layui-btn-normal" title="编辑"  onclick="xadmin.open('编辑','/admin/product/edit?id={$v.id}','','',true)" href="javascript:;">
+                                                    <i class="layui-icon">&#xe642;</i>编辑
+                                                </button>
+                                            </li>
+                                            <br>
+                                            <li class="layui-nav-item">
+                                                <button class="layui-btn-danger layui-btn layui-btn-xs" title="删除" onclick="member_del(this,{$v['id']})" href="javascript:;">
+                                                    <i class="layui-icon">&#xe640;</i>删除
+                                                </button>
+                                            </li>
+                                            <br>
+                                            <li class="layui-nav-item">
+                                                <button class="layui-btn layui-btn layui-btn-xs" title="分销权限">更多操作</button>
+                                                <dl class="layui-nav-child">
+                                                    <dd><a href="javascript:;"><button class="layui-btn layui-btn-normal layui-btn- layui-btn-xs" title="分销权限"  onclick="xadmin.open('分销权限','/admin/product/role?id={$v.id}&type=sale','','',true)" href="javascript:;">
+                                                        <i class="iconfont">&#xe6ae;</i>分销权限
+                                                    </button></a></dd>
+                                                    <dd><a href="javascript:;"><button class="layui-btn layui-btn layui-btn-normal layui-btn-xs" title="直播权限"  onclick="xadmin.open('直播权限','/admin/product/role?id={$v.id}&type=live','','',true)" href="javascript:;">
+                                                        <i class="iconfont">&#xe6ae;</i>直播权限
+                                                    </button></a></dd>
+                                                    <dd><a href="javascript:;"><button class="layui-btn layui-btn layui-btn-xs layui-btn-normal" title="会员权限"  onclick="xadmin.open('会员权限','/admin/product/role?id={$v.id}&type=role','','',true)" href="javascript:;">
+                                                        <i class="iconfont">&#xe6ae;</i>会员权限
+                                                    </button></a></dd>
+                                                    <dd><a href="javascript:;"><button class="layui-btn layui-btn layui-btn-xs layui-btn-normal" title="状态编辑"  onclick="xadmin.open('状态编辑','/admin/product/status?id={$v.id}&type=role',600,400)" href="javascript:;">
+                                                        <i class="iconfont">&#xe6ae;</i>状态编辑
+                                                    </button></a></dd>
+                                                </dl>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                  </tr>
+                                {/volist}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+<style>
+   table .moneyFont {
+       color:#FF5722;
+   }
+
+   .mySelf-lyaui-nav {
+       background: transparent;
+   }
+   .mySelf-lyaui-nav li {
+       line-height: 40px!important;
+   }
+   /*
+   .mySelf-lyaui-nav li:hover .layui-nav-child{
+        display: block;
+       left:-200px!important;
+       top:0px!important;;
+   }
+   */
+</style>
+    <script>
+      layui.use(['form','laydate'], function(){
+          var laydate = layui.laydate;
+          var  form = layui.form;
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#start' //指定元素
+          });
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#end' //指定元素
+          });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+          if(data.elem.checked){
+            $('tbody input').prop('checked',true);
+          }else{
+            $('tbody input').prop('checked',false);
+          }
+          form.render('checkbox');
+        });
+      });
+
+      /*删除*/
+      function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              var ids = [];
+              ids.push(id);
+              $.ajax({
+                  url:"{:url('Product/goods_del')}",
+                  type: "post",
+                  data:{id:ids},
+                  dataType:"json",
+                  success:function (res) {
+                      if(res.code == 200){
+                          layer.msg('删除成功', {icon: 1,time:1000});
+                          $(obj).parents("tr").remove();
+                      }else{
+                          layer.alert(res.msg, {icon:2,time:1000});
+                      }
+                  },
+                  error:function(e){
+                      layer.alert("网络错误", {icon:5,time:1000});
+                  },
+              });
+          });
+      }
+
+      // 状态值 
+      var objKeys = {
+        // 是否精选  
+        is_hot: {  // 下标  0 表示 不开启  1 表示开启
+            val: [0,1],
+            title: ['取消精选','确定精选']
+        },
+          // 是否爆款
+          is_explosion: {  // 下标  0 表示 不开启  1 表示开启
+              val: [0,1],
+              title: ['取消爆款','确定爆款']
+          },
+          // 是否福利
+          is_welfare: {  // 下标  0 表示 不开启  1 表示开启
+              val: [0,1],
+              title: ['取消福利','确定福利']
+          },
+          // 是否福利
+          is_new: {  // 下标  0 表示 不开启  1 表示开启
+              val: [0,1],
+              title: ['取消新品','确定新品']
+          },
+        // 是否上架
+        status: {  // 下标    2 不上架  1 表示 上架
+            val: [2,1],
+            title: ['不上架','上架']
+        },
+      }
+
+      var btnStrs = [
+          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-danger layui-btn-xs"><i class="layui-icon">ဆ</i></button>', // 不开启
+          '<button type="button" title="点我更改状态" class="layui-btn layui-btn-normal layui-btn-xs"><i class="layui-icon "></i></button>' // 开启
+      ];
+
+
+      $(function(){
+        bindClickBtn()
+        $(".sortClick").click(function(){
+            $(this).parent().find('div').css('display','flex')
+            $(this).hide(300)
+        })
+
+        $(".sortBtn").click(function(){
+            var id = $(this).attr('data-id')
+            if(!id) return layer.msg('没有该选项',{icon:5})
+            var sort = $(this).prev().val()
+            if(!sort || sort < 0) return layer.msg('排序输入错误',{icon:5})
+            var oldSort = $(this).parent().parent().find('.sortClick').text()
+            if(oldSort - 0 == sort - 0) return layer.msg('值不能相同',{icon:5})
+            var self = this
+            $.ajax({
+                url:'/admin/product/sortEdit',
+                data:{id,sort},
+                dataType: 'json',
+                success:function(res){
+                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 : 5})
+                    if(res && res.data){
+                        $(self).parent().parent().find('span').text(sort).show(300)
+                        $(self).parent().css('display','none')
+                    }
+                },
+                error:function(err){
+                    layer.msg('输入错误',{icon:5})
+                }
+            })
+        })
+    })
+
+      // 绑定事件
+      function bindClickBtn()
+      {
+        $("table tbody .clickStatus button").off('click');
+        $("table tbody .clickStatus button").click(function(e){
+            var self  = this;
+            // 拿取到tb
+            var tb = $(this).parent()
+            var data = {
+                id: $(tb).attr('data-id'),
+                val: $(tb).attr('data-val'),
+                key: $(tb).attr('data-key')
+            }
+            clickStatusBtn('/admin/product/goods_list_status.html',data,{
+                msg: '此商品序号:'+data.id+"-状态为:"+$(tb).attr('data-title')+'？',
+                elem: self
+            },toggleBtn);
+          })
+      }
+
+      /**
+       *  将按钮更改为相反的状态
+       */
+      function toggleBtn(data,self){
+        if(self && objKeys[data.key]){
+            var i = objKeys[data.key].val.indexOf(data.val - 0)
+            if(i >= 0){
+                var tb = $(self).parent()
+                $(self).hide(500,function(){
+                    $(tb).html(btnStrs[i])
+                    setTimeout(function(){
+                        $(self).show(400,function(){
+                            bindClickBtn();
+                        })
+                    },300)
+                })
+                // 目前只有两种状态
+                $(tb).attr('data-val',objKeys[data.key].val[i == 0 ? 1 : 0])
+                $(tb).attr('data-title',objKeys[data.key].title[i == 0 ? 1 : 0])
+            }
+        }
+      }
+
+
+      //批量删除
+      function delAll (argument) {
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+        
+        // 弹窗提示中
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url:"{:url('Product/goods_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+      }
+
+      // 三个按钮操作 等
+      function pinLiangStatusBtn(key){
+        if(!objKeys[key]) return layer.msg('必须选择一项',{icon:5});
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+        if(!ids || ids.length == 0) return layer.msg('必须选择一项',{icon:4});
+        // 数据
+        var obj = {
+            ids,
+            key
+        }  
+        layer.confirm('确认批量操作？',{title:'批量操作',icon:3,btn:[objKeys[key].title[1],objKeys[key].title[0],'取消']},function(index){
+            obj.val = objKeys[key].val[1]
+            ajaxFun('/admin/product/goods_list_pinliang_status.html',obj,'post',function(){
+                window.location.href = window.location.href
+            })
+            layer.close(index)
+        },function(index){
+            obj.val = objKeys[key].val[0]
+            ajaxFun('/admin/product/goods_list_pinliang_status.html',obj,'post',function(){
+                window.location.href = window.location.href
+            })
+        })
+      }
+
+
+
+      // ajax封装
+      function ajaxFun(url,obj,type = 'post',fun,errFun,elem){
+        var s = layer.msg('加载中...',{icon:4,time:999999})
+        $.ajax({
+                url,
+                type,
+                data:obj,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                    layer.close(s)
+                    if(fun) fun(res.data,elem);
+                },
+                error:function(e){
+                    layer.close(s)
+                    layer.alert("网络错误", {icon:5,time:1000});
+                    if(errFun) errFun(res);
+                },
+            });
+      }
+
+
+      /**
+       * 封装弹窗中的数据信息
+       * 参数：  请求地址， 请求数据， 标题，成功回调函数，错误回调函数
+       */
+      function clickStatusBtn(url,obj,options,fun= false,errFun = false){
+        var s = layer.msg('加载中...',{icon:4,time:999999})
+        layer.confirm(options.msg,{title: options.title ? options.title : '操作提示',icon: options.icon ? options.icon : 3},function(index){
+            $.ajax({
+                url,
+                type: "post",
+                data:obj,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg(res.msg ? res.msg : '操作ok', {icon: 1,time:1000});
+                        //$(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                    layer.close(s)
+                    if(fun) fun(res.data,options.elem);
+                },
+                error:function(e){
+                    layer.close(s)
+                    layer.alert("网络错误", {icon:5,time:1000});
+                    if(errFun) errFun(res);
+                },
+            });
+        });
+      }
+    </script>
+
+<script>
+    function copyCode(title){
+        $("#copyText").val(title)
+        setTimeout(function(){
+            var copy=document.getElementById("copyText");
+            copy.select(); // 选择对象
+          document.execCommand("Copy"); // 执行浏览器复制命令
+        },50)
+      layer.msg('复制成功：'+title,{icon: 6})
+    }
+  </script>
+  <input id="copyText" type="text" style="width: 1px;opacity: 0;height:1px;position: absolute;"/>
+{include file='common/scroll' /}    
+{include file='common/footer' /}

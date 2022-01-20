@@ -1,0 +1,184 @@
+{include file='common/head' /}
+    <body>
+        <div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>活动管理</cite></a>
+              <a><cite>喵呗列表</cite></a>
+          </span>
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="name"  placeholder="会员名称" autocomplete="off" class="layui-input" value="{$get.name|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="uid"  placeholder="会员ID" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="tel"  placeholder="会员电话" autocomplete="off" class="layui-input" value="{$get.tel|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="order_sn"  placeholder="订单号" autocomplete="off" class="layui-input" value="{$get.order_sn|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="aname"  placeholder="收货人" autocomplete="off" class="layui-input" value="{$get.aname|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="tel"  placeholder="收货人电话" autocomplete="off" class="layui-input" value="{$get.tel|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="下单时间开始" name="start" id="start" value="{$get.start|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="下单时间截止" name="end" id="end" value="{$get.end|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-header">
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <thead>
+                                  <tr>
+                                    <th style="text-align: center;width: 15%">下单时间</th>
+                                    <th style="text-align: center;width: 15%">订单号</th>
+                                    <th style="text-align: center;width: 15%">发起人</th>
+                                    <th style="text-align: center;width: 9%">参与人</th>
+                                    <th style="text-align: center;width: 25%">活动名称</th>
+                                    <th style="text-align: center;width: 25%">活动价格</th>
+                                    <th style="text-align: center;width: 25%">喵呗数额</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {volist name="list" id="v"}
+                                  <tr>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                                    <td style="text-align: center;">{$v.order_sn}</td>
+                                    <td style="text-align: center;">{$v.name}</td>
+                                    <td style="text-align: center;">
+                                        {volist name="v['partake']" id="vo" key="k1"}
+                                        <p>{$k1}.{$vo.uid}:{$vo.miao / 100}元</p>
+                                        <p>订单id:{$vo.oid}</p>
+                                        <hr>
+                                        {/volist}
+                                    </td>
+                                    <td style="text-align: center;">{$v->activityName}</td>
+                                    <td style="text-align: center;">{$v.price / 100}元</td>
+                                      <td style="text-align: center;">{$v.miao / 100}元<span style="color:red">（{$v.nums}/{$v.num}）</span></td>
+                                  </tr>
+                                {/volist}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+    <script>
+      layui.use(['form','laydate'], function(){
+          var laydate = layui.laydate;
+          var  form = layui.form;
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#start' //指定元素
+          });
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#end' //指定元素
+          });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+          if(data.elem.checked){
+            $('tbody input').prop('checked',true);
+          }else{
+            $('tbody input').prop('checked',false);
+          }
+          form.render('checkbox');
+        }); 
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+      /*删除*/
+      function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              var ids = [];
+              ids.push(id);
+              $.ajax({
+                  url:"{:url('Advert/type_del')}",
+                  type: "post",
+                  data:{id:ids},
+                  dataType:"json",
+                  success:function (res) {
+                      if(res.code == 200){
+                          layer.msg('删除成功', {icon: 1,time:1000});
+                          $(obj).parents("tr").remove();
+                      }else{
+                          layer.alert(res.msg, {icon:2,time:1000});
+                      }
+                  },
+                  error:function(e){
+                      layer.alert("网络错误", {icon:5,time:1000});
+                  },
+              });
+          });
+      }
+
+      //批量删除
+      function delAll (argument) {
+        var ids = [];
+        // 获取选中的id 
+        $('tbody input').each(function(index, el) {
+            if($(this).prop('checked')){
+               ids.push($(this).val())
+            }
+        });
+  
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url:"{:url('Advert/type_del')}",
+                type: "post",
+                data:{id:ids},
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg('删除成功', {icon: 1,time:1000});
+                        $(".layui-form-checked").not('.header').parents('tr').remove();
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+        });
+      }
+    </script>
+{include file='common/footer' /}

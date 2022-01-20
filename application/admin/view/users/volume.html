@@ -1,0 +1,63 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">购物券名称</th>
+                            <th style="text-align: center;">订单编号</th>
+                            <th style="text-align: center;">购物券金额</th>
+                            <th style="text-align: center;">实际支付金额</th>
+                            <th style="text-align: center;">状态</th>
+                            <th style="text-align: center;">购买时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="list" id="v"}
+                        <tr>
+                            <td style="text-align: center;">{$v.title}</td>
+                            <td style="text-align: center;">{$v.order_sn}</td>
+                            <td style="text-align: center;">{$v.balance}</td>
+                            <td style="text-align: center;">{$v.pay_amount}</td>
+                            <td style="text-align: center;">
+                                {if condition="$v['status'] eq 0"}待付款{elseif condition="$v['status'] eq 1"}付款成功{else /}付款失败{/if}
+                            </td>
+                            <td style="text-align: center;">{:date('Y-m-d H:i:s',$v['add_time'])}</td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div class="page">
+                        {$page}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function(){
+        var  form = layui.form;
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+            if(data.elem.checked){
+                $('tbody input').prop('checked',true);
+            }else{
+                $('tbody input').prop('checked',false);
+            }
+            form.render('checkbox');
+        });
+    });
+</script>
+{include file='common/footer' /}

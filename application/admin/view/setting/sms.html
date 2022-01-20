@@ -1,0 +1,106 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="sms">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            下单成功
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="订单提交成功通知" name="add_order" class="layui-textarea">{$config.add_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            取消订单
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="订单取消通知" name="close_order" class="layui-textarea">{$config.close_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            支付成功
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="订单支付成功通知" name="pay_order" class="layui-textarea">{$config.pay_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            发货通知
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="订单发货通知" name="deliver_order" class="layui-textarea">{$config.deliver_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            收货通知
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="订单确认收货通知" name="receipt_order" class="layui-textarea">{$config.receipt_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            退款申请
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="退款申请" name="refund_order" class="layui-textarea">{$config.refund_order|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            退款成功
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="退款成功" name="refund_suc" class="layui-textarea">{$config.refund_suc|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            退款拒绝
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea placeholder="退款申请被拒绝" name="refund_err" class="layui-textarea">{$config.refund_err|default=''}</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Setting/sms')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

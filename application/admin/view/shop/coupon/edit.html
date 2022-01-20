@@ -1,0 +1,212 @@
+{include file='common/head' /}
+<script type="text/javascript" charset="utf-8" src="__PLURING__/jq.js"></script>
+<!-- 表情开始 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Begin emoji-picker Stylesheets -->
+<link href="__PLURING__/emoji/lib/css/nanoscroller.css" rel="stylesheet">
+<link href="__PLURING__/emoji/lib/css/emoji.css" rel="stylesheet">
+<!-- End emoji-picker Stylesheets -->
+<!-- 表情结束 -->
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" lay-filter="example">
+                    <input type="hidden" name="id" value="{$data.id|default=0}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            店铺序号
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="shop_id" autocomplete="off" class="layui-input" value="{$data.shop_id|default=''}">
+                        </div>
+                    </div>
+<!--                    优惠券名称-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            优惠券名称
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="name" autocomplete="off" class="layui-input" value="{$data.name|default=''}" data-emojiable="true">
+                        </div>
+                    </div>
+                    <!-- 表情开始--- -->
+                    <script src="__PLURING__/jq.js"></script>
+                    <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+                    <!-- Begin emoji-picker JavaScript -->
+                    <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/config.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/util.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+                    <!-- End emoji-picker JavaScript -->
+                    <script>
+                    $(function() {
+                      // Initializes and creates emoji set from sprite sheet
+                      window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                      });
+                      // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                      // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                      // It can be called as many times as necessary; previously converted input fields will not be converted again
+                      window.emojiPicker.discover();
+                    });
+                      </script>
+                    <!-- 表情结束--- -->
+                    <!--                 类型-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            类型
+                        </label>
+                        <div class="layui-input-inline">
+                            {if !isset($data['status'])}
+                            <input type="radio" name="status" value="1" title="全店铺使用" checked>
+                            <input type="radio" name="status" value="2" title="指定商品使用">
+                            {else /}
+                            <input type="radio" name="status" value="1" title="全店铺使用" {if $data['status'] == 1}checked{/if}>
+                            <input type="radio" name="status" value="2" title="指定商品使用" {if $data['status'] == 2}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <!--关联的信息，使用逗号分隔-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            关联商品/分类
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="text" name="related_id" autocomplete="off" class="layui-input" value="{$data.related_id|default=''}">
+                        </div>
+                    </div>
+                    <!--使用条件-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            状态
+                        </label>
+                        <div class="layui-input-inline">
+                            {if !isset($data['condition'])}
+                            <input type="radio" name="condition" value="1" title="满减" checked>
+                            <input type="radio" name="condition" value="2" title="无限制">
+                            {else /}
+                            <input type="radio" name="condition" value="1" title="满减" {if $data['condition'] == 1}checked{/if}>
+                            <input type="radio" name="condition" value="2" title="无限制" {if $data['condition'] == 2}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <!--满减抵扣-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            满减抵扣
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="total_amount" autocomplete="off" class="layui-input" value="{$data.total_amount|default=0}">
+                        </div>
+                        <div class="layui-word-aux">
+                            消费了满多少才能使用此优惠券
+                        </div>
+                    </div>
+<!--                    优惠券抵扣金额-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            抵扣金额
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="amount" autocomplete="off" class="layui-input" value="{$data.amount|default=0}">
+                        </div>
+                    </div>
+<!--                    发放数量-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            发放数量
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="total" autocomplete="off" class="layui-input" value="{$data.total|default=0}">
+                        </div>
+                    </div>
+                    <!--                    有效天数-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            有效天数
+                        </label>
+                        <div class="layui-col-md6">
+                            <input type="number" name="day" autocomplete="off" class="layui-input" value="{$data.day|default=30}">
+                        </div>
+                    </div>
+                    <!--                    有效时间-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            有效时间
+                        </label>
+                        <div class="layui-col-md6">
+                            <input lay-filter="start_time" id="start_time" type="text" name="start_time" autocomplete="off" class="layui-input" value="{$data.start_time|default=date('Y-m-d H:i:s').' - '.date('Y-m-d H:i:s',time() + 3600 * 24 * 30)}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            //实例化编辑器
+            layui.use(['form', 'layer','jquery','laydate'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+                var laydate = layui.laydate;
+                //日期时间选择器
+                laydate.render({
+                    elem: '#start_time',
+                        range: true,
+                    type: 'datetime',
+                    // 点击某一个日期，响应的回调函数
+                    done: function(value, date){
+                        var date_str =  $("#start_time").val()
+                        var objTimes = getDateHoursTime(date_str);
+                        var title = '日期选择错误';
+                        if(objTimes && objTimes.day){
+                            $("input[name='day']").val(objTimes.day);
+                            title = '日期选择成功，当前有效天数为：'+ objTimes.day;
+                        }
+                        layer.msg(title,{icon:objTimes.day ? 6 : 5});
+                    }
+                });
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    var num = $('[lay-submit]').index($(this));
+                    var formData = new FormData($('form')[num]);
+                    var times = getDateTime($("#start_time").val());
+                    formData.append('times',JSON.stringify(times));
+                    // 更新时间戳
+                    //formData.set('hours',Math.floor(new Date($("input[name=hours]").val()).getTime() / 1000))
+                    //发异步，把数据提交给php
+                    $.ajax({
+                        url:"/admin/shop/coupon_edit",
+                        type: "post",
+                        data:formData,
+                        dataType:"json",
+                        cache: false,                      // 不缓存
+                        processData: false,                // jQuery不要去处理发送的数据
+                        contentType: false,                // jQuery不要去设置Content-Type请求头
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon: 5});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon: 5});
+                        },
+                    });
+                    return false;
+                });
+            });
+        </script>
+{include file='common/scroll' /}        
+{include file='common/footer' /}

@@ -1,0 +1,202 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="video">
+                    <!-- 审核视频开关-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">审核视频</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="switch" value="{$config.switch|default=1}" lay-skin="switch" lay-text="开启|关闭">
+                        </div>
+                    </div>
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>视频任务奖励：每天几次，每次多少奖励</legend>
+                    </fieldset>
+                    <!--视频任务奖励开始-->
+
+                    <!--发布视频-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            发布-
+                        </label>
+                        <div class="layui-col-md6" style="text-align: left">
+                            <label class="layui-form-label">
+                                每天：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="post_day" required="" autocomplete="off" class="layui-input" value="{$config.post_day|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                奖励：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="post_num" required="" autocomplete="off" class="layui-input" value="{$config.post_num|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            视频需要通过审核
+                        </div>
+                    </div>
+                    <!--点赞互动视频-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            点赞-
+                        </label>
+                        <div class="layui-col-md6" style="text-align: left">
+                            <label class="layui-form-label">
+                                每天：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="like_day" required="" autocomplete="off" class="layui-input" value="{$config.like_day|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                奖励：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="like_num" required="" autocomplete="off" class="layui-input" value="{$config.like_num|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            点赞互动视频
+                        </div>
+                    </div>
+                    <!--分享-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享-
+                        </label>
+                        <div class="layui-col-md6" style="text-align: left">
+                            <label class="layui-form-label">
+                                每天：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="share_day" required="" autocomplete="off" class="layui-input" value="{$config.share_day|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                奖励：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="share_num" required="" autocomplete="off" class="layui-input" value="{$config.share_num|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            分享转发视频
+                        </div>
+                    </div>
+                    <!--评论-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享：
+                        </label>
+                        <div class="layui-col-md6" style="text-align: left">
+                            <label class="layui-form-label">
+                                每天：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="comment_day" required="" autocomplete="off" class="layui-input" value="{$config.comment_day|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                奖励：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="comment_num" required="" autocomplete="off" class="layui-input" value="{$config.comment_num|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            评论视频
+                        </div>
+                    </div>
+                    <!--观看-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            观看-
+                        </label>
+                        <div class="layui-col-md8" style="text-align: left">
+                            <label class="layui-form-label">
+                                每天：
+                            </label>
+                            <div class="layui-col-md1">
+                                <input type="number" name="watch_day" required="" autocomplete="off" class="layui-input" value="{$config.watch_day|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                阅读量：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="watch_limit" required="" autocomplete="off" class="layui-input" value="{$config.watch_limit|default=0}">
+                            </div>
+                            <label class="layui-form-label">
+                                奖励：
+                            </label>
+                            <div class="layui-col-md2">
+                                <input type="number" name="watch_num" required="" autocomplete="off" class="layui-input" value="{$config.watch_num|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            视频被观看奖励
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            奖励说明
+                        </label>
+                        <div class="layui-col-md6">
+                            <textarea name="mark" placeholder="请输入内容" class="layui-textarea" value="{$config.mark|default=''}"></textarea>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            var textMark = '{$config.mark}'
+            // 1表示开启
+            var switchVal = {$config.switch  == 1 ? 1 : 0}
+        </script>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+                // 开  关闭
+                switchVal ? layui.jquery('input[name="switch"]').attr('checked', 'checked') : layui.jquery('input[name="switch"]').removeAttr('checked')
+                layui.form.render()
+                // 渲染文本域
+                $("textarea").val(textMark)
+                // 渲染开关
+                form.on('switch', function (data) {
+                    switchVal =  this.checked ? 1 : 0;
+                    console.log(11111)
+                })
+                    //监听提交
+                form.on('submit(add)', function(data) {
+                    data.field.switch = switchVal - 0
+                    $.ajax({
+                        url:"{:url('Videos/edit_setting')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                                //window.location.href = window.location.href
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

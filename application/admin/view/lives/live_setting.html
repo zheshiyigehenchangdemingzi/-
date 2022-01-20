@@ -1,0 +1,113 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="type" value="live">
+                    <!-- 审核开关-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">创建直播审核</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="is_enable" value="{$config.is_enable|default=1}" lay-skin="switch" lay-text="开启|关闭" {if condition="$config['is_enable'] == 1"}checked{/if} />
+                        </div>
+                    </div>
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>直播权限限制：</legend>
+                    </fieldset>
+                    <!--发布视频-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            用户创建直播 -
+                        </label>
+                        <div class="layui-col-md0" style="text-align: left">
+                            <div class="layui-col-md1">
+                                <input type="number" name="live_limit" required="" autocomplete="off" class="layui-input" value="{$config.live_limit|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            用户每天可以创建直播间次数
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            用户直播选品 -
+                        </label>
+                        <div class="layui-col-md0" style="text-align: left">
+                            <div class="layui-col-md1">
+                                <input type="number" name="goods_limit" required="" autocomplete="off" class="layui-input" value="{$config.goods_limit|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            用户每个直播间可以选择的商品个数
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商家创建直播 -
+                        </label>
+                        <div class="layui-col-md0" style="text-align: left">
+                            <div class="layui-col-md1">
+                                <input type="number" name="shop_live_limit" required="" autocomplete="off" class="layui-input" value="{$config.shop_live_limit|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            商家每天可以创建直播间次数
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            商家直播选品 -
+                        </label>
+                        <div class="layui-col-md0" style="text-align: left">
+                            <div class="layui-col-md1">
+                                <input type="number" name="shop_goods_limit" required="" autocomplete="off" class="layui-input" value="{$config.shop_goods_limit|default=0}">
+                            </div>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            商家每个直播间可以选择的商品个数
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+                // 开  关闭
+                layui.form.render()
+                    //监听提交
+                var switchVal = '{$config.is_enable}';
+                // 渲染开关
+                form.on('switch', function (data) {
+                    switchVal =  this.checked ? 1 : 0;
+                });
+                form.on('submit(add)', function(data) {
+                    data.field.is_enable = switchVal;
+                    $.ajax({
+                        url:"{:url('Lives/live_setting')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

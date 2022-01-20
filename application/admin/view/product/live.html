@@ -1,0 +1,199 @@
+{include file='common/head' /}
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="hidden" name="id" value="{$role.id|default=''}">
+            <input type="hidden" name="style" value="live">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    直播分红
+                </label>
+                <div class="layui-col-md6 live">
+                    <input type="radio" name="is_live" value="1" title="开启" {if condition="$role['is_live'] eq 1"}checked{/if}>
+                    <input type="radio" name="is_live" value="0" title="关闭" {if condition="$role['is_live'] eq 0"}checked{/if}>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+
+                </div>
+            </div>
+            <div class="live1" {if condition="$role['is_live'] eq 0"}style="display:none;"{/if}>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        分红方式
+                    </label>
+                    <div class="layui-col-md6 live_type">
+                        <input type="radio" name="live_type" value="1" title="百分比" {if condition="$role['live_type'] eq 1"}checked{/if}>
+                        <input type="radio" name="live_type" value="2" title="固定值" {if condition="$role['live_type'] eq 2"}checked{/if}>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        必选
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label live_name">
+                        {if condition="!empty($role['live_type'])"}
+                        {if condition="$role['live_type'] eq 1"}百分比{else /}固定值{/if}
+                        {else /}
+                        百分比
+                        {/if}
+                    </label>
+                    <div class="layui-col-md6">
+                        <input style="width: 90%;padding-left: 10px;height: 30px;line-height: 30px;" type="number" name="live_val" lay-verify="required" value="{$role['live_val']|default=0}">
+                        <span class="live_val">
+                            {if condition="!empty($role['live_type'])"}
+                            {if condition="$role['live_type'] eq 1"}%{else /}元{/if}
+                            {else /}
+                            %
+                            {/if}
+                        </span>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        必选
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        独立权限
+                    </label>
+                    <div class="layui-col-md6 goods_role">
+                        <input type="radio" name="is_live_odd" value="1" title="开启" {if condition="$role['is_live_odd'] eq 1"}checked{/if}>
+                        <input type="radio" name="is_live_odd" value="0" title="关闭" {if condition="$role['is_live_odd'] eq 0"}checked{/if}>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+
+                    </div>
+                </div>
+                <div class="role" {if condition="$role['is_live_odd'] eq 0"}style="display:none;"{/if}>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        分红方式
+                    </label>
+                    <div class="layui-col-md6 type">
+                        <input type="radio" name="type" value="1" title="百分比" {if condition="$role['live_conf']['type'] eq 1 or empty($role['live_conf']['type'])"}checked{/if}>
+                        <input type="radio" name="type" value="2" title="固定金额" {if condition="$role['live_conf']['type'] eq 2"}checked{/if}>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        必选，独立权限分红方式
+                    </div>
+                </div>
+                <div class="layui-form-item" style="margin-top: 30px;">
+                    <label class="layui-form-label">
+                        等级设置
+                    </label>
+                    <div class="layui-col-md9">
+                        <table class="layui-table layui-form">
+                            <thead>
+                            <tr>
+                                <th style="text-align: center;">会员等级</th>
+                                <th style="text-align: center;" class="t-name">
+                                    {if condition="!empty($role['type'])"}
+                                    {if condition="$role['type'] eq 1"}佣金比例{else /}固定值{/if}
+                                    {else /}
+                                    佣金比例
+                                    {/if}
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name="level" id="v"}
+                            <tr>
+                                <td><input type="hidden" name="key[]" value="{$key}">{$v}</td>
+                                <td>
+                                    <input style="width: 90%;padding-left: 10px;height: 30px;line-height: 30px;" type="number" lay-verify="required" name="value[]" value="{$role['live_conf'][$key]|default=0}">
+                                    <span class="code">
+                                        {if condition="!empty($role['type'])"}
+                                        {if condition="$role['type'] eq 1"}%{else /}元{/if}
+                                        {else /}
+                                        %
+                                        {/if}
+                                    </span>
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button>
+            </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer','jquery'],function() {
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+
+        $('.goods_role').click(function () {
+            var val = $('input[name="is_live_odd"]:checked').val();
+            if(val == 1){
+                $('.role').css('display','');
+            }else{
+                $('.role').css('display','none');
+            }
+        })
+
+        $('.live').click(function () {
+            var val = $('input[name="is_live"]:checked').val();
+            if(val == 1){
+                $('.live1').css('display','');
+            }else{
+                $('.live1').css('display','none');
+            }
+        })
+
+        $('.type').click(function () {
+            var val = $('input[name="type"]:checked').val();
+            if(val == 1){
+                $('.code').html('%');
+                $('.t-name').html('百分比');
+            }else{
+                $('.code').html('元');
+                $('.t-name').html('固定值');
+            }
+        })
+
+        $('.live_type').click(function () {
+            var val = $('input[name="live_type"]:checked').val();
+            if(val == 1){
+                $('.live_val').html('%');
+                $('.live_name').html('百分比');
+            }else{
+                $('.live_val').html('元');
+                $('.live_name').html('固定值');
+            }
+        })
+
+        //监听提交
+        form.on('submit(add)', function(data) {
+            $.ajax({
+                url:"{:url('Product/role')}",
+                type: "post",
+                data:data.field,
+                dataType:"json",
+                success:function (res) {
+                    if(res.code == 200){
+                        layer.alert(res.msg, {icon: 1},function () {
+                            //关闭当前frame
+                            xadmin.close();
+                            // 可以对父窗口进行刷新
+                            xadmin.father_reload();
+                        });
+                    }else{
+                        layer.alert(res.msg, {icon:2,time:1000});
+                    }
+                },
+                error:function(e){
+                    layer.alert("网络错误", {icon:5,time:1000});
+                },
+            });
+            return false;
+        });
+    });
+</script>
+{include file='common/footer' /}

@@ -1,0 +1,222 @@
+{include file='common/head' /}
+    <body>
+        <div class="x-nav">
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <tbody>
+                                  <tr>
+                                      <td style="text-align: center;width:20%;">订单号</td>
+                                      <td style="text-align: center;">{$data.order_sn}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">商户单号</td>
+                                      <td style="text-align: center;"></td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">支付方式</td>
+                                      <td style="text-align: center;">{$data.pay_type == 1 ? '微信支付' : '余额支付'}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">总额</td>
+                                      <td style="text-align: center;color: #FF5722;"><span >{$data.sum_money}</span> </td>
+                                  </tr>
+                                  <tr>
+                                    <td style="text-align: center;">运费</td>
+                                    <td style="text-align: center;color: #FF5722;">{$data.freight}</td>
+                                    </tr>
+                                <tr>
+                                    <td style="text-align: center;">购物券</td>
+                                    <td style="text-align: center;color: #FF5722;">{$data.volume}</td>
+                                </tr>
+                                  <tr>
+                                      <td style="text-align: center;">自购省</td>
+                                      <td style="text-align: center;color: #FF5722;">{$data.purchase_money}</td>
+                                  </tr>
+                                <tr>
+                                  <tr>
+                                      <td style="text-align: center;">优惠券</td>
+                                      <td style="text-align: center;color: #FF5722;">{$data.coupon_money}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="text-align: center;">实付金额</td>
+                                    <td style="text-align: center;color: #FF5722;"><span >{$data.total}</span> </td>
+                                </tr>
+                                  <style>
+                                      .str_title {
+                                          width: 80px;
+                                          text-align: left;
+                                          display: inline-block;
+                                      }
+                                  </style>
+                                  <tr>
+                                      <td style="text-align: center;">计算方式</td>
+                                      <td style="text-align: center;">
+                                          <span class="str_title">总额</span> - <span class="str_title">自购省</span> - <span class="str_title">购物券</span> - <span class="str_title">优惠券</span> = <span class="str_title">实付金额</span>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">计算如下</td>
+                                      <td style="text-align: center;">
+                                          <span class="str_title">{$data.sum_money}元</span> - <span class="str_title">{$data.purchase_money}</span> - <span class="str_title">{$data.volume}</span> - <span class="str_title">{$data.coupon_money}</span> = <span class="str_title" style="color:red;">{$data.total}元</span>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">配送方式</td>
+                                      <td style="text-align: center;">{$data['deliver']}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">用户名</td>
+                                      <td style="text-align: center;">{$data.nickname}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">微信昵称</td>
+                                      <td style="text-align: center;">{$data.nickname}</td>
+                                  </tr>
+                                <!-- 收货人 -->
+                                  {if $data['receipt_name']}
+                                  <tr>
+                                      <td style="text-align: center;">收货人</td>
+                                      <td style="text-align: center;">
+                                          <span onclick="copyCode('{$data[\'receipt_name\']}')">
+                                            {$data['receipt_name']}
+                                          </span>
+                                          </td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">号码</td>
+                                      <td style="text-align: center;">
+                                          <span onclick="copyCode('{$data[\'receipt_phone\']}')">
+                                            {$data['receipt_phone']}
+                                          </span>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">收货地址</td>
+                                      <td style="text-align: center;">
+                                          <span onclick="copyCode('{$data[\'receipt_address\']}')">
+                                            {$data['receipt_address']}
+                                          </span>
+                                      </td>
+                                  </tr>
+                                  {/if}
+                                  <tr>
+                                      <td style="text-align: center;">订单备注</td>
+                                      <td style="text-align: center;">{$data.remarks}</td>
+                                  </tr>
+                                <!-- 物流信息 -->
+                                  {if $data->getExpressOne}
+                                  <tr>
+                                      <td style="text-align: center;">物流公司</td>
+                                      <td style="text-align: center;">{$logistics[$data->getExpressOne->company]}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">快递单号</td>
+                                      <td style="text-align: center;">{$data->getExpressOne->express_sn}</td>
+                                  </tr>
+                                  <tr>
+                                      <td style="text-align: center;">描述</td>
+                                      <td style="text-align: center;">{$data->getExpressOne->desc}</td>
+                                  </tr>
+                                  {/if}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <thead>
+                                <tr>
+                                    <th style="text-align: center;">商品图片</th>
+                                    <th style="text-align: center;">商品名称</th>
+                                    <th style="text-align: center;">商品规格</th>
+                                    <th style="text-align: center;">价格详情</th>
+                                    <th style="text-align: center;">抵扣详情</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {volist name="data['goods']" id="vo"}
+                                <tr>
+                                    <td style="text-align: center;"><a href="{$vo.img}" target="_blank">
+                                        <img src="{$vo.img}" height="50"></a>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {if $vo.supply_url && strlen($vo.supply_url) >= 4}
+                                        <a title="货源连接" target="_blank" style="color:steelblue;" href="{$vo.supply_url}">{$vo.title}</a>
+                                        {else/}
+                                        {$vo.title}
+                                        {/if}
+                                    </td>
+
+                                    <td style="text-align: center;">
+                                        {$vo.attr_str}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        成本价：{$vo.cost}元
+                                        <hr>
+                                        数量：{$vo.num}
+                                        <hr>
+                                        单价：{$vo.price}元
+                                        <hr>
+                                        总额：{$vo.price * $vo.num}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        自购省：{$vo.purchase_money}
+                                        <hr>
+                                        {if $vo.purchase_money > 0}
+                                        自购省比例：{$vo.purchase_ratio}
+                                        <hr>
+                                        {/if}
+                                        购物券：{$vo.volume}
+                                        <hr>
+                                        {if $vo.volume > 0}
+                                        购物券比例：{$vo.volume_ratio}
+                                        <hr>
+                                        {/if}
+                                        优惠券：{$vo.coupon_money}
+                                    </td>
+                                </tr>
+                                {/volist}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <tbody>
+                                <tr>
+                                    <td style="text-align: center;width:20%;">下单时间</td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$data['add_time'])}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">付款时间</td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$data['pay_time'])}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">发货时间</td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$data['deliver_time'])}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">收货时间</td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$data['receive_time'])}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">完成时间</td>
+                                    <td style="text-align: center;">{:date('Y-m-d H:i:s',$data['complete_time'])}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+{include file='common/copyCode' /}
+{include file='common/footer' /}

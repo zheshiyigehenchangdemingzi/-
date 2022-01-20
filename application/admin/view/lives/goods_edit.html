@@ -1,0 +1,684 @@
+{include file='common/head' /}
+<!-- 表情开始 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Begin emoji-picker Stylesheets -->
+<link href="__PLURING__/emoji/lib/css/nanoscroller.css" rel="stylesheet">
+<link href="__PLURING__/emoji/lib/css/emoji.css" rel="stylesheet">
+<!-- End emoji-picker Stylesheets -->
+<!-- 表情结束 -->
+
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="id"  value="{$data.id|default=0}">
+                    {if !isset($data['id']) && !isset($data['goods_list'])}
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>商品选择操作：</legend>
+                      </fieldset>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            选择商品分类
+                        </label>
+                        <!-- 分类 -->
+                        <div class="layui-col-md1">
+                            <select id="goods_cid" style="width:150px;" name="cid" lay-verify="" lay-search>
+                                <option selected value="">分类-可输入搜索值</option>
+                                {volist name="goodtypes" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 选择品牌 -->
+                        <div class="layui-col-md1">
+                            <select id="goods_bid" style="width:150px;" name="bid" lay-verify="" lay-search>
+                                <option selected value="">品牌-可输入搜索值</option>
+                                {volist name="goodBs" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 商品名称 -->
+                        <div class="layui-col-md1">
+                            <input id="goods_name" placeholder="商品标题" type="text" name="goods_name" value="" autocomplete="off" class="layui-input">                      
+                        </div>
+                        <!-- 商品序号 -->
+                        <div class="layui-col-md1">
+                            <input id="goods_id" placeholder="商品序号" type="number" name="goods_id" value="" autocomplete="off" class="layui-input">                      
+                        </div>
+                        &nbsp;&nbsp;
+                        <div class="layui-col-md1">
+                            <button onclick="getGoodsList()" title="搜索商品" class="layui-btn"  type="button" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                        <div class="layui-col-md3">
+<!--                            <button onclick="allCheckClik(true)" title="商品全选" class="layui-btn layui-btn-normal"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品当前全选</button>-->
+                            <button onclick="allCheckClik(false)" title="商品取消全选" class="layui-btn layui-btn-warm"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品取消全选</button>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            需要先搜索才能显示商品
+                            <input id="copyText" type="text" name="copyText" style="width: 10px;opacity: 0;" value=""/>
+                        </div>
+                    </div>
+                    <!-- 选择商品 -->
+                    <div class="layui-col-md11">
+                        <div id="goodsList" style="
+                        overflow-y: auto;
+                        max-height: 400px;
+                        padding: 10px;
+                        border: 1px solid #01AAED;
+                        border-left: none;
+                        border-right: none;">
+                        </div>
+                    </div>
+                    <style>
+                        .yulanClickGoods > div {
+                            border:1px dashed #999;
+                            margin-right:10px;
+                            /* padding-left:8px; */
+                            padding: 5px;
+                            text-align: center;
+                            border-radius: 6px;
+                            width:300px;
+                        }
+                    </style>
+                    {/if}
+                    <script>
+
+                        function getGoodsList(obj = null){
+                            if(!obj) {
+                                obj = {
+                                    cid:  $("#goods_cid").select().val(),
+                                    bid:  $("#goods_bid").select().val(),
+                                    name: $("#goods_name").val(),
+                                    goods_id: $("input[name=goods_id]").val(),
+                                    is_activity: 0
+                                }
+                            }
+
+                            var num = layer.msg('加载中',{icon:4})
+                            $.ajax({
+                                url:"{:url('Product/getGoods')}",
+                                type: "get",
+                                data:obj,
+                                dataType:"json",
+                                success:function (res) {
+                                    window.goodsId = undefined;
+                                    if(res.code == 200 && res.data){
+                                        layer.msg('加载商品成功',{icon:6})
+                                        var html = ``;
+                                        var data = res.data.data
+                                        if(data.length == 0){
+                                            $("#goodsList").html('')
+                                            $(".yulanClickGoods").html('')
+                                            return layer.msg('抱歉，搜索不到该商品信息',{icon:5})
+                                            //return layer.alert('抱歉，搜索不到该商品信息')
+                                        }
+                                        window.GOODS_DATA_LIST = {}
+                                        for(var i = 0; i < data.length;i++){
+                                            //onclick="checkIdClick(${data[i].id})"
+                                            html += `
+                                                    <div class="goodsItem" title="${data[i].name}" style="float: left;
+    cursor: pointer;
+    border: 1px solid #b9c2c5;
+    padding: 8px;
+    border-radius: 5px;
+    border-style: dashed;
+    margin-right: 10px;
+    margin-bottom:10px;">
+                                                            <div class="goodsCheckBox">
+                                                                <input lay-filter="goodsIds" id="${'goodsId_'+data[i].id}" type="radio" value="${data[i].id}" title="${data[i].name ? data[i].name.substr(0,10)+'...' : ''}" name="goods_ids" lay-skin="primary">
+                                                                <img style="height:80px;width:80px;border:1px solid #999;padding:3px;border-radius:4px;" src="${data[i].cover.split(',')[0]}"/>
+                                                            </div>
+                                                            <hr/>
+                                                            <div>
+                                                                <button type="button" onclick="copyCode('${data[i].name}')" title="点我复制名称" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                                                                <button type="button" onclick="copyCode('${data[i].id}')" title="点我复制序号" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                                                                <button type="button" onclick="openUrl('${data[i].supply_url}')" title="点我打开货源链接" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                                                            </div>
+                                                    </div>
+                                            `;  
+                                            window.GOODS_DATA_LIST[data[i].id] = data[i]
+                                        }
+                                        if(html){
+                                        setTimeout(function(){
+                                            // 监听复选框
+                                            $("#goodsList").html(html)
+                                            $(".yulanClickGoods").html('')
+                                            layui.form.render()
+                                            setTimeout(function(){
+                                                  //监听复选框-单个
+                                                LAYUI_FORM.on('radio(goodsIds)', function(data){
+                                                        // console.log(data,data.elem.checked,data.value)
+                                                        // if(data.elem.checked==true){
+
+                                                        // }else{
+
+                                                        // }
+                                                    window.goodsId = data.value;
+                                                    viewGoodIdsList(data.value)
+                                                });
+                                            },100)
+                                        },50)
+                                        }
+                                    }else{
+                                        layer.alert(res.msg, {icon:2,time:1000});
+                                    }
+                                },
+                                error:function(e){
+                                    layer.alert("网络错误", {icon:5,time:1000});
+                                },
+                            });
+                        }
+
+                        function copyCode(title){
+                            $("#copyText").val(title)
+                            setTimeout(function(){
+                                var copy=document.getElementById("copyText");
+                                copy.select(); // 选择对象
+	                            document.execCommand("Copy"); // 执行浏览器复制命令
+                            },50)
+	                        layer.msg('复制成功：'+title,{icon: 6})
+                        }
+
+                        // 选择表单
+                        function checkIdClick(id){
+                            // $('#goodsId_'+id).prop('checked') ?  $('#goodsId_'+id).attr('checked',false) : $('#goodsId_'+id).attr('checked',true)//$('#goodsId_'+id).click()
+                        }
+
+                        // 全选
+                        function allCheckClik(bool = true){
+                            layer.msg(bool ? '全选成功' : '取消成功',{icon: 6});
+                            bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').prop('checked',false),$('input[name="goods_ids"]').removeAttr('checked') 
+                            // bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').removeAttr('checked')
+                            setTimeout(function(){
+                                layui.form.render('checkbox')
+                                setTimeout(function(){
+                                    bool ? viewGoodIdsList() : $(".yulanClickGoods").html('')
+                                },100)
+                            },50)
+                        }
+                    </script>
+                    <hr>
+                    <!-- 预览选中商品 -->
+                    <div id="yuLanShangPinView" class="layui-form-item">
+                        <label class="layui-form-label">
+                            预览商品
+                        </label>
+                        <div class="layui-col-md10">
+                            {if !isset($data['goods_list'])}
+                            <div style="overflow: auto;max-height: 300px;" class="yulanClickGoods">
+                            </div>
+                            {else/}
+                            <input type="hidden" name="goods_edit_id"  value="{$data['goods_list']['id']|default=0}">
+                            <div class="yulanClickGoodsItem" title="{$data['goods_list']['name']}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                                <div title="{$data['goods_list']['id']}-{$data['goods_list']['name']}" onclick="openUrl('{$data[\'goods_list\'][\'supply_url\']}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                名称：<span style="color:#1E9FFF;">{$data['goods_list']['name']}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">{$data['goods_list']['id']}</span>
+                            </span>
+                                    <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="{$data['goods_list']['cover']}">
+                                </div>
+                                <hr>
+                                <div>
+                                    <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('{$data[\'goods_list\'][\'name\']}')" title="点我复制名称"><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                                    <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('{$data[\'goods_list\'][\'id\']}')" title="点我复制序号"><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                                    <button type="button" class="layui-btn layui-btn-normal" onclick="openUrl('{$data[\'goods_list\'][\'supply_url\']}')" title="点我跳转货源链接"><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                                </div>
+                            </div>
+                            {/if}
+                        </div>
+                    </div>
+                    <hr>
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>常规操作如下：</legend>
+                      </fieldset>
+
+                    <!-- 评论内容 -->
+                    <style>
+                        /*.emoji-wysiwyg-editor.layui-textarea {*/
+                        /*    height:100px;*/
+                        /*}*/
+                    </style>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            名称
+                        </label>
+                        <div class="layui-col-md4">
+                            <input id="discussTxt" style="height:100px;" placeholder="请输入内容" name="name" class="layui-textarea" value="{$data.name|default=''}" data-emojiable="true"/>
+                        </div>
+                        <div class="layui-col-md5">
+                            名称必须包含中文，长度不得小于3位，长度超过14位后截取掉
+                        </div>
+                    </div>
+
+                    <!-- 表情开始--- -->
+                    <script src="__PLURING__/jq.js"></script>
+                    <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+                    <!-- Begin emoji-picker JavaScript -->
+                    <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/config.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/util.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+                    <!-- End emoji-picker JavaScript -->
+                    <script>
+                    $(function() {
+                      // Initializes and creates emoji set from sprite sheet
+                      window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                      });
+                      // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                      // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                      // It can be called as many times as necessary; previously converted input fields will not be converted again
+                      window.emojiPicker.discover();
+                    });
+                      </script>
+                    <!-- 表情结束--- -->
+
+                    <!-- 评论图片 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            图片
+                        </label>
+                        <div class="layui-input-block layui-upload">
+                            {if !isset($data['id'])}
+                            <button type="button" class="layui-btn layui-btn-normal file" id="test1"><i class="layui-icon"></i>上传图片</button>
+                            {/if}
+                            <span class="layui-inline layui-upload-choose">支持 png、jpg、jpeg 格式文件,必须分辨率为300*300以下</span>
+                            <input class="layui-upload-file" type="file" accept="undefined" name="file" id="test1s">
+                        </div>
+                        <div>
+                            <img id="img" src="{$data.cover|default=''}" alt="请选择图片" />
+                            <input type="hidden" name="img_url" value="{$data.cover|default=''}" />
+                        </div>
+                    </div>
+
+                    {if $data && isset($data['wx_status'])}
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            审核状态
+                        </label>
+                        <div class="layui-input-block" style="line-height: 36px">
+                            <span style="color: #1e9fff">{$data['wx_status']}</span>
+                        </div>
+                    </div>
+                    {/if}
+<!--                    市场价-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">市场价</label>
+                        <div class="layui-col-md3">
+                            <input type="number" name="price" value="{$data.price|default=0}" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+<!--   直播价                 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">直播价</label>
+                        <div class="layui-col-md3">
+                            <input type="number" name="price2" value="{$data.price2|default=0}" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <!--佣金-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">佣金</label>
+                        <div class="layui-col-md3">
+                            <input type="number" name="commission" value="{$data.commission|default=0}" autocomplete="off" class="layui-input">
+                        </div>
+                        <div>
+                            *百分比，且以该商品中的商品规格中的直播价为准
+                        </div>
+                    </div>
+<!--                    排序-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序</label>
+                        <div class="layui-col-md3">
+                            <input type="number" name="sort" value="{$data.sort|default=0}" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+<!--                    状态-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            是否上架
+                        </label>
+                        <div class="layui-input-inline">
+                            {if !isset($data['status'])}
+                            <input type="radio" name="status" value="1" title="上架" checked>
+                            <input type="radio" name="status" value="0" title="下架" >
+                            {else /}
+                            <input type="radio" name="status" value="1" title="上架" {if $data['status'] == 1}checked{/if}>
+                            <input type="radio" name="status" value="0" title="下架" {if $data['status'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+<!--                    精选-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            是否精选
+                        </label>
+                        <div class="layui-input-inline">
+                            {if !isset($data['is_hot'])}
+                            <input type="radio" name="is_hot" value="1" title="精选" checked>
+                            <input type="radio" name="is_hot" value="0" title="取消精选" >
+                            {else /}
+                            <input type="radio" name="is_hot" value="1" title="精选" {if $data['is_hot'] == 1}checked{/if}>
+                            <input type="radio" name="is_hot" value="0" title="取消精选" {if $data['is_hot'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+<!--                    -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            注意：
+                        </label>
+                        <div class="layui-input-block" style="line-height: 36px">
+                            <style>
+                                .guize_ul li {
+                                    list-style: decimal;
+                                }
+                            </style>
+                            <ul class="guize_ul" style="color:#FF5722">
+                                <li>目前一旦上传商品名称,则无法更改，确定添加商品时确定好名称</li>
+                                <li>目前一旦上传商品封面图片，则无法更改，确定添加商品时确定封面图片</li>
+                                <li>目前可以修改的为：市场价和直播价，是否上架，排序，佣金</li>
+                                <li>由于微信直播商品次数限制，单个商品一个小时只能更新一次价格</li>
+                                <li>由于小程序的api次数限制，尽量上传成功后不要做太多的改动</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            layui.use(['form', 'layer','jquery','rate','laydate'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+                window.LAYUI_FORM = form;
+                setTimeout(function(){
+                    initGoods()
+                },1)
+                  //监听下拉框-单个
+                //   LAYUI_FORM.on('select(pinglun_types)', function(data){
+                //       viewHaoPingList(data.value)
+                //         // console.log(data,data.elem.checked,data.value)
+                //         // if(data.elem.checked==true){
+                //
+                //         // }else{
+                //
+                //         // }
+                // });
+
+                // 监听用户组列表               
+                    setTimeout(function(){
+                            //监听复选框-单个
+                        LAYUI_FORM.on('checkbox(usersIds)', function(data){
+                                // console.log(data,data.elem.checked,data.value)
+                                // if(data.elem.checked==true){
+                                    
+                                // }else{
+                                    
+                                // }
+                                viewUsersIdsList()
+                        });
+                    },100)
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    if(window.AJAX_BOOL && window.AJAX_BOOL){
+                        layer.msg('当前请求加载数据中，稍等片刻',{icon:5})
+                        return false;
+                    }
+                    
+                    var layui = layer;
+                    var edit_id = $('input[name=goods_edit_id]').val()
+                    if(edit_id && edit_id - 0 > 0){
+                        window.goodsId = edit_id
+                    }
+                    // 商品
+                    if(!window.goodsId){
+                        layer.msg('必须选择商品',{icon:5});
+                        return false;
+                    }
+                    data.field.goodsIds = window.goodsId
+                    var obj = {
+                        id: data.field.id,
+                        goods_id: window.goodsId,
+                        name: data.field.name,
+                        price: data.field.price,
+                        price2: data.field.price2,
+                        sort: data.field.sort,
+                        status: data.field.status,
+                        is_hot: data.field.is_hot,
+                        commission: data.field.commission
+                    }
+                    if(!obj.name || obj.name.length < 2){
+                        layer.msg('名称不得为空',{icon:5})
+                        return false;
+                    }
+                    if(obj.price - 0 <= 0){
+                        layer.msg('市场价不得小于0',{icon:5})
+                        return false;
+                    }
+                    if(obj.price2 - 0 <= 0){
+                        layer.msg('现价不得小于0',{icon:5})
+                        return false;
+                    }
+                    if(obj.commission - 0 <= 0){
+                        layer.msg('佣金不得小于0',{icon:5})
+                        return false;
+                    }
+                    if(obj.commission - 0 >= 1){
+                        layer.msg('佣金不得大于等于1，佣金取值0-1之间',{icon:5})
+                        return false;
+                    }
+                    var cover = $("input[name=img_url]").val()
+                    if(cover){
+                        obj.cover = cover
+                    }
+                    window.AJAX_BOOL = true;
+                    var num_loading = layer.msg('加载中',{icon: 16,time:150000})
+                    $.ajax({
+                        url:"{:url('Lives/goods_edit')}",
+                        type: "post",
+                        data:obj,
+                        dataType:"json",
+                        success:function (res) {
+                            layer.close(num_loading)
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                            window.AJAX_BOOL = false;
+                        },
+                        error:function(e){
+                            layer.close(num_loading)
+                            window.AJAX_BOOL = false;
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+            });
+
+        </script>
+
+
+<script>
+    //按钮-进行上传操作--图片阅览
+    $('#test1').click(function(){
+        $('#test1s').click();
+    })
+
+    // 操作成功后的回调
+    $('#test1s').change(function(e){
+        var imgBox = e.target;
+        if(imgBox.files[0].size > 1024 * 1024 *2){
+            return layer.msg('失败，文件不得超过2mb',{icon: 5})
+        }
+        var img = getObjectURL(imgBox.files[0]);
+        $('#img').attr('src',img);
+        var data = {image: imgBox.files[0]}
+        var formData = new FormData();
+        formData.append('image', imgBox.files[0]);
+        formData.append('prefix','lives/goodsImg');
+        $.ajax({
+            url:"{:url('admin/uploads/cosFiles')}",
+            type: 'post',
+            async: false,
+            data: formData,
+            dataType: 'json',
+            processData: false,// 告诉jQuery不要去处理发送的数据
+            contentType: false,// 告诉jQuery不要去设置Content-Type请求头
+            beforeSend: function (){ //过程...
+            },
+            success: function (res) {
+                if (res.code == 200) {
+                    layer.msg('加载成功', {icon: 6})
+                    //$('input[name=img_url]').val(HOST_URL +'/' +  res.data.fileName + '/' + (res.data.prefix ? '/' +  res.data.prefix + '/' : '') + res.data.url.replace("\\",'/'))
+                    // $('input[name=img_url]').val('/' +  res.data.fileName +  (res.data.prefix ? '/' +  res.data.prefix + '/' : '') + res.data.url.replace("\\",'/'))
+                    $('input[name=img_url]').val(res.data.url)
+                } else {
+                    layer.msg(res.msg || '失败，麻烦重新尝试', {icon: 5})
+                }
+            },
+            error:function(){
+                layer.msg( '失败，重新尝试，多次失败后麻烦联系开发人员', {icon: 5})
+            }
+        })
+    });
+
+    //建立一個可存取到該file的url
+    function getObjectURL(file) {
+        var url;
+        if (window.createObjectURL != undefined) { // basic
+            url = window.createObjectURL(file);
+        } else if (window.URL != undefined) { // mozilla(firefox)
+            url = window.URL.createObjectURL(file);
+        } else if (window.webkitURL != undefined) { // webkit or chrome
+            url = window.webkitURL.createObjectURL(file);
+        }
+        return url;
+    }
+</script>
+
+<script>
+    // 渲染选中商品
+    function viewGoodIdsList(id){
+        //if(!window.GOODS_DATA_LIST) return   layui.msg('麻烦先搜下商品',{icon:5});
+        var layui = layer
+        var goodsIds = [id]
+        if(goodsIds && goodsIds.length >0){
+            var html = ``;
+            for(var i = 0;i < goodsIds.length;i++){
+                var id = goodsIds[i]
+                if(!window.GOODS_DATA_LIST || !window.GOODS_DATA_LIST[id]) continue;
+                var linshiData = window.GOODS_DATA_LIST[id]
+                html += `
+                <div class="yulanClickGoodsItem" title="${linshiData.name}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                        <div title="${linshiData.id}-${linshiData.name}" onclick="openUrl('${linshiData.supply_url}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                名称：<span style="color:#1E9FFF;">${linshiData.name ? linshiData.name.substr(0,10)+'...' : ''}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                            </span>
+                            <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="${linshiData.cover.split(',')[0]}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.name}')" title="点我复制名称" ><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.id}')" title="点我复制序号" ><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="openUrl('${linshiData.supply_url}')" title="点我跳转货源链接" ><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                            <button data-id="${linshiData.id}" onclick="clickGoods(this,${linshiData.id})" type="button" class="layui-btn layui-btn-danger"  title="点我删除" ><i class="layui-icon layui-icon-delete"></i>删除</button>
+                        </div>
+                </div>
+                `;
+            }
+            if(html){
+                layer.msg('切换商品ok',{icon: 6})
+                $(".yulanClickGoods").html(html)
+            }else{
+                $(".yulanClickGoods").html('')
+            }
+        }
+    }
+
+    // 删除列表中的商品
+    function clickGoods(self,id){
+        if(!id || !self) return layer.msg('错误值，刷新重试',{icon:5})
+        $("#goodsId_"+id).prop('checked',false)
+        setTimeout(function(){
+            $(self).parents('.yulanClickGoodsItem').remove()
+            layui.form.render('checkbox')
+            layer.msg('删除成功',{icon:6})
+        },100)
+    }
+</script>
+
+<script>
+    // 跳转地址
+    function openUrl(url){
+        if(url && url.indexOf('http') >= 0)
+            window.open(url,'_tagert');
+        else 
+            layer.msg('链接为空，跳转失败',{icon: 5})
+    }   
+</script>
+
+<script>
+    // 初始化商品数据
+    function initGoods(){
+        var obj = localStorage.getItem('lives_goods_add_pl_caogaoList')
+        if(obj) obj = JSON.parse(obj);
+        if(obj && (obj.bid|| obj.cid)){
+            if(obj.bid){
+                $("select[name=bid]").find("option[value="+obj.bid+"]").prop("selected",true);
+            }
+            if(obj.cid){
+                $("select[name=cid]").find("option[value="+obj.cid+"]").prop("selected",true);
+            }
+            layui.form.render('select')
+            getGoodsList(obj)
+            if(window.JISHIQI_comment_add_pl_caogaoList){
+                window.clearInterval(window.JISHIQI_comment_add_pl_caogaoList)
+            }
+            // 监听数据 开始
+            setInterval(function(){
+                jianTingListForm()
+            },500)
+        }else{
+            if(window.JISHIQI_comment_add_pl_caogaoList){
+                window.clearInterval(window.JISHIQI_comment_add_pl_caogaoList)
+            }
+            // 监听数据 开始
+            window.JISHIQI_comment_add_pl_caogaoList = setInterval(function(){
+                jianTingListForm()
+            },500)
+        }
+    }
+
+    // 监听存储数据开始
+    function jianTingListForm(){
+        var obj = {
+            // 分类
+            cid: $("#goods_cid").select().val(),
+            // 品牌
+            bid: $("#goods_bid").select().val()
+        }
+        if(!obj.bid && !obj.cid) return console.log('返回了')
+        localStorage.setItem('lives_goods_add_pl_caogaoList',JSON.stringify(obj))
+    }
+</script>
+
+{include file='common/scroll' /}
+{include file='common/footer' /}

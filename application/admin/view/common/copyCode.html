@@ -1,0 +1,12 @@
+<script>
+    function copyCode(title){
+        $("#copyText").val(title)
+        setTimeout(function(){
+            var copy=document.getElementById("copyText");
+            copy.select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+        },50)
+        layer.msg('复制成功：'+title,{icon: 6})
+    }
+</script>
+<input id="copyText" type="text" style="width: 1px;opacity: 0;height:1px;position: absolute;"/>

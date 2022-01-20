@@ -1,0 +1,171 @@
+{include file='common/head' /}
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <body>
+        <div class="x-nav">
+          <span class="layui-breadcrumb" style="visibility: visible;">
+                  <a><cite>商品管理</cite></a><span lay-separator="">/</span>
+                  <a><cite>商品分类</cite></a>
+              </span>
+            <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+                <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+            </a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-header">
+                            <button class="layui-btn" onclick="xadmin.open('添加商品分类','/admin/product/type_edit','','',true)">
+                                <i class="layui-icon"></i>商品分类</button>
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body ">
+                            <table class="layui-table layui-form">
+                              <thead>
+                                <tr>
+                                    <th style="text-align: center;">id</th>
+                                  <th style="text-align: center;">分类图片</th>
+                                  <th style="text-align: center;">分类名称</th>
+                                  <th style="text-align: center;">分类排序</th>
+                                  <th style="text-align: center;">是否启用</th>
+                                  <th style="text-align: center;">是否显示</th>
+                                  <th style="text-align: center;">菜单操作</th>
+                              </thead>
+                              <tbody class="x-cate">
+                              {volist name="list" id="v"}
+                                <tr cate-id='{$v.id}' fid='0' >
+                                    <td  style="text-align: center;">
+                                        {$v.id}
+                                    </td>
+                                  <td  style="text-align: center;">
+                                      {if condition="$v['cover']"}
+                                      <a href="{$v.cover}" target="_blank"><img src="{$v.cover}" height="50"></a>
+                                      {/if}
+                                  </td>
+                                  <td  style="text-align: center;">
+                                    <i class="layui-icon x-show" status='true'>&#xe623;</i>{$v.name}
+                                  </td>
+                                  <td  style="text-align: center;">{$v.sort}</td>
+                                  <td  style="text-align: center;">
+                                      {if condition="$v['status'] eq 1"}
+                                        <span class="layui-btn layui-btn-normal layui-btn-mini" onclick="menu_status(this,{$v['id']})">是</span>
+                                      {else /}
+                                        <span class="layui-btn layui-btn-danger layui-btn-mini" onclick="menu_status(this,{$v['id']})">否</span>
+                                      {/if}
+                                  </td>
+                                  <td  style="text-align: center;">
+                                        {if condition="$v['is_show'] eq 1"}
+                                            <span class="layui-btn layui-btn-normal layui-btn-mini" onclick="menu_status(this,{$v['id']})">是</span>
+                                        {else /}
+                                            <span class="layui-btn layui-btn-danger layui-btn-mini" onclick="menu_status(this,{$v['id']})">否</span>
+                                        {/if}
+                                  </td>
+                                  <td style="text-align: center;" class="td-manage">
+                                    <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('编辑','/admin/product/type_edit?id={$v.id}')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+                                    <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="menu_del(this,{$v['id']})" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                                  </td>
+                                </tr>
+                              {volist name="v['son']" id="vo"}
+                                <tr cate-id='{$vo.id}' fid='{$v.id}' >
+                                  <td style="text-align: center;">
+                                      {if condition="$vo['cover']"}
+                                      <a href="{$vo.cover}" target="_blank"><img src="{$vo.cover}" height="50"></a>
+                                      {/if}
+                                  </td>
+                                  <td style="text-align: center;">&nbsp;&nbsp;
+                                    ├{$vo.name}
+                                  </td>
+                                  <td style="text-align: center;">{$vo.sort}</td>
+                                  <td style="text-align: center;">
+                                      {if condition="$vo['status'] eq 1"}
+                                      <span class="layui-btn layui-btn-normal layui-btn-mini">是</span>
+                                      {else /}
+                                      <span class="layui-btn layui-btn-danger layui-btn-mini">否</span>
+                                      {/if}
+                                  </td>
+                                  <td style="text-align: center;">
+                                        {if condition="$vo['is_show'] eq 1"}
+                                        <span class="layui-btn layui-btn-normal layui-btn-mini">是</span>
+                                        {else /}
+                                        <span class="layui-btn layui-btn-danger layui-btn-mini">否</span>
+                                        {/if}
+                                   </td>
+                                  <td style="text-align: center;" class="td-manage">
+                                    <button class="layui-btn layui-btn layui-btn-xs"  onclick="xadmin.open('编辑','/admin/product/type_edit?id={$vo.id}')" ><i class="layui-icon">&#xe642;</i>编辑</button>
+                                    <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="menu_del(this,{$vo['id']})" href="javascript:;" ><i class="layui-icon">&#xe640;</i>删除</button>
+                                  </td>
+                                </tr>
+                              {/volist}
+                              {/volist}
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+          layui.use(['form'], function(){
+            form = layui.form;
+          });
+
+           /*删除*/
+          function menu_del(obj,id){
+              layer.confirm('确认要删除吗？',function(index){
+                  $.ajax({
+                      url:"{:url('Product/type_del')}",
+                      type: "post",
+                      data:{id:id},
+                      dataType:"json",
+                      success:function (res) {
+                          if(res.code == 200){
+                              $(obj).parents("tr").remove();
+                              layer.msg(res.msg, {icon: 1,time:1000});
+                          }else{
+                              layer.alert(res.msg, {icon:2,time:1000});
+                          }
+                      },
+                      error:function(e){
+                          layer.alert("网络错误", {icon:5,time:1000});
+                      },
+                  });
+              });
+          }
+
+          // 分类展开收起的分类的逻辑
+          // 
+          $(function(){
+            $("tbody.x-cate tr[fid!='0']").hide();
+            // 栏目多级显示效果
+            $('.x-show').click(function () {
+                if($(this).attr('status')=='true'){
+                    $(this).html('&#xe625;'); 
+                    $(this).attr('status','false');
+                    console.log($(this).parents('tr'))
+                    cateId = $(this).parents('tr').attr('cate-id');
+                    $("tbody tr[fid="+cateId+"]").show();
+               }else{
+                    cateIds = [];
+                    $(this).html('&#xe623;');
+                    $(this).attr('status','true');
+                    cateId = $(this).parents('tr').attr('cate-id');
+                    getCateId(cateId);
+                    for (var i in cateIds) {
+                        $("tbody tr[cate-id="+cateIds[i]+"]").hide().find('.x-show').html('&#xe623;').attr('status','true');
+                    }
+               }
+            })
+          })
+
+          var cateIds = [];
+          function getCateId(cateId) {
+              $("tbody tr[fid="+cateId+"]").each(function(index, el) {
+                  id = $(el).attr('cate-id');
+                  cateIds.push(id);
+                  getCateId(id);
+              });
+          }
+   
+        </script>
+    </body>
+{include file='common/footer' /}

@@ -1,0 +1,215 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" type="post">
+                    <input type="hidden" name="type" value="finance">
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>财务基础设置</legend>
+                    </fieldset>
+                    <!--提现开始-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            提现设置-
+                        </label>
+                        <div class="layui-form-mid layui-word-aux">
+                            手续费：
+                        </div>
+                        <div class="layui-col-md1" style="text-align: left">
+                            <input style="width:90%" type="number" name="withdraw_formalities" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_formalities|default=0}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            购物券返现：
+                        </div>
+                        <div class="layui-col-md1" style="text-align: left">
+                            <input style="width:90%" type="number" name="withdraw_cashBack" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_cashBack|default=0}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            最低提现：
+                        </div>
+                        <div class="layui-col-md1" style="text-align: left">
+                            <input style="width:90%" type="number" name="withdraw_min" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_min|default=0}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            最大提现：
+                        </div>
+                        <div class="layui-col-md1" style="text-align: left">
+                            <input style="width:90%" type="number" name="withdraw_max" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_max|default=0}">
+                        </div>
+                    </div>
+                    <!--提现通知-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            提现通知-
+                        </label>
+                        <div class="layui-form-mid layui-word-aux">
+                            申请：
+                        </div>
+                        <div class="layui-col-md2" style="text-align: left">
+                            <input style="width:90%" type="text" name="withdraw_application" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_application|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            审核：
+                        </div>
+                        <div class="layui-col-md2" style="text-align: left">
+                            <input style="width:90%" type="text" name="withdraw_audit" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_audit|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            到账：
+                        </div>
+                        <div class="layui-col-md2" style="text-align: left">
+                            <input style="width:90%" type="text" name="withdraw_arrive" required="" autocomplete="off" class="layui-input" value="{$config.withdraw_arrive|default=''}">
+                        </div>
+                    </div>
+                    <!--文字解释-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            文字解释-
+                        </label>
+                        <div class="layui-form-mid layui-word-aux">
+                            余额：
+                        </div>
+                        <div class="layui-col-md2" style="text-align: left">
+                            <input style="width:90%" type="text" name="text_money" required="" autocomplete="off" class="layui-input" value="{$config.text_money|default=''}">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            可提现余额：
+                        </div>
+                        <div class="layui-col-md2" style="text-align: left">
+                            <input style="width:90%" type="text" name="text_moneyWithdraw" required="" autocomplete="off" class="layui-input" value="{$config.text_moneyWithdraw|default=''}">
+                        </div>
+                    </div>
+                    <!--结算喵呗周期-->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            喵呗周期-
+                        </label>
+                        <!--拼团活动结算周期-->
+                        <div>
+                            <div class="layui-form-mid layui-col-md1">
+                                <span style="color:#FF5722">拼团活动结算:</span>
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                (周期)小时：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="number" name="FightTogether_cycle_day" required="0结算时间10分钟" autocomplete="off" class="layui-input" value="{$config.FightTogether_cycle_day|default=0}">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                说明：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="text" name="FightTogether_cycle_text" required="" autocomplete="off" class="layui-input" value="{$config.FightTogether_cycle_text|default=''}">
+                            </div>
+                        </div>
+                        <hr>
+                        <label class="layui-form-label">
+                        </label>
+                        <!--分享结算周期-->
+                        <div>
+                            <div class="layui-form-mid layui-col-md1">
+                                <span style="color:#FF5722">分享结算:</span>
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                (周期)小时：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="number" name="FightTogether_share_day" required="0结算时间10分钟" autocomplete="off" class="layui-input" value="{$config.FightTogether_share_day|default=0}">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                说明：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="text" name="FightTogether_share_text" required="" autocomplete="off" class="layui-input" value="{$config.FightTogether_share_text|default=''}">
+                            </div>
+                        </div>
+                        <hr>
+                        <label class="layui-form-label">
+                        </label>
+                        <!--购物券分佣结算-->
+                        <div>
+                            <div class="layui-form-mid layui-col-md1">
+                                <span style="color:#FF5722">分佣结算:</span>
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                (周期)小时：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="number" name="FightTogether_ShoppingVoucher_day" required="0结算时间10分钟" autocomplete="off" class="layui-input" value="{$config.FightTogether_ShoppingVoucher_day|default=0}">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                说明：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="text" name="FightTogether_ShoppingVoucher_text" required="" autocomplete="off" class="layui-input" value="{$config.FightTogether_ShoppingVoucher_text|default=''}">
+                            </div>
+                        </div>
+                        <hr>
+                        <label class="layui-form-label">
+                        </label>
+                        <!--团队奖励结算周期-->
+                        <div>
+                            <div class="layui-form-mid layui-col-md1">
+                                <span style="color:#FF5722">团结结算:</span>
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                (周期月)号：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="number" name="FightTogether_ShoppingVoucher_day" required="0结算时间10分钟" autocomplete="off" class="layui-input" value="{$config.FightTogether_ShoppingVoucher_day|default=0}">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                说明：
+                            </div>
+                            <div class="layui-col-md2" style="text-align: left">
+                                <input style="width:90%" type="text" name="FightTogether_ShoppingVoucher_text" required="" autocomplete="off" class="layui-input" value="{$config.FightTogether_ShoppingVoucher_text|default=''}">
+                            </div>
+                        </div>
+                        <!--开启账号充值 2.0 版本开启-->
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">账号充值</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" name="switch" value="{$config.switch|default=1}" lay-skin="switch" lay-text="开启|关闭">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">
+                                敬请期待2.0版本后开启
+                            </div>
+                        <hr>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label"></label>
+                            <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer','jquery'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+                layui.form.render()
+                    //监听提交
+                form.on('submit(add)', function(data) {
+                    $.ajax({
+                        url:"{:url('Finance/edit_setting')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon:1,time:1000});
+                                //window.location.href = window.location.href
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+{include file='common/footer' /}

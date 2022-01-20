@@ -1,0 +1,273 @@
+{include file='common/head' /}
+    <body>
+        <div class="x-nav">
+          <span class="layui-breadcrumb">
+              <a><cite>订单管理</cite></a>
+              <a><cite>订单列表</cite></a>
+          </span>
+          <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+        </div>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="id"  placeholder="订单序号" autocomplete="off" class="layui-input" value="{$get.id|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="uname"  placeholder="用户名" autocomplete="off" class="layui-input" value="{$get.uname|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="uid"  placeholder="用户ID" autocomplete="off" class="layui-input" value="{$get.uid|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="gname"  placeholder="商品名称" autocomplete="off" class="layui-input" value="{$get.gname|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="order_sn"  placeholder="订单号" autocomplete="off" class="layui-input" value="{$get.order_sn|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="aname"  placeholder="收货人" autocomplete="off" class="layui-input" value="{$get.aname|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="tel"  placeholder="收货人电话" autocomplete="off" class="layui-input" value="{$get.tel|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input type="text" name="spu"  placeholder="商品货号" autocomplete="off" class="layui-input" value="{$get.spu|default=''}">
+                                </div>
+<!--                                订单类型-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <select name="type">
+                                        <option value="">订单类型</option>
+                                        {volist name="types" id="v"}
+                                        <option value="{$key}" {if condition="strlen($get['type']) >= 1 && $get['type'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+<!--                                订单状态-->
+                                <div class="layui-inline layui-show-xs-block">
+                                    <select name="status">
+                                        <option value="">状态筛选</option>
+                                        {volist name="status" id="v"}
+                                        <option value="{$key}" {if condition="strlen($get['status']) >= 1 && $get['status'] == $key"}selected{/if}>{$v}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <!-- 分页数据 -->
+                                <div class="layui-inline layui-show-xs-block" style="width: 150px;">
+                                    <select name="limit">
+                                        <option value="" selected>分页数据</option>
+                                        <option value="10" {if condition="$get['limit'] == 10"}selected{/if}>10条</option>
+                                        <option value="20" {if condition="$get['limit'] == 20"}selected{/if}>20条</option>
+                                        <option value="30" {if condition="$get['limit'] == 30"}selected{/if}>30条</option>
+                                        <option value="50" {if condition="$get['limit'] == 50"}selected{/if}>50条</option>
+                                        <option value="100" {if condition="$get['limit'] == 100"}selected{/if}>100条</option>
+                                        <option value="150" {if condition="$get['limit'] == 150"}selected{/if}>150条</option>
+                                        <option value="200" {if condition="$get['limit'] == 200"}selected{/if}>200条</option>
+                                    </select>
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="下单时间开始" name="start" id="start" value="{$get.start|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <input class="layui-input"  autocomplete="off" placeholder="下单时间截止" name="end" id="end" value="{$get.end|default=''}">
+                                </div>
+                                <div class="layui-inline layui-show-xs-block">
+                                    <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-header">
+                            <span style="line-height:40px;float: right;">共有数据：{$count} 条</span>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main">
+                            <table class="layui-table layui-form">
+                                <thead>
+                                  <tr>
+                                    <th style="text-align: center;">商品图片</th>
+                                    <th style="text-align: center;">商品名称</th>
+                                    <th style="text-align: center;">商品规格</th>
+                                    <th style="text-align: center;">商品单价</th>
+                                    <th style="text-align: center;">商品数量</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {volist name="list" id="v"}
+                                {php}$count=count($v['goods']);{/php}
+                                  <tr>
+                                      <td colspan="5">
+                                          序号：{$v.id}&nbsp;|&nbsp;&nbsp;
+                                          <span style="color:#01AAED;">{$v.type}</span>
+                                          | {:date('Y-m-d H:i',$v['add_time'])}&nbsp;|&nbsp;
+                                          <span style="color:red">{$v.uname}</span>&nbsp;|&nbsp;
+                                          订单号：{$v.order_sn}&nbsp;|&nbsp;
+                                          实付金额：{$v.total}元&nbsp;|&nbsp;
+                                          购物券：{$v.volume}元&nbsp;|&nbsp;
+                                          {$v.type}&nbsp;|&nbsp;
+                                          {$v['deliver']}&nbsp;|&nbsp;
+                                          <span style="color:{$color[$v['status']]}">{$status[$v['status']]}</span>&nbsp;&nbsp;
+                                          {if condition="$v['status'] eq 2"}
+                                          <button class="layui-btn layui-btn layui-btn-xs" title="发货处理"  onclick="xadmin.open('发货处理','/admin/orders/deliver?id={$v.id}',600,400)" href="javascript:;">
+                                              发货处理
+                                          </button>&nbsp;&nbsp;
+                                          {/if}
+                                          {if condition="$v['status'] eq 8"}
+                                          <button class="layui-btn layui-btn layui-btn-xs" title="退款审核"  onclick="xadmin.open('退款审核','/admin/orders/refund?id={$v.id}',600,400)" href="javascript:;">
+                                              退款审核
+                                          </button>&nbsp;&nbsp;
+                                          {/if}
+                                          {if condition="$v['status'] eq 3"}
+                                          <button class="layui-btn layui-btn layui-btn-xs" title="确认收货"  onclick="confirm_receipt(this,{$v['id']})" href="javascript:;">
+                                              确认收货
+                                          </button>&nbsp;&nbsp;
+                                          {/if}
+                                          {if condition="$v['status'] eq 4"}
+                                          <button class="layui-btn layui-btn layui-btn-xs" title="结束订单"  onclick="finish_order(this,{$v['id']})" href="javascript:;">
+                                              结束订单
+                                          </button>&nbsp;&nbsp;
+                                          {/if}
+                                          <button class="layui-btn layui-btn layui-btn-xs" title="订单详情"  onclick="xadmin.open('订单详情','/admin/orders/info?id={$v.id}','','',true)" href="javascript:;">
+                                              订单详情
+                                          </button>&nbsp;&nbsp;
+                                      </td>
+                                  </tr>
+                                {volist name="v['goods']" id="vo"}
+                                  <tr>
+                                    <td style="text-align: center;"><a href="{$vo.cover}" target="_blank">
+                                        <img src="{$vo.cover}" height="50"></a>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {if $vo.supply_url && strlen($vo.supply_url) >= 4}
+                                            <a title="货源连接" target="_blank" style="color:steelblue;" href="{$vo.supply_url}">{$vo.name}</a>
+                                        {else/}
+                                            {$vo.name}
+                                        {/if}
+                                    </td>
+
+                                    <td style="text-align: center;">
+                                        {php}
+                                            if($vo['valjson'] && is_array($vo['valjson'])){
+                                                $json = $vo['valjson'];
+                                                if($json){
+                                                    foreach($json as $key => $val){
+                                                         echo $key.":<sapn style='color:#FF5722'>".$val."</sapn>、";
+                                                    }
+                                                }
+                                            }else{
+                                                echo "无";
+                                            }
+                                        {/php}
+                                    </td>
+                                    <td style="text-align: center;">{$vo.price}元</td>
+                                    <td style="text-align: center;">{$vo.num}</td>
+                                  </tr>
+                                {/volist}
+                                <tr>
+                                <td colspan="5">
+                                    {if $v.is_fictitious == 1}<span style="color: red">测试用户</span>&nbsp;|&nbsp;{/if}收货地址：
+                                    {if $v['address_json']}
+                                        {$v['address_json']['name']}
+                                        {$v['address_json']['phone']}
+                                        {$v['address_json']['address']}
+                                    {/if}
+                                    {if $v->getExpressOne}
+                                        &nbsp;|&nbsp;<span style="color:#FF5722">物流信息：</span>
+                                    &nbsp;
+                                    快递公司：{$logistics[$v->getExpressOne->company]}&nbsp;
+                                    &nbsp;单号：&nbsp;<span onclick="copyCode('{$v->getExpressOne->express_sn}')">{$v->getExpressOne->express_sn}</span>
+                                    &nbsp;&nbsp;发货时间：&nbsp;{:date('Y-m-d H:i:s',$v->getExpressOne->add_time)}
+                                    &nbsp;&nbsp;描述：&nbsp;{$v->getExpressOne->desc}
+                                    {/if}
+                                </td>
+                                </tr>
+                                {/volist}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </body>
+    <script>
+      layui.use(['form','laydate'], function(){
+          var laydate = layui.laydate;
+          var  form = layui.form;
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#start' //指定元素
+          });
+
+          //执行一个laydate实例
+          laydate.render({
+              elem: '#end' //指定元素
+          });
+
+        // 监听全选
+        form.on('checkbox(checkall)', function(data){
+          if(data.elem.checked){
+            $('tbody input').prop('checked',true);
+          }else{
+            $('tbody input').prop('checked',false);
+          }
+          form.render('checkbox');
+        });
+      });
+
+      /*确认收货*/
+      function confirm_receipt(obj,id){
+          layer.confirm('此订单确认进行收货处理吗？',function(index){
+              $.ajax({
+                  url:"{:url('Orders/receipt')}",
+                  type: "post",
+                  data:{id:id},
+                  dataType:"json",
+                  success:function (res) {
+                      if(res.code == 200){
+                          layer.msg(res.msg, {icon: 1,time:1000});
+                          location.reload()
+                      }else{
+                          layer.alert(res.msg, {icon:2,time:1000});
+                      }
+                  },
+                  error:function(e){
+                      layer.alert("网络错误", {icon:5,time:1000});
+                  },
+              });
+          });
+      }
+
+      /*结束订单*/
+      function finish_order(obj,id){
+          layer.confirm('此订单确认完成吗？',function(index){
+              $.ajax({
+                  url:"{:url('Orders/finish')}",
+                  type: "post",
+                  data:{id:id},
+                  dataType:"json",
+                  success:function (res) {
+                      if(res.code == 200){
+                          layer.msg(res.msg, {icon: 1,time:1000});
+                          location.reload()
+                      }else{
+                          layer.alert(res.msg, {icon:2,time:1000});
+                      }
+                  },
+                  error:function(e){
+                      layer.alert("网络错误", {icon:5,time:1000});
+                  },
+              });
+          });
+      }
+    </script>
+{include file='common/copyCode' /}
+{include file='common/footer' /}

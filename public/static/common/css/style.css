@@ -1,0 +1,44 @@
+/*对的图标*/
+.layui-icon.ok-icon {
+    color: #00a0e9;
+}
+
+/*错的图标*/
+.layui-icon.error-icon {
+    color: #ff2222;
+}
+
+
+/*顶部  logo*/
+.logo a {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.image-logo {
+    width: 32px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+/*全局*/
+
+
+/*全局视频上传*/
+.drop-upload-video {
+    width: 300px;
+}
+
+/*全局 表格图片设置宽度*/
+.layui-table img {
+    width: 200px;
+    height: auto;
+    max-width: 200px;
+}
+
+table .tab-image-cover {
+    width: 200px;
+    height: auto;
+    max-width: 200px;
+}

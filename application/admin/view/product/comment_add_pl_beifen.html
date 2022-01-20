@@ -1,0 +1,1148 @@
+{include file='common/head' /}
+<script type="text/javascript" src="__UPLOAD__/index.js"></script>
+<!-- 表情开始 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<!-- Begin emoji-picker Stylesheets -->
+<link href="__PLURING__/emoji/lib/css/nanoscroller.css" rel="stylesheet">
+<link href="__PLURING__/emoji/lib/css/emoji.css" rel="stylesheet">
+<!-- End emoji-picker Stylesheets -->
+<!-- 表情结束 -->
+
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <input type="hidden" name="cover" id="cover" value="{$data.cover|default=''}">
+                    <input type="hidden" name="id"  value="{$data.id|default=0}">
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>商品选择操作：</legend>
+                      </fieldset>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            选择商品分类
+                        </label>
+                        <!-- 分类 -->
+                        <div class="layui-col-md1">
+                            <select id="goods_cid" style="width:150px;" name="cid" lay-verify="" lay-search>
+                                <option selected value="">分类-可输入搜索值</option>
+                                {volist name="goodtypes" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 选择品牌 -->
+                        <div class="layui-col-md1">
+                            <select id="goods_bid" style="width:150px;" name="bid" lay-verify="" lay-search>
+                                <option selected value="">品牌-可输入搜索值</option>
+                                {volist name="goodBs" id="v"}
+                                    <option value="{$key}">{$v}</option>
+                                {/volist}
+                            </select>
+                        </div>
+                        <!-- 商品名称 -->
+                        <div class="layui-col-md1">
+                            <input id="goods_name" placeholder="商品标题" type="text" name="goods_name" value="" autocomplete="off" class="layui-input">                      
+                        </div>
+                        <!-- 商品序号 -->
+                        <div class="layui-col-md1">
+                            <input id="goods_id" placeholder="商品序号" type="number" name="goods_id" value="" autocomplete="off" class="layui-input">                      
+                        </div>
+                        &nbsp;&nbsp;
+                        <div class="layui-col-md1">
+                            <button onclick="getGoodsList()" title="搜索商品" class="layui-btn"  type="button" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                        <div class="layui-col-md3">
+                            <button onclick="allCheckClik(true)" title="商品全选" class="layui-btn layui-btn-normal"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品当前全选</button>
+                            <button onclick="allCheckClik(false)" title="商品取消全选" class="layui-btn layui-btn-warm"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>商品取消全选</button>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            需要先搜索才能显示商品
+                            <input id="copyText" type="text" name="copyText" style="width: 10px;opacity: 0;" value=""/>
+                        </div>
+                    </div>
+                    <!-- 选择商品 -->
+                    <div class="layui-col-md11">
+                        <div id="goodsList" style="
+                        overflow-y: auto;
+                        max-height: 400px;
+                        padding: 10px;
+                        border: 1px solid #01AAED;
+                        border-left: none;
+                        border-right: none;">
+                        </div>
+                    </div>
+                    <style>
+                        .yulanClickGoods > div {
+                            border:1px dashed #999;
+                            margin-right:10px;
+                            /* padding-left:8px; */
+                            padding: 5px;
+                            text-align: center;
+                            border-radius: 6px;
+                            width:300px;
+                        }
+                    </style>
+                    <script>
+
+                        function getGoodsList(){
+                            var obj = {
+                                cid:  $("#goods_cid").select().val(),
+                                bid:  $("#goods_bid").select().val(),
+                                name: $("#goods_name").val(),
+                                goods_id: $("input[name=goods_id]").val()
+                            }
+                            var num = layer.msg('加载中',{icon:4})
+                            $.ajax({
+                                url:"{:url('Product/getGoods')}",
+                                type: "get",
+                                data:obj,
+                                dataType:"json",
+                                success:function (res) {
+                                    if(res.code == 200 && res.data){
+                                        layer.msg('加载商品成功',{icon:6})
+                                        var html = ``;
+                                        var data = res.data.data
+                                        window.GOODS_DATA_LIST = {}
+                                        for(var i = 0; i < data.length;i++){
+                                            //onclick="checkIdClick(${data[i].id})"
+                                            html += `
+                                                    <div class="goodsItem" title="${data[i].name}" style="float: left;
+    cursor: pointer;
+    border: 1px solid #b9c2c5;
+    padding: 8px;
+    border-radius: 5px;
+    border-style: dashed;
+    margin-right: 10px;
+    margin-bottom:10px;">
+                                                            <div class="goodsCheckBox">
+                                                                <input lay-filter="goodsIds" id="${'goodsId_'+data[i].id}" type="checkbox" value="${data[i].id}" title="${data[i].name ? data[i].name.substr(0,10)+'...' : ''}" name="goods_ids" lay-skin="primary">
+                                                                <img style="height:80px;width:80px;border:1px solid #999;padding:3px;border-radius:4px;" src="${data[i].cover.split(',')[0]}"/>
+                                                            </div>
+                                                            <hr/>
+                                                            <div>
+                                                                <button type="button" onclick="copyCode('${data[i].name}')" title="点我复制名称" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                                                                <button type="button" onclick="copyCode('${data[i].id}')" title="点我复制序号" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                                                                <button type="button" onclick="openUrl('${data[i].supply_url}')" title="点我打开货源链接" class="layui-btn layui-btn-normal" type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                                                            </div>
+                                                    </div>
+                                            `;  
+                                            window.GOODS_DATA_LIST[data[i].id] = data[i]
+                                        }
+                                        if(html){
+                                                    // 监听复选框
+                                                    $("#goodsList").html(html)
+                                                    $(".yulanClickGoods").html('')
+                                        setTimeout(function(){
+                                            layui.form.render()
+                                            setTimeout(function(){
+                                                  //监听复选框-单个
+                                                LAYUI_FORM.on('checkbox(goodsIds)', function(data){
+                                                        // console.log(data,data.elem.checked,data.value)
+                                                        // if(data.elem.checked==true){
+                                                            
+                                                        // }else{
+                                                            
+                                                        // }
+                                                    viewGoodIdsList()
+                                                });
+                                            },100)
+                                        },50)
+                                        }
+                                    }else{
+                                        layer.alert(res.msg, {icon:2,time:1000});
+                                    }
+                                },
+                                error:function(e){
+                                    layer.alert("网络错误", {icon:5,time:1000});
+                                },
+                            });
+                        }
+
+                        function copyCode(title){
+                            $("#copyText").val(title)
+                            setTimeout(function(){
+                                var copy=document.getElementById("copyText");
+                                copy.select(); // 选择对象
+	                            document.execCommand("Copy"); // 执行浏览器复制命令
+                            },50)
+	                        layer.msg('复制成功：'+title,{icon: 6})
+                        }
+
+                        // 选择表单
+                        function checkIdClick(id){
+                            // $('#goodsId_'+id).prop('checked') ?  $('#goodsId_'+id).attr('checked',false) : $('#goodsId_'+id).attr('checked',true)//$('#goodsId_'+id).click()
+                        }
+
+                        // 全选
+                        function allCheckClik(bool = true){
+                            layer.msg(bool ? '全选成功' : '取消成功',{icon: 6});
+                            bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').prop('checked',false),$('input[name="goods_ids"]').removeAttr('checked') 
+                            // bool ?  $('input[name="goods_ids"]').prop('checked',true) : $('input[name="goods_ids"]').removeAttr('checked')
+                            setTimeout(function(){
+                                layui.form.render('checkbox')
+                                setTimeout(function(){
+                                    bool ? viewGoodIdsList() : $(".yulanClickGoods").html('')
+                                },100)
+                            },50)
+                        }
+                    </script>
+                    <hr>
+                    <!-- 预览选中商品 -->
+                    <div id="yuLanShangPinView" class="layui-form-item">
+                        <label class="layui-form-label">
+                            预览商品
+                        </label>
+                        <div class="layui-col-md10">
+                            <div style="overflow: auto;max-height: 300px;" class="yulanClickGoods">
+
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>用户选择操作：</legend>
+                      </fieldset>
+                    <!-- 选择会员快捷操作 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            选择会员操作
+                        </label>
+                        <div class="layui-col-md6">
+                            <div class="layui-col-md3">
+                                <input name="user_id" placeholder="随机用户人数" class="layui-input" value="1" type="number" />
+                            </div>
+                            <div class="layui-col-md6">
+                                <button onclick="suijiUser(true)" title="随机用户" class="layui-btn layui-btn-danger"  type="button" ><i class="layui-icon layui-icon-edit"></i>随机用户</button>
+                                <button onclick="suijiUser(false)" title="新增随机用户" class="layui-btn layui-btn-normal"  type="button"><i class="layui-icon layui-icon-addition"></i>新增用户</button>
+                                <button onclick="allCheckClikUser(true)" title="用户全选" class="layui-btn layui-btn-normal"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>用户全选</button>
+                                <button onclick="allCheckClikUser(false)" title="用户取消全选" class="layui-btn layui-btn-warm"  type="button" lay-filter="sreach"><i class="layui-icon layui-icon-snowflake"></i>用户取消全选</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 选择会员 -->
+                    <div class="layui-form-item">
+                        <div class="layui-col-md11">
+                            <div class="userListBox" style="overflow-y: auto;max-height: 400px;padding: 10px;border: 1px solid #1E9FFF;border-left: none;border-right: none;">
+                                {volist name="users" id="v"}
+                                    <div>
+                                        <input lay-filter="usersIds" id="userId_{$v.id}" type="checkbox" name="uids" value="{$v.id}" title="{$v.nickname}" lay-skin="primary"> 
+                                        <img src="{$v.avatarurl}" style="width:50px;height:50px;"/>
+                                    </div>
+                                {/volist}
+                            </div>
+                        </div>
+                        
+                        <style>
+                            .userListBox div {
+                                float: left;
+                                border: 1px solid #999;
+                                padding: 6px;
+                                margin-right: 6px;
+                                margin-bottom: 6px;
+                                border-style: dashed;
+                                border-radius: 5px;
+                            }
+                        </style>
+                    </div>
+                    <hr>
+                    <!-- 预览用户 -->
+                    <div id="yuLanUSERView" class="layui-form-item">
+                        <label class="layui-form-label">
+                            预览用户
+                        </label>
+                        <div class="layui-col-md10">
+                            <div style="overflow: auto;max-height: 300px;" class="yuLanUSERViewCLICK">
+
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        .yuLanUSERViewCLICK > div {
+                            border: 1px dashed #999;
+                            margin-right: 10px;
+                            padding: 5px;
+                            text-align: center;
+                            border-radius: 6px;
+                        }
+                    </style>
+                    <hr>
+                    <script>
+                        window.USERLIST = {:json_encode($users)};
+                        window.USERLISTOBJ = {}
+                        if(window.USERLIST && window.USERLIST.length > 0)
+                            for(var i  =0;i < window.USERLIST.length;i++) window.USERLISTOBJ[window.USERLIST[i].id] = window.USERLIST[i]
+                        // 随机用户
+                        function suijiUser(bool = true){
+                            //var num = Math.floor(USERLIST.length / 10) + Math.floor(Math.random() *  (USERLIST.length / 10 + 5)) 
+                            var num = Math.floor($("input[name=user_id]").val())
+                            var list =  getRandomArrayElements(USERLIST, num)
+                            if(bool){
+                                $("input[name='uids']").prop('checked',false)
+                            }
+                            for(var i = 0; i <list.length;i++){
+                                $("#userId_"+list[i].id).prop('checked',true)
+                            }
+                            setTimeout(function(){
+                                layui.form.render('checkbox')
+                                setTimeout(function(){
+                                    // 渲染用户
+                                    viewUsersIdsList()
+                                },100)
+                            },50)
+                            layer.msg('随机成功',{icon:6})
+                        }
+
+                        // 取消全选或者  当前全选
+                        function allCheckClikUser(bool = true){
+                            bool ? $("input[name='uids']").prop('checked',true) : $("input[name='uids']").prop('checked',false)
+                            setTimeout(function(){
+                                layui.form.render('checkbox')
+                                setTimeout(function(){
+                                    // 渲染用户
+                                    viewUsersIdsList()
+                                    !bool && $(".yuLanUSERViewCLICK").html('')
+                                },100)
+                            },50)
+                            layer.msg(bool ? '全选用户成功' : '取消全选成功',{icon:6})
+                        }
+
+                        function getRandomArrayElements(arr, count) {
+                            var shuffled = arr.slice(0), i = arr.length, min = i - count, temp, index;
+                            while (i-- > min) {
+                                index = Math.floor((i + 1) * Math.random());
+                                temp = shuffled[index];
+                                shuffled[index] = shuffled[i];
+                                shuffled[i] = temp;
+                            }
+                            return shuffled.slice(min);
+                        }
+
+                    </script>
+                    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                        <legend>常规操作如下：</legend>
+                      </fieldset>
+                    <!-- 日期范围 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            日期范围
+                        </label>
+                        <div class="layui-col-md6">
+                            <span style="display: none;">{$date_str = date('Y-m-d',time() - 3600*24 * rand(20,120)) .' - '.date('Y-m-d',time() - 3600*24 * rand(5,20))}</span>
+                            <!-- 2020-07-16 - 2020-08-16 -->
+                            <input type="text" class="layui-input" name="dateYmd" id="dateYmd" value="{$date_str}" placeholder="{$date_str}">
+                        </div>
+                        <div class="layui-col-md3">
+                            <button title="随机日期" onclick="suijiDate()" type="button" class="layui-btn layui-btn-danger"><i class="layui-icon layui-icon-edit"></i>随机日期</button>
+                        </div>
+                    </div>
+                    <script>
+                        // 随机日期
+                        function suijiDate(){
+                            var str = getDateYmdStr(getRandomDateBetween(5,100).toLocaleDateString()) +" - " + getDateYmdStr(getRandomDateBetween(1,5).toLocaleDateString())
+                            layer.msg('随机日期为：'+str+' 设置ok',{icon:6})
+                            $("#dateYmd").attr('value',str).attr('placeholder',str).val(str)
+                        }
+                    </script>
+
+                    <!-- 评分等级 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评分等级
+                        </label>
+                        <div class="layui-col-md6">
+                            <div id="rote-level"></div>
+                            <input type="hidden"  name="level" autocomplete="off" class="layui-input" value="5">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">
+                            评分等级，值取1-5
+                        </div>
+                    </div>
+                    <!-- 评论模板 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评论模板
+                        </label>
+                        <div class="layui-col-md1">
+                            <select id="pinglun_typesKey" lay-filter="pinglun_types" name="pinglun_types" lay-verify="" lay-search>
+                                <option selected value="">模板-可输入搜索值</option>
+                                <option  value="kouhong" selected>口红</option>
+                                <option  value="kouqiang" >口腔护理-清新味</option>
+                                <option  value="meifagehu_chunmo" >美发个护-唇膜</option>
+                                <option  value="ximiannai" >洗面奶</option>
+                                <option  value="xiezs" >卸妆水</option>
+                                <option  value="zhijiaoyou">指甲油</option>
+                            </select>
+                        </div>
+                        <div class="layui-col-md3">
+                            <select id="pinglun_list" lay-filler="pinglun_list" name="pinglun_list" lay-verify="" lay-search>
+                                <option selected value="">模板-可输入搜索值</option>
+                            </select>
+                        </div>
+                        <div class="layui-col-md1">
+                            <button onclick="editCommentVal(true)" title="生成评论" type="button" class="layui-btn layui-btn-normal layui-btn-xs" onclick=""><i class="layui-icon layui-icon-edit"></i>生成评论</button>
+                        </div>
+                        <div class="layui-col-md1">
+                            <button onclick="editCommentVal(false)" title="随机评论" type="button" class="layui-btn layui-btn-warm layui-btn-xs" onclick=""><i class="layui-icon layui-icon-ok"></i>随机评论</button>
+                        </div>
+                    </div>
+                    <script>
+                        // 生成评论信息
+                        function editCommentVal(bool = true){
+                            var val = null;
+                            if(bool){
+                                val = $("#pinglun_list").select().val()
+                                if(!val || val.length <= 2) return layer.msg('请选择评论内容',{icon:5})
+                                
+                            }else{
+                                var key =  $("#pinglun_typesKey").select().val()
+                                var list = null;
+                                if(key && window.PILUN_LIST[key]){
+                                    list = window.PILUN_LIST[key];
+                                }else {
+                                    // 默认第一个
+                                    list =  window.PILUN_LIST.kouhong
+                                }
+                                val = list.vals[Math.floor(Math.random() * list.vals.length)]
+                            }
+                            $("#discussTxt").next().text(val)
+                            $("#discussTxt").attr('value',val).val(val)
+                            layer.msg('评论生成ok',{icon:6})
+                        }
+                    </script>
+                    <!-- 评论内容 -->
+                    <style>
+                        .emoji-wysiwyg-editor.layui-textarea {
+                            height:100px;
+                        }
+                    </style>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评论内容
+                        </label>
+                        <div class="layui-col-md6">
+                            <input style="height:100px;" id="discussTxt" style="height:100px;" placeholder="请输入内容" name="discuss" class="layui-textarea" value="{$data.discuss|default=''}" data-emojiable="true"/>
+                        </div>
+                    </div>
+
+                    <!-- 表情开始--- -->
+                    <script src="__PLURING__/jq.js"></script>
+                    <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+                    <!-- Begin emoji-picker JavaScript -->
+                    <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/config.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/util.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+                    <!-- End emoji-picker JavaScript -->
+                    <script>
+                    $(function() {
+                      // Initializes and creates emoji set from sprite sheet
+                      window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                      });
+                      // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                      // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                      // It can be called as many times as necessary; previously converted input fields will not be converted again
+                      window.emojiPicker.discover();
+                    });
+                      </script>
+                    <!-- 表情结束--- -->
+
+                    <!-- 评论图片 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评论图片
+                        </label>
+                        <div class="layui-col-md9">
+                            <div id="bannerListImgs">
+                                <div>
+                                    <input name="bannerDataImgs" type="hidden" value="{$data.cover|default=''}"/>
+                                    <!-- 添加 -->
+                                    <button title="添加新的轮播图-推荐" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                                        <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" id="bannerImgs_data_push" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                                        <i class="layui-icon layui-icon-praise"></i>
+                                        添加上传
+                                    </button>
+                                    <!-- 替换 -->
+                                    <button title="替换会删除原有的轮播图-不推荐" style="position: relative;" type="button" class="layui-btn layui-btn-warm">
+                                        <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" id="bannerImgs_data" type="file" size="30" name="bannerImgs_data[]" value="替换图片" multiple=true/>
+                                        <i class="layui-icon layui-icon-upload-circle"></i>
+                                        替换上传
+                                    </button>
+                                    <!-- 批量删除 -->
+                                    <button title="直接清空当前轮播图" type="button" onclick='bannerDelAll()' class="layui-btn layui-btn-danger"><i class="layui-icon layui-icon-delete"></i>清空</button>
+                                    <table class="layui-table">
+                                        <thead>
+                                            <th>图片</th>
+                                            <th>操作</th>
+                                        </thead>
+                                        <tbody id="bannerListImgs-tbody">
+                                            {if isset($data.cover) && $imgs && is_array($imgs)}
+                                            {volist name="imgs" id="v"}
+                                            <tr data-name="{$v}">
+                                                <td> <img style="cursor: pointer;" title="点我预览图片" data-src="{$v}" onclick="lookImg('{$v}','商品-轮播图',this)" style="width:150px;"  src="{$v}" /></td>
+                                                <td>
+                                                    <button title="替换图片" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                                                        <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" class="bannerList_tiHuan" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                                                        <i class="layui-icon layui-icon-edit"></i>替换
+                                                    </button>
+                                                    <button title="向上排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                                                    <button title="向下排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                                                    <button title="删除" type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="bannerViewdel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                                                </td>
+                                            </tr>
+                                            {/volist}
+                                            {/if}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            评论图片
+                        </label>
+                        <div class="layui-col-md9">
+                            <div id="demo" class="demo" style="width: 650px; height: 400px;">
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">回复内容</label>
+                        <div class="layui-col-md9">
+                            <input style="height:100px;" placeholder="请输入内容" name="reply" class="layui-textarea" value="{$data.reply|default=''}" data-emojiable="true"/>
+                        </div>
+                    </div>
+                    <!-- 表情开始--- -->
+                    <script src="__PLURING__/jq.js"></script>
+                    <script>window.jQuery || document.write('<script src="js/jquery-2.1.1.min.js"><\/script>')</script>
+                    <!-- Begin emoji-picker JavaScript -->
+                    <script src="__PLURING__/emoji/lib/js/nanoscroller.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/tether.min.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/config.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/util.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/jquery.emojiarea.js"></script>
+                    <script src="__PLURING__/emoji/lib/js/emoji-picker.js"></script>
+                    <!-- End emoji-picker JavaScript -->
+                    <script>
+                    $(function() {
+                      // Initializes and creates emoji set from sprite sheet
+                      window.emojiPicker = new EmojiPicker({
+                        emojiable_selector: '[data-emojiable=true]',
+                        assetsPath: '/static/pluring/emoji/lib/img/',
+                        popupButtonClasses: 'fa fa-smile-o'
+                      });
+                      // Finds all elements with `emojiable_selector` and converts them to rich emoji input fields
+                      // You may want to delay this step if you have dynamically created input fields that appear later in the loading process
+                      // It can be called as many times as necessary; previously converted input fields will not be converted again
+                      window.emojiPicker.discover();
+                    });
+                      </script>
+                    <!-- 表情结束--- -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序</label>
+                        <div class="layui-col-md9">
+                            <input type="number" name="sort" value="{$data.sort|default=0}" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            是否显示
+                        </label>
+                        <div class="layui-input-inline">
+                            {if empty($data['is_display'])}
+                            <input type="radio" name="is_display" value="1" title="是" checked>
+                            <input type="radio" name="is_display" value="0" title="否" >
+                            {else /}
+                            <input type="radio" name="is_display" value="1" title="是" {if $data['is_display'] == 1}checked{/if}>
+                            <input type="radio" name="is_display" value="0" title="否" {if $data['is_display'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            匿名
+                        </label>
+                        <div class="layui-input-inline">
+                            {if empty($data['is_anonymous'])}
+                            <input type="radio" name="is_anonymous" value="1" title="是">
+                            <input type="radio" name="is_anonymous" value="0" title="否" checked >
+                            {else /}
+                            <input type="radio" name="is_anonymous" value="1" title="是" {if $data['is_anonymous'] == 1}checked{/if}>
+                            <input type="radio" name="is_anonymous" value="0" title="否" {if $data['is_anonymous'] == 0}checked{/if}>
+                            {/if}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"></label>
+                        <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                </form>
+            </div>
+        </div>
+        <script>
+            var level = 5;
+            var reply = "<?php echo isset($data) && isset($data->discuss) && $data->discuss ? $data->discuss : '' ?>";
+        </script>
+        <script>
+            layui.use(['form', 'layer','jquery','rate','laydate'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+                window.LAYUI_FORM = form;
+                var rate = layui.rate;
+
+                reply && $("textarea").val(reply)
+                  //监听下拉框-单个
+                  LAYUI_FORM.on('select(pinglun_types)', function(data){
+                      viewHaoPingList(data.value)
+                        // console.log(data,data.elem.checked,data.value)
+                        // if(data.elem.checked==true){
+                            
+                        // }else{
+                            
+                        // }
+                });
+
+                // 监听用户组列表               
+                    setTimeout(function(){
+                            //监听复选框-单个
+                        LAYUI_FORM.on('checkbox(usersIds)', function(data){
+                                // console.log(data,data.elem.checked,data.value)
+                                // if(data.elem.checked==true){
+                                    
+                                // }else{
+                                    
+                                // }
+                                viewUsersIdsList()
+                        });
+                    },100)
+
+
+                 //日期范围
+                layui.laydate.render({
+                    elem: '#dateYmd',
+                    range: true
+                });
+
+                //显示文字
+                rate.render({
+                    elem: '#rote-level'
+                    ,value: level
+                    ,text: true //开启文本
+                });
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    if(window.AJAX_BOOL && window.AJAX_BOOL){
+                        return layer.msg('当前请求加载数据中，稍等片刻',{icon:5});
+                    }
+                    var bannerImgStr =  bannerGetImgs()
+
+                    // if(!bannerImgStr){
+                    //     layer.msg('请上传轮播图',{icon:5})
+                    //     return false;
+                    // }
+                    if(bannerImgStr){
+                        data.field.bannerImgStr = bannerImgStr
+                    }
+                    
+                    var layui = layer;
+                    
+                    var goodsIds = []
+                    var goods = $("input[name=goods_ids]")
+                    if(goods.length == 0 ) return layer.msg('必须选择商品',{icon:5});
+                    // alert('商品ok')
+                    for(var i = 0; i < goods.length;i++){
+                        if($(goods[i]).next() && $(goods[i]).next().attr('class').indexOf('layui-form-checked') >= 0) {
+                            goodsIds.push($(goods[i]).val())
+                        }
+                    }
+                    // alert('选取完毕')
+                    if(goodsIds.length ==0) return layer.msg('必须选择商品',{icon:5});
+                    // alert('用户开始')
+                    var uids = []
+                    var udiDoms = $("input[name=uids]")
+                    if(udiDoms.length == 0) return layui.msg('必须选择用户');
+                    for(var i = 0; i < udiDoms.length;i++){
+                        if($(udiDoms[i]).prop('checked')) uids.push($(udiDoms[i]).val())
+                    }
+                    if(uids.length ==0) return layui.msg('必须选择用户')
+                    data.field.goodsIds = goodsIds
+                    data.field.uids = uids
+                    window.AJAX_BOOL = true;
+                    $.ajax({
+                        url:"{:url('Product/comment_add_pl')}",
+                        type: "post",
+                        data:data.field,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                            window.AJAX_BOOL = false;
+                        },
+                        error:function(e){
+                            window.AJAX_BOOL = false;
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+            });
+
+
+
+            window.onload = function(){
+                $("#rote-level ul > li").click(function(){
+                    $("input[name=level]").val($("#rote-level > span").text()[0] - 0)
+                })
+            }
+        </script>
+
+
+<script>
+    // 存储信息
+    var bannerFilesObj = [];
+    // 绑定事件-替换
+    $("#bannerImgs_data").change(function(){
+        var files = document.querySelector("input[name='bannerImgs_data[]']").files
+        if(!files || files.length == 0) return layer.msg('请选择文件',{icon: 5})
+        var form  = new FormData();
+        form.append('prefix','goods_comment');
+        for(var i = 0; i < files.length;i++){
+            bannerFilesObj.push({
+                size: files[i].size / 1024 + 'KB',
+                type: files[i].type,
+                name: files[i].name
+            })
+            form.append('file[]',files[i]);
+        }
+        uploadsImgsMores(form);
+    })
+    // 添加 - 图片
+    $("#bannerImgs_data_push").change(function(){
+        var files = document.querySelector("input[name='bannerImgs_data_push']").files
+        if(!files || files.length == 0) return layer.msg('请选择文件',{icon: 5})
+        var form  = new FormData();
+        form.append('prefix','goods_comment');
+        for(var i = 0; i < files.length;i++){
+            bannerFilesObj.push({
+                size: files[i].size / 1024 + 'KB',
+                type: files[i].type,
+                name: files[i].name
+            })
+            form.append('file[]',files[i]);
+        }
+        uploadsImgsMores(form,true);
+    })
+
+    // ajax 多文件请求
+    function uploadsImgsMores(data,bool = false){
+        $.ajax({
+            url: '/admin/Uploads/cosFilesPl',    
+            type: 'post',
+            data,
+            dataType : "json",
+            async: true, // 是否异步
+            processData: false, //processData 默认为false，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+            contentType: false, //
+            success:function(res){
+                if(res.code && res.code == 200 && res.data){
+                    bannerView(res.data,bool)
+                }
+                layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 :5 })
+            }
+        })
+    }
+
+
+    // 渲染
+    function bannerView(data,bool){
+        if(!data || data.length == 0) return false;
+        var html = ``;
+        var sval = '';
+        for(var i = 0; i < data.length;i++){
+            sval +=  data[i].url + (i == data.length - 1  ? '' : ',');
+            html += `
+                <tr data-name="${data[i].url}">
+                    <td> <img style="cursor: pointer;" title="点我预览图片" data-src="${decodeURIComponent(data[i].url)}" onclick="lookImg('${decodeURIComponent(data[i].url)}','商品-轮播图',this)" style="width:150px;"  src="${data[i].url}" /></td>
+                    <td>
+                        <button title="替换图片" style="position: relative;" type="button" class="layui-btn layui-btn-normal">
+                            <input style="cursor: pointer;height:100%;width:100%;position: absolute;top:0;left:0;opacity: 0;" class="bannerList_tiHuan" type="file" size="30" name="bannerImgs_data_push" value="添加图片" multiple=true/>
+                            <i class="layui-icon layui-icon-edit"></i>替换
+                        </button>
+                        <button title="向上排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,true)"><i class="layui-icon layui-icon-up"></i>&nbsp;向上</button>
+                        <button title="向下排序" type="button" class="layui-btn layui-btn-warm layui-btn- layui-btn-xs" onclick="bannerViewValueSort(this,false)"><i class="layui-icon layui-icon-down"></i>&nbsp;向下</button>
+                        <button title="删除" type="button" class="layui-btn layui-btn-danger layui-btn- layui-btn-xs" onclick="bannerViewdel(this)"><i class="layui-icon layui-icon-delete"></i>&nbsp;删除</button>
+                    </td>
+                </tr>
+            `;
+        }
+        if(!bool){
+            $("#bannerListImgs tbody").css('display','none').html(html)
+            $("#bannerListImgs tbody").show(600); 
+        }else{
+            var htmlTr = $("#bannerListImgs tbody").css('display','none').html()
+            $("#bannerListImgs tbody").html(htmlTr + html).show(600); 
+        }
+        setTimeout(function(){
+            bannerList_TiHuanBtn()
+        },500)
+        $("input[name='bannerDataImgs']").val(sval)
+    }
+
+    // 向上 或者向下
+    function bannerViewValueSort(self,bool){
+        // 开始演员
+        var f = $(self).parents('tr');
+        var tit = ''
+        var list = $("#bannerListImgs-tbody tr")
+        var fname = $(f).attr('data-name')
+        // 向上
+        if(bool){
+            if(!(list.length <= 2 || $(list[0]).attr('data-name') != fname))
+                tit = '-已在最后面'
+            $(f).hide(500,function() {
+                setTimeout(function () {
+                    if (tit.length == 0) {
+                        $(f).show(500)
+                        return $(f).prev().insertAfter(f);
+                    }
+                    var html = $(f).html();$(f).remove()
+                    $("#bannerListImgs-tbody").append('<tr data-name="' +fname+'">' + html + '</tr>')
+                },500)
+            })
+        // 向下
+        }else{
+            if(!(list.length <= 2 || $(list[list.length - 1]).attr('data-name') != fname))
+                tit = '-已在最前面'
+            $(f).hide(500,function() {
+                setTimeout(function () {
+                    if (tit.length == 0) {
+                        $(f).show(500)
+                        return $(f).next().insertBefore(f);
+                    }
+                    var html = $(f).html();$(f).remove()
+                    $("#bannerListImgs-tbody").prepend('<tr data-name="' +fname+'">' + html + '</tr>')
+                }, 500)
+            })
+        }
+        layer.msg('切换顺序-' +  (bool ? ' 向上移动ok' : ' 向下移动ok')+tit,{icon:6})
+    }
+
+    // 删除
+    function  bannerViewdel(self){
+        layer.confirm('确定删除此图片?',{
+            icon:4,
+            title:'轮播图-删除'
+        },function(index){
+            $(self).parents('tr').remove();
+            layer.msg('删除ok',{icon:6})
+            layer.close(index)
+        })
+    }
+
+    // 拿取到 图片数据
+    function bannerGetImgs(){
+        var imgs =  $("#bannerListImgs-tbody").find('img')
+        if(!imgs || imgs.length == 0) return false;
+        var s = '';
+        for(var i = 0; i < imgs.length;i++){
+            s += $(imgs[i]).attr('data-src') + (i == imgs.length - 1 ? '' : ',')
+        }
+        return s;
+    }
+
+
+    // 点我清空数据
+function bannerDelAll(){
+layer.confirm('是否清除当前轮播图数据?',{title:'轮播图操作',icon:3},function(index){
+    layer.close(index)
+    layer.msg('清除轮播图成功',{icon:6})
+    $("#bannerListImgs-tbody").hide(300,function(){
+        $("#bannerListImgs-tbody").html("")
+    })
+})
+}
+
+// 绑定事件
+function bannerList_TiHuanBtn(){
+                    $(".bannerList_tiHuan").off('change')
+                    $(".bannerList_tiHuan").change(function(){
+                        var f = $(this)[0].files
+                        var self = this
+                        if(f && f.length > 0){
+                            var form = new FormData();
+                            form.append('prefix','goods_banners');
+                            form.append('file',f[0])
+                            $.ajax({
+                                url: '/admin/Uploads/uploadImg',    
+                                type: 'post',
+                                data: form,
+                                dataType : "json",
+                                async: true, // 是否异步
+                                processData: false, //processData 默认为false，当设置为true的时候,jquery ajax 提交的时候不会序列化 data，而是直接使用data
+                                contentType: false, //
+                                success:function(res){
+                                    if(res.code && res.code == 200 && res.data){
+                                        var url = '/' + res.data.fileName + '/' + res.data.prefix+ '/' + res.data.url.replace("\\",'/') 
+                                        var fElem = $(self).parents('tr')
+                                        $(fElem).find('img').attr('src',url).attr('data-src',url)
+                                        $(fElem).attr('data-name',url)
+                                    }
+                                    layer.msg(res.msg || '操作ok',{icon: res.code == 200 ? 6 :5 })
+                                }
+                            })
+                        }
+                    })
+                }
+</script>
+
+<script>
+    // 渲染选中商品
+    function viewGoodIdsList(){
+        //if(!window.GOODS_DATA_LIST) return   layui.msg('麻烦先搜下商品',{icon:5});
+        var layui = layer
+        var goodsIds = []
+        var goods = $("input[name=goods_ids]")
+        if(goods.length == 0 ) return   layui.msg('必须选择商品');
+        // alert('商品ok')
+        for(var i = 0; i < goods.length;i++)
+            if($(goods[i]).next() && $(goods[i]).next().attr('class').indexOf('layui-form-checked') >= 0) goodsIds.push($(goods[i]).val())
+        if(goodsIds && goodsIds.length >0){
+            var html = ``;
+            for(var i = 0;i < goodsIds.length;i++){
+                var id = goodsIds[i]
+                if(!window.GOODS_DATA_LIST || !window.GOODS_DATA_LIST[id]) continue;
+                var linshiData = window.GOODS_DATA_LIST[id]
+                html += `
+                <div class="yulanClickGoodsItem" title="${linshiData.name}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                        <div title="${linshiData.id}-${linshiData.name}" onclick="openUrl('${linshiData.supply_url}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                名称：<span style="color:#1E9FFF;">${linshiData.name ? linshiData.name.substr(0,10)+'...' : ''}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                            </span>
+                            <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="${linshiData.cover.split(',')[0]}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.name}')" title="点我复制名称" ><i class="layui-icon layui-icon-snowflake"></i>名称</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.id}')" title="点我复制序号" ><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="openUrl('${linshiData.supply_url}')" title="点我跳转货源链接" ><i class="layui-icon layui-icon-snowflake"></i>货源</button>
+                            <button data-id="${linshiData.id}" onclick="clickGoods(this,${linshiData.id})" type="button" class="layui-btn layui-btn-danger"  title="点我删除" ><i class="layui-icon layui-icon-delete"></i>删除</button>
+                        </div>
+                </div>
+                `;
+            }
+            if(html){
+                layer.msg('生成预览商品列表ok',{icon: 6})
+                $(".yulanClickGoods").html(html)
+            }else{
+                $(".yulanClickGoods").html('')
+            }
+        }
+    }
+
+    // 删除列表中的商品
+    function clickGoods(self,id){
+        if(!id || !self) return layer.msg('错误值，刷新重试',{icon:5})
+        $("#goodsId_"+id).prop('checked',false)
+        setTimeout(function(){
+            $(self).parents('.yulanClickGoodsItem').remove()
+            layui.form.render('checkbox')
+            layer.msg('删除成功',{icon:6})
+        },100)
+    }
+
+    // 删除列表中的用户
+    function clickUsersdel(self,id){
+        if(!id || !self) return layer.msg('错误值，刷新重试',{icon:5})
+        $("#userId_"+id).prop('checked',false)
+        setTimeout(function(){
+            $(self).parents('.yuLanUSERViewCLICKItem').remove()
+            layui.form.render('checkbox')
+            layer.msg('删除成功',{icon:6})
+        },100)
+    }
+
+    // 选中用户列表渲染
+    function viewUsersIdsList(){
+        //if(!window.GOODS_DATA_LIST) return   layui.msg('麻烦先搜下商品',{icon:5});
+        var uids = []
+        var layui = layer
+        var udiDoms = $("input[name=uids]")
+        if(udiDoms.length == 0) return layui.msg('必须选择用户');
+        for(var i = 0; i < udiDoms.length;i++) if($(udiDoms[i]).prop('checked')) uids.push($(udiDoms[i]).val())
+        if(uids.length ==0) return layui.msg('必须选择用户')
+        if(uids && uids.length >0){
+            var html = ``;
+            for(var i = 0;i < uids.length;i++){
+                var id = uids[i]
+                if(!window.USERLISTOBJ || !window.USERLISTOBJ[id]) continue;
+                var linshiData = window.USERLISTOBJ[id]
+                html += `
+                <div class="yuLanUSERViewCLICKItem" title="昵称：${linshiData.nickname}-序号：${linshiData.id}" style="float: left;cursor: pointer;padding-bottom: 8px;margin-bottom: 10px;">
+                        <div title="昵称：${linshiData.nickname}-序号：${linshiData.id}" onclick="openUrl('${linshiData.avatarurl}')" style="display: flex;justify-content: space-evenly;">
+                            <span style="text-align: left;">
+                                昵称：<span style="color:#1E9FFF;">${linshiData.nickname}</span>
+                                <hr>
+                                序号：<span style="color:#1E9FFF;">${linshiData.id}</span>
+                            </span>
+                            <img style="height:50px;border:1px solid #999;padding:3px;border-radius:4px;" src="${linshiData.avatarurl}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.nickname}')" title="点我复制昵称" ><i class="layui-icon layui-icon-snowflake"></i>昵称</button>
+                            <button type="button" class="layui-btn layui-btn-normal" onclick="copyCode('${linshiData.id}')" title="点我复制序号" ><i class="layui-icon layui-icon-snowflake"></i>序号</button>
+                            <button data-id="${linshiData.id}" onclick="clickUsersdel(this,${linshiData.id})" type="button" class="layui-btn layui-btn-danger"  title="点我删除" ><i class="layui-icon layui-icon-delete"></i>删除</button>
+                        </div>
+                </div>
+                `;
+            }
+            if(html){
+                layer.msg('生成预览用户列表ok',{icon: 6})
+                $(".yuLanUSERViewCLICK").html(html)
+            }else{
+                $(".yuLanUSERViewCLICK").html('')
+            }
+        }
+    }
+</script>
+
+<script>
+    // 跳转地址
+    function openUrl(url){
+        if(url && url.indexOf('http') >= 0)
+            window.open(url,'_tagert');
+        else 
+            layer.msg('链接为空，跳转失败',{icon: 5})
+    }   
+</script>
+
+<script>
+    $(function(){
+        bannerList_TiHuanBtn();
+        setTimeout(function(){
+            viewHaoPingList()
+        },1500)
+
+        // 延时开始
+        setTimeout(function(){
+            var obj = localStorage.getItem('comment_add_pl_caogaoList')
+            if(obj) obj = JSON.parse(obj);
+            console.log(obj)
+            if(obj && (obj.bid|| obj.cid)){
+                if(obj.bid){
+                    $("select[name=bid]").find("option[value="+obj.bid+"]").prop("selected",true); 
+                }
+                if(obj.cid){
+                    $("select[name=cid]").find("option[value="+obj.cid+"]").prop("selected",true); 
+                }
+                layui.form.render('select')
+                setTimeout(function(){
+                    getGoodsList()
+                    // 监听数据 开始
+                    setInterval(function(){
+                        jianTingListForm()
+                    },500)
+                }, 1000)
+            }else{
+                // 监听数据 开始
+                setInterval(function(){
+                    jianTingListForm()
+                },500)
+            }
+        },1500)
+    })
+
+    // 监听存储数据开始
+    function jianTingListForm(){
+        var obj = {
+            // 分类
+            cid: $("#goods_cid").select().val(),
+            // 品牌
+            bid: $("#goods_bid").select().val()
+        }
+        if(!obj.bid && !obj.cid) return console.log('返回了')
+        localStorage.setItem('comment_add_pl_caogaoList',JSON.stringify(obj))
+    }
+</script>
+
+<script>
+    // 渲染好评列表
+    // function viewHaoPingList(){
+    //     var key = $("#pinglun_typesKey").select().val()
+    //     if(!key) return layer.msg('请选择评论模板分类',{icon:5})
+    //     if(!PILUN_LIST[key] || !PILUN_LIST[key].vals || PILUN_LIST[key].vals.length == 0) return layer.msg('不存在此评论模板分类',{icon:5})
+    //     var html = `<option selected value="">好评列表-可输入搜索值</option>`;
+    //     for(var i = 0; i <PILUN_LIST[key].vals.length;i++){
+    //         PILUN_LIST[key].vals[i]
+    //         html += `<option selected value="${PILUN_LIST[key].vals[i]}">${PILUN_LIST[key].vals[i]}</option>`;
+    //     }
+    //     $("#pinglun_list").html(html)
+    //     layer.msg('生成模板评论ok',{icon:6})
+    //     setTimeout(function(){
+    //         layui.form.render('select')
+    //     },200)
+    // }
+
+    
+
+    // 评论分类
+    var pinglun_types = [
+        ["kouhong","口红"],
+        ["kouqiang","口腔护理-清新味"],
+        ["meifagehu_chunmo","美发个护-唇膜"],
+        ["ximiannai","洗面奶"],
+        ["xiezs","卸妆水"],
+        ["zhijiaoyou","指甲油"]
+    ]
+
+    // 评论
+    var PILUN_LIST = {
+        // 口红
+        "kouhong" : {
+            name: "口红",
+            vals: ["质感真的棒🔥很轻薄🔥且保湿，涂上效🔥果很棒不油腻持🔥久度，很高🔥🔥上嘴很滋润包装精美上档次🔥不拔干衬托肤色不🔥均白皙透亮，感觉刚涂上挺好，会有痕🔥迹在。 唇膏质地：丝绒，涂🔥起来很舒服，有巧克力🔥味道。 上嘴效果：很显白，好看！ 薄🔥涂","。","质感真的棒很轻薄且保湿👸涂上效果很棒不油腻持久度🎦🚪上嘴很滋润😄包装精美上档次👩👿还有淡淡的香味还有一个猫头鹰的小图案质感超级喜欢，📚颜色特别好看，👶把我的大牌口红都比下去了日常用黄皮完全没问题不拔干衬托肤色白皙透亮","很划算，我很喜欢，以后常来，谢谢店家","唇釉颜色漂亮📲质感真的棒很轻薄且保湿👄涂上效果很棒不油腻持久度👵😰上嘴很滋润🙆包装精美上档次📍很温柔的颜色⬆雾面哑光高级感🍪丝滑不拔干🏡炒鸡喜欢👋 无限回购性价比超高值得购买 丝绒质地不拔干衬托肤色白皙透亮 物超所值","很划算，我很喜欢，以后常来，谢谢店家","嘴很滋润包装精美上档次，😞不拔干衬托肤色白皙透亮，😢物超所值，😢壳子也很持久质感，💜薄涂也质地持久超级显白，💙😉一点也不输大牌包装精美上档次喜欢的宝宝们赶紧入手这只是一上嘴我最喜欢的，💘雾面系列质地我就不吹了，😏真的人见人爱。","集美们看这里哦👆我领了35圆隐藏抵扣捲，实际到手只用了34圆，⚠️捡到宝了，想不到还有这样，哈哈哈哈⚠️","新水润不油腻丝绒质地不拔干☺高持久度也算不错很好看🙆带着那种淡淡口红💁上色度挺好，❤可以说性价比非常高，😃壳子也很持久质感💆","持久度也算不错，绝与图片几乎零色差，看包装精美 第一次买口红没让我失望，买之前还有点担心呢口红设计的超级漂亮精致🎉不输大牌的感觉哦 。","619这个颜色真心不错，太喜欢了。带着那种淡淡的清香味，性价比：真的太划算了！！！简直是我想要的颜色，丝绒质地不拔干衬托肤色白皙透亮","非常棒 超级丝绒 美美哒","被姐妹种草买了这个唇釉，🐶唇釉颜色漂亮，👯涂上效果很棒不油腻持久度🈯干衬托肤色不均白皙透亮，💂质地持久超级显白，📐还有淡淡的香味还有🍄一个猫头鹰的小图案🏯很可爱了这个唇釉太好看了，💁包装精美上档次🍅真的是不要太漂亮了超级喜欢，🌼而且非常水润","这个颜色我超级喜欢，涂上去很元气很少女，日常用黄皮完全没问题，显白。非常好上色，口红挺滋润的，我都是没有用唇膏直接涂，不沾杯持妆久","棒极了 性价比高 物有所值","被姐妹种草买了这个唇釉，🐶唇釉颜色漂亮，👯涂上效果很棒不油腻持久度🈯干衬托肤色不均白皙透亮，💂质地持久超级显白，📐还有淡淡的香味还有🍄一个猫头鹰的小图案🏯很可爱了这个唇釉太好看了，💁包装精美上档次🍅真的是不要太漂亮了超级喜欢，🌼而且非常水润","不显唇纹，不易拔干，很喜欢没有油腻感，味道也好闻，不挑肤色，持久并且不沾杯，一打开很香的味道。想买的姐妹不要犹豫啦","没想到效果真是太棒了，适合自己，日常妆涂就超级好看，而且作为丝绒唇釉来讲，这个湿润度已经有做的很好了","整体评价：不错，喜欢😘好多中颜色，值得买，活动那个划算，没有买过李佳琪推荐的，第一次买，确实不错👍","这款产品有点干","再说镜面唇釉，这个倒是有点失望，主要是因为持久度和质感。入了两只镜面一只漆光，上唇效果几乎完全一样，有一定的光泽感但是完全涂不出效果图那种质感，不过看起来也还好。持久度相比于哑光唇釉要差好多，基本上只要是喝水或吃东西，光泽感会立刻消失，颜色也会变淡，补妆效果也不太好。我的唇纹比较深，补妆之后很显唇纹，颜色也远不如第一次涂。而且比较让人头痛的是，如果吃面包什么的，因为镜面唇釉比较滋润，有一定黏度，面包屑会粘在嘴唇上很难蹭下来，嘴巴看起来就会给人感觉脏脏的orz... 总之呢只要是不喝水吃东西的话颜色和持久度都还蛮好的，上班的话不太建议涂哦，因为午饭过后要补妆，效果会打折扣。 最最后还想说的是因为色号繁多，很多色号颜色非常非常接近，建议选色号的时候多对比下效果图，如果喜欢的色号看起来很接近只有很轻微的差异，建议只拍一支就好，因为上嘴效果真的几乎没有区别的。因为价格亲民质量也很让人放心，我前前后后一共入了8支，有几只颜色就过于相近了，比如P805和P705，都是偏深的干玫瑰色，私以为只拍一只就好了。 推荐色号：镜面701，P615，B605，613D 不推荐P705 805 颜色偏深","超级爱！！！！！！！！","很轻薄且🌈保湿涂上效果很棒不油腻持久度很高上嘴很🌼滋润包装精美上档次不拔干衬托肤色白皙透亮物超所值壳子也很持久质超级显白还有淡淡的香味😍","超级好用！涂上还有股巧克力味儿！姐妹听我的，买它！下次还会回购的真的好用 颜色也好看，我喜欢比较深一点儿的颜色，涂上挺细腻的，不会很干巴。","还有一个嘻嘻","唇釉颜色漂亮🏰质感真的棒很轻薄且保湿👠涂上效果很棒不油腻持久度🍥上嘴很滋润包装精美上档次不拔干衬托肤色不均白皙透亮🌠还有淡淡的香味还有一个猫头鹰的小图案很可爱久质感薄涂也质地持久超级显白，⚪👉🍔~~~","很轻薄且🌈保湿涂上效果很棒不油腻持久度很高上嘴很🌼滋润包装精美上档次不拔干衬托肤色白皙透亮物超所值壳子也很持久质超级显白还有淡淡的香味😍","唇膏质地：这个色，更让我喜欢，因为我是黄皮肤，617我拍的色，不太契合我的肤色，这款不错","这个质地细腻光滑，不错，还会再来买","质地轻薄，有轻微结块现象，上色饱和度中等，跟图片有色差，没图片那么深，带粉色偏光，略带玫调，更接近酒红，显白程度一般，但是对白皮黄白皮很友好，唇色深的不建议，唇色浅的会巨好看，图片右侧的是666D，左侧是R666，图一薄涂图二厚涂，本人深唇色，图三图四是明暗灯光对比，不染唇，轻微沾杯","我错了，这个颜色不存在挑皮可言，出了门那个偏光就没那么明显，然后薄涂的那种，水蜜桃的感觉真的是绝了，不过还是有色差啦，但是黄皮也是完全可以的","解释：亲爱哒，谢谢您对我们的支持和肯定，无论哪一件事情，只要坚持，一直做，自然而然有动人之处，形成一种美好的风景，就让我们和您一起坚持，做最好的彩妆，做最真的自己~欢迎您关注店铺，一起了解更多的优惠以及新品"]
+        },
+        // 口腔护理-清新味
+        "kouqiang" : {
+            name: "口腔护理-清新味",
+            vals: ["使用效果：口腔喷雾使用起来很方便 而且味道清新 不辣口 喜欢 整体评价：一个小小的放在包里很方便 包装与外观：很好看 用起来很高大上","口腔喷雾很不错 可以用蛮久的 而且饭后喷一喷很方便呢 而且可以清新口气好久呢 比吃口香糖方便多了 不错不错","小小的蓝色的瓶子美观，小巧方便随身放在包里也方便携带，吃过饭之后喷一下，口气就清新啦淡淡的薄荷味道舒心也不会辣嘴，奶思","小蓝瓶特别好用！味道是薄荷的清香口味 很清新 小小只方便携带 平时吃完火锅嘴里有异味 喷喷口气变清新 物超所值 强力推荐","喷雾，挺好用的，方便携带，吃过饭，吃过火锅喷喷，嘴里就不难受了，香香的，而且味道甜甜的","使用效果：非常好，味道清新，好牌子，以前有买过别家的但是没有他们家的效果好，值得加购 整体评价：级好看 包装细至 十分甚美 客服真的是好的没的说 包装与外观：外观和其他店铺的比起来是较好的 简直是迷你小瓶","蓝色小喷瓶很不错哦，味道也不错，口气清新，出门携带方便，见客户前喷一喷","挺好的，小巧方便气味清新，用后有薄荷味清爽的很，超赞推荐！","蛮好的，味道还是很清新的，本以为会辣嘴巴，一点都没有，保持口气清新，携带方便！","小巧玲珑，携带方便，喷到嘴巴里有淡淡的薄荷香味，冰冰凉凉很舒服，不错。","使用后口气很清新，味道真心很好","新产品买回来试试 味道很清新 很凉爽","包装很好，气味好闻，携带方便，满意","薄荷味道超好闻，喷了以后超舒服","挺好用的，一股甜甜的清香。快递也很快，还害怕赶开学前收不到呢。客服小姐姐也很耐心。","味道好，保持时间久，挺喜欢的。","发货速度很快，味道也很好","刚好是吃完饭，快递就送过来了，马上就试了一下，，我觉得效果挺好的，是我喜欢的味道，喷完之后口里真的没有饭菜的味道了，很清新。爱了爱了！！！还在等什么(ﾟoﾟ;，！！！！","不错跟口香糖味道比较相似，模样小巧方便携带","发货及时，包装精美，手感舒适，味道清新，价格优惠，比较实惠。","收到小蓝瓶啦～颜值很高哦 味道淡淡的不刺激 香型也很持久哟 出门约饭必备的小物 每个小姐姐包里都应该备一个哦～","最近一直随身携带这个小蓝瓶 效果真的不错 朋友好多都问我链接了～买起来吧～"]
+        },
+        // 美发个护-唇膜
+        "meifagehu_chunmo" : {
+            name: "美发个护-唇膜",
+            vals: ["整体评价：還可以，就是大小瓶了，就那麽一點點，哈哈哈哈~~~不過，用著挺滋潤的，真的可以淡化細紋，而且我這人比較懶，都沒怎麼用，如果堅持早晚都擦的話，效果會更明顯哦，贊贊贊~~~~ 使用效果：可以可以，挺滋潤的，嘴脣的細紋明顯淡了一點。","太漂亮了 小巧精致 质感非常好 比国际大牌质感还要好 喜欢","第一次尝试买，收到货太惊艳，包装太完美啦！","感觉挺好的 还没有用喃 包装很给力","整体评价：这包装真的爱了，而且很仔细 唇膜用了非常好保湿效果绝佳，真的推荐，以后就用这款了","整体评价：收到了，小小瓶的，很不错，我开了试了一下，有股淡淡的花香味，抹在嘴唇上清凉清凉的，真的是爱上了花家产品了呢","小小个的很迷你可爱，美观精致。之前本来是买拉妹儿的唇膏，无意间逛到花西子的。之前有入散粉，有好感，所以这次买也没有踩雷。擦口红前抹一层，口红非常好上色，且饱和度也高，但稍稍有点油，需要拿纸巾擦一下。上唇后是凉凉的，要是没有凉凉的感觉会更好。感觉是平价版的拉妹儿唇膏","好多都是花西子，这次买了妆前乳，定妆喷雾，双层cc，不晓得是不是使用了这些，我觉得我皮肤好多了，之前用那个隔离，没用这三样，到了中午就开始暗沉，总觉得皮肤很黄，花西子的气垫真的好好用，现在这么热，出那么多汗水居然都不脱妆我到了下午直接用气垫补妆，好自然，反正睡前我贴着镜子看都不卡纹，太爽了！！！！！","小巧玲珑，精致有型，润而不腻，薄荷清爽，值得拥有。","好喜欢呀 涂在唇上润润的 不油腻 小瓶子好精致呀 用过别的牌子的唇膜 跟花西子没法比 真的爱了 会无限回购的","太可爱了，真的，很喜欢这个小瓶子，小小一瓶，但是可以用很久，有点不太舍得用，挺润唇的，有股淡淡的花香，摸到嘴上有点冰冰凉，还是很推荐买的，因为瓶子真的太讨喜了😍。客服很热情，冬青服务很棒。","哇塞，包裹太精致了，每一步都小心翼翼得拆开。太完美了很喜欢，看上去很好用的样子，试试再来追评。","我也是花西子的老粉了，不光是东西好用，包装也是特别精美而且卖家每次送的东西都超大方的，下单后也都是顺丰到家，从任何方面都是无可挑剔的，真的是超爱花西子也会一直支持下去，希望花西子越来越好","第一次这么想给一个商品写评论 是真的觉得特别好！第一次用他们家的产品 真的感觉就特别用心！产品用起来很不错 很滋润 有淡淡的花香气息 墨绿色的小瓶子也非常好看 快递包装盒是自制的 很好看 里面附带的信也特别好 觉得是在用心做产品👍","包装小巧可爱 不占地方 小巧的金属感都特别质感 滋润保湿不油腻 第二天早起还有保湿效果","买了一个唇膜，收到好多个小礼物（梳子是生日礼），超开心呀，唇膜好可爱吖，香香的，抹上舒舒服服，一如既往最爱小西！❤","非常满意，包装特别细心特别可爱的小唇膜，带个小勺子 设计的外观非常合理，本来还苦恼不便于收纳，收到才发现完全是多虑了，取用特别方便。非常感谢客服新蕊，新蕊服务特别非常好 耐心的给我解答问题，谢谢你哦","在嘴唇上很容易就化开来，易推开，和我之前用的唇膜相比味道淡淡的很清新不油腻，睡前涂抹很舒服，第二天早上起来嘴唇就润润的。","还没打开就闻见一股淡淡的薄荷味，，上唇很凉润，效果立见，最惊喜的一点，和普通唇膜不同，能很明确感觉到它的修复效果，仅仅一分钟而已，唯一不足的就是，这个小金勺安置成为问题，平时不用的时候会担心污染，虽然一擦就干净了，但用后和保存，都是一些小问题，希望能出一个能保存小金勺的小物件，小布袋都可以，虽然这是赠送的吧，毕竟花西子家的东西都挺珍惜的","膏体很润很好闻，有一种玫瑰和薄荷的花香味儿，搭配的小勺也很精致拿在手上挺有分量，给大家上图做参考，放在手上的大小和膏体的近景图"]
+        },
+        // 洗面奶
+        "ximiannai" : {
+            name: "洗面奶",
+            vals: ["温和度：比较软 保湿效果：很保湿 我的肤质：适合大部分肤质","洗面奶还没用，这是我不知道第几次在他家买这个洗面奶了，清洁力很强，可以偶尔用，不能天天用，不然皮肤会屏障受损。不过这次送的起泡网里居然有根头发，说真的，心里不舒服，上图吧。","第二次买了好用","自从知道这个洗面奶好用，我一直都在用，真的很好用超爱！","[追加评论] 特别好用的一款洗面奶哦，我皮肤比较油，用这个很合适，值得购买","很好 洗的很干净 清清爽爽 还会再来的","朋友推荐，很好用！","很不错，洗完脸后不觉得干燥紧绷，也不刺激皮肤，光滑舒服，洗得很干净。","清洁力很强，应该是正品，希望能解决我的痘痘","不错的 二次回购了","这是我会无限回购的洗面奶，因为我觉得真的非常的好用，我用的是蓝色的。","宝贝收到后，特意试用一下再来评价的，洗的干净，没有其他的气味清爽不干燥，很适合我的皮肤，好评！","感觉挺好的，买了好几次了","一直都在用这牌子！好！","目前使用觉得与以往用的牌子有着不一样的体验感吧！希望使用效果会越来越好！ 保湿效果：优 清洁能力：优 我的肤质：偏油性","清洁效果超级超级好 价格也超级超级实在 还送一个起泡网 真的极力推荐","非常好用，之前买过两次绿色的，下次再换一个颜色","挺好的。我没备注客服还不忘敲我问我要什么颜色的，感动。用的好会再来买的。","给好评，东西和日本的货不太一样-_- ，这个颜色更浅味道更淡质地更稀使用感有差，但是我用来当沐浴露用了，效果很好。。。这个价钱还可以","应该是可以吧 用不出什么来 挺温和的 味道可以","回购的，换了个颜色，打算每个颜色买一次","蛮好，很爱的一款洗面奶。","儿子喜欢这个牌子","产品不错，还送了个起泡网","第三次购买了！特别好用！","还没用，等用后追评","一如既往","一直都爱","用了有3年了快。蓝管已复购无数次，对痘痘肌真的是太友好了。粉，绿，白，黄也都用过，都很好用。关键又实惠！真心推荐！身边的朋友用了都说好用！","用了好几天了，清洁效果不错，比较温和","朋友推荐的洗面奶，洗完很清爽！","本人是油性皮肤还总冒痘所以买了蓝色那款，第一次用感觉还不错，洗完后是很清爽的感受，也不会有紧绷感，另外客服人超好，好评啦","我买的是绿色的去黑头的，用起来挺好的","买给爸爸的，爸爸很喜欢，觉得效果很好","一直用这家店铺。挺好的。是日版，发货快。就是价格一瓶的话优惠没以前大了","真的是太爱这家店了，洗面奶很好用，物流也很快，值得购买","帮我姐买的，没用过，不知道好不好","包装很好，物流也很快，已经买过很多次了，很喜欢","很好挺不错的"]
+        },
+        // 卸妆水
+        "xiezs" : {
+            name: "卸妆水",
+            vals: ["宝贝刚到货，看着两瓶大大的，真是优惠，之前我也一直用芦荟系列的。朋友推萑买的，她说既实惠效果也非常好，用后很清爽，期待后期效果，谢谢店家优惠的好活动！","很满意的一次购物喔，以后就选这家的卸妆水啦，这卸妆水上脸很清爽保湿，而且卸妆非常干净，卸完妆脸上也不会有紧绷感，脸上毛孔里脏东西都能卸的干干净净，不会闷痘，简直是太开心了，资莱皙家的芦荟卸妆水棒棒哒","日常妆容用它完全足够的，查了是真品，很安全哦~价格有点贵，质地清爽，触肤即溶，卸妆特别轻松，不伤皮肤，可以用来卸全脸，具有温和清洁和卸妆功能，用它卸眼妆真的是超级方便的，按压一下水就上来了，卸妆水脸眼睫毛膏都可以卸了","敷在眼上几秒钟一抹就给卸干净了，眼妆唇妆都可以轻松卸干净，真的是厉害了呀，卸完后脸上还有淡淡的芦荟味道，用着很喜欢。用后脸上也不会有紧绷感，而且洗完后脸上感觉超级舒服的，我用着对皮肤还挺友好的，下次买卸妆水还来这家买了！","这次回购帮同事拿的实惠划算一瓶用好久卸妆干净不油腻。","很温和，但是能有效的清洁皮肤，日常妆容基本能卸得不留痕迹，眼妆唇妆都可以很好卸干净。并且卸的时候并不会烧眼睛和辣嘴唇呢，最后感谢下客服小姐姐特别耐心的回复，这款卸妆水真的强推！","颜值很高的一款卸妆水，专门买了一款按压设计的，使用起来方便很多了，果然价格贵的效果就是好啊，卸妆水的卸妆力度真的很强，而且萃取的芦荟成分可以给皮肤保湿，用着真的超级滋润的一款卸妆水，而且每天使用这款还可以达到控油效果的。","特别喜欢用这款卸妆水，每次卸妆都很干净的，而且卸完脸上很清爽，卸完之后，我会再用洗面奶清洁一下脸部然后敷点面膜，这样清洁保养效果会更好，现在脸上都是很水润清爽的，肌肤状态好了很多了，也很少长痘痘的，护肤前提找到一款清洁效果好的卸妆水真的很重要。","由于天天都有化妆，卸妆水真的必不可少，用量挺省的哦，现在皮肤变得更加滋润了~产品很适合任何肤质哦！用着很好啊，这款芦荟卸妆水用着79入手的，味道是很好闻的芦荟清香，卸妆能力真的是好棒，价格有点小贵，不过真值得！","芦荟系列的滋润效果也是很好的，这么好用的卸妆水我怎么现在才发现啊~难受了o(╥﹏╥)o芦荟卸妆水用着真的卸的很干净，我用完后会再用洗面奶洗一下脸蛋，然后肌肤就更加干净了也特舒服，现在我的肌肤就是出油少了，一直都是很润，清洁到位就是痘痘也是很是滋生了哦，棒棒棒！！","这款卸妆产品挺好用的，79买的，价格有点小贵，卸妆水按压式的设计拿卸妆棉在上面按压几下就可以了，轻轻卸掉再用清水冲洗下就超干净了，稍微擦几下就能轻易的卸掉，清洁效果这么棒，我现在每天晚上的妆都在用它卸。","芦荟卸妆水的能力我个人还是很满意的，用来卸妆感到非常的舒服，真的是整张脸都适合使用，用着非常温和亲肤，效果完全超出了我的期望值；到货的时候卖家还是买一送一的，我到手2瓶都是500ML的，量很大够我用好长时间的了，也是物有所值啦。","以后就认准这个牌子的卸妆水啦~感觉价格有点小贵，79买到的，不过果然是一分价钱一分货，我用了真的比之前的卸妆水好用，只有一点点水就能把我脸上的妆都卸掉，用着晚上卸妆也是很好用的！不愧是李佳琦介绍的产品！","产品使用方便，而且水的质地清爽，卸的温和，超保湿哦，卸完后皮肤很舒服，一点也不会紧绷，皮肤会很水润透彻，卖家还送了一瓶同款的，量都很足，可以用很久了~这个卸妆水的清洁效果是很强的啊！","果然79的，价格贵的效果就是好啊，完美的做到了卸妆无残留，使用起来还特别方便，直接按压就可以了，很方便又很好控制用量的那种，这款卸妆水真的是我用过所有卸妆水里面最深得我心的，观望的妹子们可以考虑入手啦","以后我买卸妆水就首先这家的了，毕竟用了后我觉得非常好，卸妆非常的温和，用完以后皮肤超清爽还滑滑的，对于干皮的我来说真的是特别友好呢，用了这款卸妆水后我还发现我脸上的痘痘啊黑头什么的都明显少了好多啦，化妆果然要清洁干净啊","我超级喜欢用这款卸妆水，卸妆水挺保湿滋润的，79买回来的，价格贵的效果就是好，买的真值价啊~现在用着这款芦荟卸妆水产品的我用了之后我的肌肤白净了很多，我很喜欢，卸完之后还有保湿肌肤的效果啊哈哈！产品的质地是很清爽的，很温和的！","这款芦荟卸妆水用着很好用，里面的卸妆水内含有芦荟成分，对待肌肤有修护作用，而且我用着我的肌肤出油量也少了很多，脸上特别干净，十分清爽，皮肤有了很明显的改善味道好闻，很清新的一股味道，卸的很干净，后面不用洗面奶都行了~","迫不及待的赶紧打开试了一下，一点都不辣眼睛，比之前买的其他牌子好用的多，卸妆温和不刺激，卸的也很干净，这么便宜的价格买了两大瓶，太经济实惠好用，卸胳膊上防晒霜也不心疼，好产品必须会继续回购👍","收到货了超值超划算，很大两瓶","卸的挺干净清洁效果强，卸完妆还能起到保湿的作用，天然芦荟成分，淡淡的芦荟香味闻着也很舒服，超喜欢这个按压头的设计，用着很卫生便捷。对这款芦荟卸妆水十分满意哦，真的超级奶思的一个卸妆水","两大瓶子，价钱便宜，量也比较大，很划算，味道淡淡的好闻不刺鼻，很喜欢。","卸妆能力真不错！从小红书推荐过来的，然后就入手了，这芦荟卸妆水卸妆效果真的是很牛，透明液体的质地，倒在化妆棉上没一会就全部浸湿了，按压在肌肤上轻轻一抹，就能把脸上的妆容都卸干净，没让我失望","收到宝贝打开有好大两瓶，可以用很久了;芦荟温和不刺激，卸得又干净;关键是实惠量也多;快递也超赞！很满意，还会再介绍朋友买！","很棒的呀，我就是看中芦荟成分温和力。所以才买了这款卸妆水，毕竟温和型的对皮肤才好呢，芦荟的成分虽然是很温和的那种，但是卸妆力度也是很赞的啊，不只是能做到干净无残留，而且卸完妆后的肌肤也是很水润保湿的，蛮不错的","物流好快，昨天下单今天中午到，第二次买了，很好用卸妆干净，买一次要用半年了，便宜又好用，不伤皮肤卸完妆干干净净，大家放心买，我卸妆都用这个牌子","没想到到用的时候效果还不错，芦荟的成分用在脸上很清爽滋润肌肤；芦荟本身是可以帮助肌肤抗初老的，对肌肤还有着非常大的帮助的，就是买来价格是79，当时还觉得价格有点小贵，用着效果这么好就值了。","多亏有了它的帮助，现在晚上洗脸的时候，脸上都是白白净净的，很好用！一天工作下来很多的粉底会卡在脸部，幸好有这款温和不伤肌的芦荟卸妆水，配合着洗面奶，卸妆水用在脸上还挺舒服的！强烈推荐购买","卸妆水的触感很舒服的，是非常清爽的那种卸妆水来的，保湿无异，卸妆力度也很OK，哪怕是卸哑光唇釉都不在话下，清洁效果那可真是杠杠的，很推荐给各位有化妆的宝宝们！价格有点小贵，用着满意就觉得物有所值了，真的超好用的","使用感真是绝了，有了它都不觉得卸妆是件麻烦事了，芦荟成分的卸妆水上脸超温和，就像是在涂保湿水一样清爽滋润，简直0油感，同时卸妆力只能用惊艳两字来形容，卸第一遍的时候就已经卸得相当干净了，我的脸现在的皮肤也没有这么暗淡了","芦荟成分的卸妆水是真的很温和哦，这款芦荟卸妆水卸妆效果真的很不错~不管是淡妆还是浓妆都卸得很干净，卸完之后皮肤是水水润润的，也不会有残留，虽然有点小贵，不过姐妹们不要错过，有需要的可以放心购买哟~还是很值得入手的","这个卸妆水是芦荟的味道来的呢，好喜欢，卸完之后脸很清爽，保湿效果是很不错的，卸得也是蛮干净的，这一款芦荟卸妆水任何肤质都可以使用呢，收到了满满的两大瓶卸妆水，主含芦荟成分非常温和舒服，卸完妆皮肤还是很水润的那种呢","芦荟成分简单安全，不仅能深入清洁肌肤细纹间和毛孔内部污垢，还能够维持肌肤的健康水润状态。产品用着效果不错就是价格有点贵，不过用着真好用，每次用着脸部都水润润的一点也不紧绷，效果绝佳！全脸都能用，非常温和的卸妆水","它能够很好的洗掉肌肤里面的污垢和遗留在脸上的妆，还你一张干净白皙的脸蛋哦，去油效果也很不错哦，现在每天晚上卸妆都会用到它，很好用呢~卸完妆之后我无论涂什么护肤品都是很好吸收的，很开心可以买到这么好用的产品啊！","挺温和的，价格也实惠，不刺激，卸妆也干净！","卸妆水的卸妆效果超级给力，价格贵就是有贵的好啊，这么好用的卸妆水真是超值了。水质清爽，非常的温和，卸妆水可以把脸上的妆卸得很干净，里面的芦荟成分还有着收缩毛孔的功效，卸完后皮肤润润的，滋润效果超棒！","推荐(＾－＾)各位入手！这款芦荟卸妆水真的超温和，里面的芦荟成分很天然，用在脸上清洁效果都挺好的，还能滋润肌肤，如果是浓妆，建议卸妆水用多一点，然后卸两次，这样卸妆效果会更好！"]
+        },
+        // 指甲油
+        "zhijiaoyou": {
+            name: "指甲油",
+            vals: ["整体评价：东西挺好，雾蓝色颜色是我要的。另一个带有亮片的红色买的不是特别好看。 包装与外观：包装精美，自己也是美甲爱好者。不过也就难得做做美甲，这家价格不贵，没啥味道，还挺好。拍点图片参考效果，忽略我一双劳动人民滴手。 上妆效果：自己做做方便，实惠，比起外面店铺好多了。","买了四瓶，涂的芋泥啵啵紫，条纹背景那张是刚涂完第二天早上拍的，视频是过了两天的。涂了好几层的效果，总体来说效果不错，也没有异味，价格也很实惠，值得买","整体评价：买二送一的活动很实惠，我选的是吃土色，很好看，适合冬天的颜色 包装与外观：包装完好，没有破损和泄露 持久情况：如果有刷顶油，可以坚持很多天 上妆效果：很好看，颜色比图片深一点点","特好看没啥味 挺好的 用完下次还没 也挺实惠的 送美甲工具 就是我自己不太会修指甲有点弄的没有人家专业涂美甲弄的好看精致但是指甲油是非常好看值得购买","整体评价：光泽度很好，水感速干，可撕拉，味道虽然不好闻但是很淡，不刺鼻，整体很满意，价格实惠，很显白但不太好上色，我一般要上两三遍，不过很好看的。 包装与外观：包装完整，还送了美甲贴和酒精棉 持久情况：我是先刷底油，上色后在刷亮油，挺持久的，平时洗手洗脸都不会掉。","颜色超级好看，收到试了一个颜色，显白，有买有送，便宜又实惠","颜色太漂亮了 就是没有涂好 价格实惠 卖家态度更好 会回购的 整体评价：棒 包装与外观：喜欢 持久情况：一个星期没问题 上妆效果：颜色太漂亮啦","包装很漂亮，价格也很实惠，朋友推荐买这款值得。第三次购买了，又可以美美的了，用了不伤指甲","收到宝贝还送了两个加固的和打底的指甲油，很实惠，并且指甲油的颜色很正，值得购买！","之前买过几次了，一直挺喜欢，价格可爱，干得快，没什么味道，颜色也都很正。","之前买过几次了，一直挺喜欢，价格可爱，干得快，没什么味道，颜色也很正。","买了五个颜色都非常好看。爵士蓝非常显摆白，五个颜色都非常好上色。东西不错，还有优惠，可以放心省钱购买，不要犹豫了","颜色漂亮，没有味道，非常好，物美价廉，可以斯掉的那种，不需要烤灯很方便","真的很好看很良心，态度很好还很实惠，颜色上手很好看，满意。送一堆东西。 整体评价：绝了 包装与外观：非常好 持久情况：满意 上妆效果：好 我的肤质：好","从没想过这么实惠的价格能买到这么好的宝贝，下次还来你家，颜色很正，持久，不容易掉，这是涂了好几天了的效果，没怎么掉，挺好的","指甲油很满意，颜色正速干好图，关键是太便宜了，还送的东西，昨晚收到就涂了，好快","宝贝价廉物美，真得很不错！而且还没回来异味呢！","整体来说物美价廉，特别是客服态度特别特别好，还有护甲油跟亮油，涂出来的效果非常奈斯，喜欢","特别好，看见别人评论说洗澡要掉我还担心了，但是我自己拿来涂了洗澡不会掉，洗衣服手洗也没有掉，关键是好看还实惠，又下单了两瓶，关键是第一次碰见这么热心的客服","解释：亲爱的买家您好，感谢亲的惠顾以及对我们店铺的支持，我们会更加努力！祝您每天好心情，期待亲的下次光临~","快递很给力，这个车厘子色很漂亮，价钱也实惠谢谢客服收藏后有送底油+亮油","颜色很漂亮，酒红色厚涂三层，效果更漂亮，第一次在这家买东西买来超出心里预期效果，喜欢的小伙伴可以买了，送的东西也蛮多的价位还不贵","整体评价：包装很好，物流快。和图片一致，没有色差，很漂亮。 包装细致，每一样都是有妥当的包装的。 一定一定一定要看卖家的说明！！睡前美甲，涂底油、涂甲油、再涂封层，在意一点即使做家务也可以维持一周，很靠谱！ 上妆效果：自然，显白哦!","经济实惠，颜色又好看又好涂，都去给我买 哈哈哈哈哈","指甲油好看无异味，真心不错哦，喜欢的姐妹们可以购买哦","很不错，跟美甲店做纯色的效果差不多，而且这个还可以撕拉，给你们看图片 黑黄皮妹子推荐车子里色，好看 显白！ 喜欢的妹子大胆入，不踩雷","很不错，跟美甲店做纯色的效果差不多，而且这个还可以撕拉，给你们看图片 黑黄皮妹子推荐车子里色，好看 显白！ 喜欢的妹子大胆入，不踩雷","很不错，跟美甲店做纯色的效果差不多，而且这个还可以撕拉，给你们看图片 黑黄皮妹子推荐车子里色，好看 显白！ 喜欢的妹子大胆入，不踩雷","这个绿色真的惊艳了😍😍😍（无滤镜，晚上室内灯光，淘宝内拍照，可参考。绿色真的好看！）","发个视频，底油涂出来了，可以抠掉的，干得快，味道小","宝贝的颜色非常的正非常的好看东西特别齐全赠品也很多包装上，也特别的细致指甲油的盖子特别的磨砂有质感很喜欢期待上手效果。","宝贝的颜色非常的正非常的好看东西特别齐全赠品也很多包装上，也特别的细致指甲油的盖子特别的磨砂有质感很喜欢期待上手效果。","我买的七彩酒红色，带细闪，超级好看，干的速度我觉得挺快的，不知道能维持几天，等过两天看它掉不掉的厉害再来追平，下面是我自己涂的，姐妹们参考一下吧！受光线影响会有些许色差，没有加任何滤镜！还有就是指甲油没什么味道这点很不错！","包装非常的精致，指甲油颜色和实图一模一样，非常好看，特别是底油和加固提亮油涂上后更加好看了，持久不易掉","包装非常的精致，颜色和实图一模一样，非常好看，特别是底油和加固提亮油涂上后更加好看了，持久不易掉","非常非常好看，款式是我喜欢的，无限回购。用同事的手上色了，哟 显白的呢 而且卖家还送了浅棕色和亮油底油哟 买它","整体评价：光泽度很好，水感速干，可撕拉，味道虽然不好闻但是很淡，不刺鼻，整体很满意，价格实惠，很显白但不太好上色，我一般要上两三遍，不过很好看的。 包装与外观：包装完整，还送了美甲贴和酒精棉 持久情况：我是先刷底油，上色后在刷亮油，挺持久的，平时洗手洗脸都不会掉。","产品与描述的一样，没有异味，涂上马上就干了，很好涂，手残党也涂得均匀好看，喜欢的马上下单，不要犹豫啦！","薄涂两层的效果。很好看。而且是撕拉式的，涂上也不会容易掉","很亮。干透了可以撕下来，撕的很干净。但是又不会容易掉","整体评价：光泽度很好，上色效果好，每个颜色都特别好看，很衬皮肤，也很容易撕下来，喜欢的买它 包装与外观：很高大上","收到先给妹妹涂了一下。很透明的粉红色～好看。好评(o^^o)","基本上没什么味道，颜色也好看，干的也很快，这点特好节约不少时间。昨天试了下冰透乌裸梅挺好看的，就是跟以前那种指甲油不一样，薄涂没啥颜色我就都厚涂一层，挺好看的","基本上没什么味道，颜色也好看，干的也很快，这点特好节约不少时间。昨天试了下冰透乌裸梅挺好看的，就是跟以前那种指甲油不一样，薄涂没啥颜色我就都厚涂一层，挺好看的","指甲油颜色很通透(因为灯光下拍照的原因，颜色更鲜一点实一点），涂了个粉嫩嫩的颜色，哈哈手白的人一定要尝试一下，很好看！！。"]
+        }
+    };
+</script>
+
+{include file='common/scroll' /}
+{include file='common/footer' /}

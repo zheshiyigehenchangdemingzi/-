@@ -1,0 +1,108 @@
+{include file='common/head' /}
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <div class="layui-form" type="post">
+                    <input type="hidden" name="type" value="finance">
+                    <fieldset class="layui-elem-field layui-field-title">
+                        <legend>购物券{$data.name|default='VIP会员'}-自省购-分享赚设置</legend>
+                    </fieldset>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            名称:
+                        </label>
+                        <div class="layui-col-md4" style="text-align: left">
+                            <input style="width:100%" type="text" name="name" required="" autocomplete="off" class="layui-input" value="{$data.name|default='VIP会员'}">
+                        </div>
+                    </div>
+                    <!-- 自购省 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            自省购:
+                        </label>
+                        <div class="layui-col-md4" style="text-align: left">
+                            <input style="width:100%" type="number" name="purchase" required="" autocomplete="off" class="layui-input" value="{$data.purchase|default=0}">
+                        </div>
+                        <div>
+                            <span style="color:red">*</span> 千分之比例
+                        </div>
+                    </div>
+                    <!-- 分享赚 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">
+                            分享赚:
+                        </label>
+                        <div class="layui-col-md4" style="text-align: left">
+                            <input style="width:100%" type="number" name="share" required="" autocomplete="off" class="layui-input" value="{$data.share|default=0}">
+                        </div>
+                        <div>
+                            <span style="color:red">*</span> 千分之比例
+                        </div>
+                    </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label"></label>
+                            <button class="layui-btn" lay-filter="add" lay-submit="">确定保存</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            layui.use(['form', 'layer','jquery'],function() {
+                $ = layui.jquery;
+                var form = layui.form,layer = layui.layer;
+
+                $('.goods_role').click(function () {
+                    var val = $('input[name="is_sale"]:checked').val();
+                    if(val == 1){
+                        $('.role').css('display','');
+                    }else{
+                        $('.role').css('display','none');
+                    }
+                })
+
+                $('.type').click(function () {
+                    var val = $('input[name="sale_type"]:checked').val();
+                    if(val == 1){
+                        $('.code').html('%');
+                    }else{
+                        $('.code').html('元');
+                    }
+                })
+
+                //监听提交
+                form.on('submit(add)', function(data) {
+                    var obj = {
+                        name: $('input[name="name"]').val(),
+                        purchase: $('input[name="purchase"]').val(),
+                        share: $('input[name="share"]').val()
+                    }
+                    console.log(obj)
+
+                    $.ajax({
+                        url:"{:url('Volumes/volume_edit_vip')}",
+                        type: "post",
+                        data:obj,
+                        dataType:"json",
+                        success:function (res) {
+                            if(res.code == 200){
+                                layer.alert(res.msg, {icon: 1},function () {
+                                    //关闭当前frame
+                                    xadmin.close();
+                                    // 可以对父窗口进行刷新
+                                    xadmin.father_reload();
+                                });
+                            }else{
+                                layer.alert(res.msg, {icon:2,time:1000});
+                            }
+                        },
+                        error:function(e){
+                            layer.alert("网络错误", {icon:5,time:1000});
+                        },
+                    });
+                    return false;
+                });
+            });
+        </script>
+{include file='common/footer' /}
