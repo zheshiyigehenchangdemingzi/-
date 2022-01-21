@@ -46,6 +46,10 @@ class Common extends Base
         $live2dConfig = Config::get('live2d');
         $this->assign('LIVE2D', $live2dConfig);
 
+        // skin 皮肤
+        $configSkin = Config::get('skin');
+        $this->assign('CONFIG_SKIN', $configSkin);
+
         //网站菜单
         $menuModel = new Menu();
         $menu = $menuModel->getMenu($AdminInfo['role_id']);

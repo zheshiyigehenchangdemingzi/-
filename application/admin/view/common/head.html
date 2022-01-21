@@ -19,6 +19,10 @@
     <link rel="stylesheet" href="/static/common/css/style.css">
     <script src="/static/common/js/common.js"></script>
 
+    {if !empty($CONFIG_SKIN.src)}
+    <link rel="stylesheet" href="/static/common/css/skin/{$CONFIG_SKIN.src}.css">
+    {/if}
+
     <!--[endif]-->
     <script>
         // 是否开启刷新记忆tab功能

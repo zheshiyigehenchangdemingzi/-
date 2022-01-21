@@ -1,0 +1,31 @@
+/*顶部 - 头部 导航*/
+.container {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/*全局 默认按钮 */
+.layui-btn {
+    background-color: rgba(62, 54, 54, 0.92);
+}
+
+/*左侧菜单- 悬浮*/
+.left-nav a:hover {
+    background: rgba(62, 54, 54, 0.92)!important;
+    color: #fff;
+    border-color: #04564e !important;
+}
+
+/*左侧菜单*/
+.left-nav a.active {
+    background: rgba(62, 54, 54, 0.92)!important;
+}
+
+/*危险按钮*/
+.layui-btn-danger {
+    background-color: #FF5722;
+}
+
+/*成功按钮*/
+.layui-btn-normal {
+    background-color: #c21291;
+}
