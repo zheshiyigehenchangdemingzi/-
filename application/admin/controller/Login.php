@@ -3,11 +3,16 @@ namespace app\admin\controller;
 use app\common\controller\Base;
 use app\common\model\Admin;
 use think\captcha\Captcha;
+use think\Config;
 
 Class Login extends Base{
     //登录页
     public function index()
     {
+        // 网站标题
+        $configTitle = Config::get('title');
+        $this->assign('CONFIG_TITLE', $configTitle);
+
         return $this->fetch();
     }
 

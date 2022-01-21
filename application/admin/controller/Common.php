@@ -50,6 +50,10 @@ class Common extends Base
         $configSkin = Config::get('skin');
         $this->assign('CONFIG_SKIN', $configSkin);
 
+        // 网站标题
+        $configTitle = Config::get('title');
+        $this->assign('CONFIG_TITLE', $configTitle);
+
         //网站菜单
         $menuModel = new Menu();
         $menu = $menuModel->getMenu($AdminInfo['role_id']);
