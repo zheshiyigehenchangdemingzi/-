@@ -1,6 +1,7 @@
 ## 开源：Apache2开源协议发布，并提供免费使用。（免费白嫖，欢迎欢迎 ）
 
-## 教程视频：（等补充到b站）
+## 教程视频：[首页B站](https://space.bilibili.com/258238619) `https://space.bilibili.com/258238619`
+  + ![01-搭建项目视频教程](https://www.bilibili.com/video/BV18R4y1M7DJ)  `https://www.bilibili.com/video/BV18R4y1M7DJ`
 
 ## 定位：社交+短视频+直播+多商户
 
