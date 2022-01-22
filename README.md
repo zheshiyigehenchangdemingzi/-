@@ -17,7 +17,9 @@
   + 账号：`xiaozeng` 密码：`123465`
   + ![展示图](./demo_img/1.png);
   + ![演示图](./demo_img/1.gif)
-
+  + api接口项目演示图： （如需了解更多 请查看上面的git项目地址）
+    + ![api接口项目演示图](./demo_img/api/1.gif)
+    + [api接口文档html](https://madmin.zengye.top/static/docs/zengji.html) 
 
 
 ## 为什么开源？（希望中国能向西方工会学习，受了某些‘良心’老板的欠薪，严重刨削，敢于站出来维护打工人的利益，前人种树，后人乘凉）
