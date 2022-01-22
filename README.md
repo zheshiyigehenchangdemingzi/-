@@ -9,6 +9,7 @@
   + [门店商户管理系统](): 待补充 预计这两天
   + [api接口-app小程序专用](https://gitee.com/user_ye/zeng_api): `https://gitee.com/user_ye/zeng_api`
   + [小程序代码](): 待补充 预计这两天
+  + 因为后台管理系统 `https://madmin.zengye.top` 走了cdn并且设置了防盗链 所以需要自己复制地址（游览器输入）进行访问 ，如果是从码云或其他地方跳转的会访问不了 
 
 ## 后台管理系统展示图：
   + 演示地址：[管理后台系统](https://madmin.zengye.top/admin/login) （里面的数据 随意操作）
@@ -19,7 +20,7 @@
   + ![演示图](./demo_img/1.gif)
   + api接口项目演示图： （如需了解更多 请查看上面的git项目地址）
     + ![api接口项目演示图](./demo_img/api/1.gif)
-    + [api接口文档html](https://madmin.zengye.top/static/docs/zengji.html) 
+    + [api接口文档html](https://madmin.zengye.top/static/docs/zengji.html) `https://madmin.zengye.top/static/docs/zengji.html`
 
 
 ## 为什么开源？（希望中国能向西方工会学习，受了某些‘良心’老板的欠薪，严重刨削，敢于站出来维护打工人的利益，前人种树，后人乘凉）
