@@ -3,7 +3,12 @@
 ## 教程视频：[首页B站](https://space.bilibili.com/258238619) `https://space.bilibili.com/258238619`
   + [01-搭建项目视频教程](https://www.bilibili.com/video/BV18R4y1M7DJ)  `https://www.bilibili.com/video/BV18R4y1M7DJ`
 
-## 定位：社交+短视频+直播+多商户
+## 一条龙服务项目 定位：社交+短视频+商城+sass系统 (来白嫖) 
+  + [管理系统](https://gitee.com/user_ye/zeng_admin)：`https://gitee.com/user_ye/zeng_admin` **就是这个项目**
+    + 演示站点：`https://madmin.zengye.top/admin/login` 账号：`admin` 密码：`123456`
+  + [门店商户管理系统](): 待补充 预计这两天
+  + [api接口-app小程序专用](https://gitee.com/user_ye/zeng_api): `https://gitee.com/user_ye/zeng_api`
+  + [小程序代码](): 待补充 预计这两天
 
 ## 后台管理系统展示图：
   + 演示地址：[管理后台系统](https://madmin.zengye.top/admin/login) （里面的数据 随意操作）
@@ -12,6 +17,8 @@
   + 账号：`xiaozeng` 密码：`123465`
   + ![展示图](./demo_img/1.png);
   + ![演示图](./demo_img/1.gif)
+
+
 
 ## 为什么开源？（希望中国能向西方工会学习，受了某些‘良心’老板的欠薪，严重刨削，敢于站出来维护打工人的利益，前人种树，后人乘凉）
   + 公司名称：`喵美美（广州）网络科技有限公司` 于2020年10月低 欠薪跑路 [企业查链接](https://www.tianyancha.com/brand/b306e612764)
