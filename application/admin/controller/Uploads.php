@@ -18,6 +18,20 @@ class Uploads extends Common
     const UPLOADS_TYPES_IMAGE = 'image';
     const UPLOADS_TYPES_VIDEO = 'video';
 
+    public static $TYPE_IMAGE = [
+        'image/jpg',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+    ];
+    public static $TYPE_VIDEO = [
+        'video/mp4',
+        'video/avi',
+        'video/ogg',
+        'video/webm',
+        'video/mpeg4',
+    ];
+
     // 批量上传文件 -- 结合 cos
     public function cosFilesPl()
     {
@@ -162,16 +176,17 @@ class Uploads extends Common
             $file = request()->file('file');
         if (empty($file))
             return return_ajax(400, '请选择文件');
+
         // 类型验证
-        $types = [
-            'image/jpg',
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-        ];
+        $type = $this->request->post('type','image');
+        $types = self::$TYPE_IMAGE;
+        if($type == self::UPLOADS_TYPES_VIDEO) {
+            $types = self::$TYPE_VIDEO;
+        }
+
         $fileData = $file->getInfo(1);
         if (!in_array($fileData['type'], $types))
-            return return_ajax(400, '类型不正确');
+            return return_ajax(400, '类型不正确'.$fileData['type']);
         if ($fileData['size'] > 1024 * 1024 * 2)
             return return_ajax(400, '文件超过2mb');
         $info = $file->move(ROOT_PATH . 'public/newUploads' . ($file_prefix ? '/' . $file_prefix : ''));
@@ -198,20 +213,21 @@ class Uploads extends Common
             $file = request()->file('file');
         if (empty($file))
             return return_ajax(400, '请选择文件');
+
         // 类型验证
-        $types = [
-            'image/jpg',
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-        ];
+        $type = $this->request->post('type','image');
+        $types = self::$TYPE_IMAGE;
+        if($type == self::UPLOADS_TYPES_VIDEO) {
+            $types = self::$TYPE_VIDEO;
+        }
+
         $return_datas = [];
         $fileDatas = [];
         $time = time();
         foreach ($file as $k => $v) {
             $fileDatas[$k] = $v->getInfo(1);
             if (!in_array($fileDatas[$k]['type'], $types))
-                return return_ajax(400, '文件' . ($k + 1) . ',中类型不正确');
+                return return_ajax(400, '文件' . ($k + 1) . ',中类型不正确' . $fileDatas[$k]['type']);
             if ($fileDatas[$k]['size'] > 1024 * 1024 * 2)
                 return return_ajax(400, '文件' . ($k + 1) . '超过2mb');
             $info = $v->move(ROOT_PATH . 'public/newUploads' . ($file_prefix ? '/' . $file_prefix : ''), $time . "_" . md5($k + rand(1000, 33333) . '_' . rand(50, 10000)));
