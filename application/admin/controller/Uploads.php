@@ -30,6 +30,7 @@ class Uploads extends Common
         'video/ogg',
         'video/webm',
         'video/mpeg4',
+        'video/quicktime',
     ];
 
     // 批量上传文件 -- 结合 cos
@@ -187,8 +188,11 @@ class Uploads extends Common
         $fileData = $file->getInfo(1);
         if (!in_array($fileData['type'], $types))
             return return_ajax(400, '类型不正确'.$fileData['type']);
-        if ($fileData['size'] > 1024 * 1024 * 2)
-            return return_ajax(400, '文件超过2mb');
+
+        $configUpload =  Config::get('upload');
+        if ($fileData['size'] / 1024 > $configUpload[$type]['size'])
+            return return_ajax(400, '文件超过' . round($configUpload[$type]['size'] / 1024, 2). "mb");
+
         $info = $file->move(ROOT_PATH . 'public/newUploads' . ($file_prefix ? '/' . $file_prefix : ''));
         if ($info) {
             $fileName = $info->getSaveName();

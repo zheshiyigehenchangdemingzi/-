@@ -76,6 +76,7 @@
                                 var form = new FormData();
                                 form.append('image', file);
                                 form.append('prefix', 'video/cover');
+                                layer.msg('加载中...',{icon: 16})
                                 axios.post('/admin/Uploads/cosFiles', form).then(function (response) {
                                     if (response && response.data && response.data.code == 200) {
                                         //var s = '/' + response.data.data.fileName+'/'+response.data.data.url
@@ -83,7 +84,7 @@
                                         $("input[name='cover']").val(response.data.data.url)
                                         $("#drop_area_share > p").hide(300)
                                     }
-                                    layer.msg('成功', {icon: response.data.code == 200 ? 6 : 5})
+                                    layer.msg(response.data.msg || '成功' , {icon: response.data.code == 200 ? 6 : 5})
                                 }).catch(function (error) {
                                     layer.msg('错误，尝试', {icon: 5})
                                 });
@@ -132,6 +133,7 @@
                                 form.append('image', file);
                                 form.append('prefix', 'video/videoUrl');
                                 form.append('type', 'video');
+                                layer.msg('加载中...',{icon: 16})
                                 axios.post('/admin/Uploads/cosFiles', form).then(function (response) {
                                     if (response && response.data && response.data.code == 200) {
                                         //var s = '/' + response.data.data.fileName+'/'+response.data.data.url
@@ -140,7 +142,7 @@
                                         $("#drop_area_share > p").hide(300)
                                         $(previewUploadDom).attr('src', response.data.data.url).show();
                                     }
-                                    layer.msg('成功', {icon: response.data.code == 200 ? 6 : 5})
+                                    layer.msg(response.data.msg || '成功' , {icon: response.data.code == 200 ? 6 : 5})
                                 }).catch(function (error) {
                                     layer.msg('错误，尝试', {icon: 5})
                                 });
